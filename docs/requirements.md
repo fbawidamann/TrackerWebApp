@@ -41,7 +41,8 @@ Status: agreed on 2026-09-29.
 ### Personal records
 - Only one PR type: **heaviest weight** per exercise (completed, normal sets only).
 - PRs are detected when a workout is finished and shown in the finish summary. History marks them with a badge.
-- Charts additionally show estimated 1RM (Epley) and volume trends, but these do **not** count as PRs.
+- Exercise charts show **heaviest weight** and **best set reps** per session (one chart with a Weight/Reps switch, range 3M/6M/1Y/All). There are no e1RM or volume charts.
+- e1RM (Epley) appears only as a small figure in the workout detail footer (`Best 82.5 kg · e1RM 99 kg`). It never counts as a PR.
 
 ### Rest timer
 - Low priority for the user. Keep it simple: it starts after a set is ticked off and uses one global default (90 s, set in Settings). **There is no per-exercise override.**
@@ -52,10 +53,12 @@ Status: agreed on 2026-09-29.
 - Only one workout can be in progress at a time. The screen stays on during a workout (can be turned off in Settings).
 - Finishing asks before discarding unfinished sets, then shows a summary with new PRs. A workout started from a routine that was changed offers to update the routine.
 
-### Exercises
-- Built-in catalog of 800+ exercises from free-exercise-db (see [ADR 0003](adr/0003-exercise-catalog.md)), with instructions and images.
-- Users can create custom exercises.
-- Search and filter by muscle group and equipment.
+### Exercises (details in [design/screens/exercises.md](design/screens/exercises.md))
+- Built-in catalog of 800+ exercises from free-exercise-db (see [ADR 0003](adr/0003-exercise-catalog.md)), with instructions and images. Images appear only on the exercise detail page.
+- The list shows your exercises first, then all exercises. Search is always visible. A filter button opens sorting (recently used, A–Z, muscle group, most used) and filters (muscle group, equipment, show hidden).
+- Exercise detail tabs: Progress (chart + PR history), History (past sessions), About (images, muscles, instructions).
+- Custom exercises: name, equipment, primary muscle, type. They can be edited and deleted (history stays).
+- Any exercise can be hidden from the list and picker.
 
 ### Units
 - Stored as kg. The UI shows **kg only** for now. A lb setting exists in the data model and will be added later.

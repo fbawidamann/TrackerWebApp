@@ -41,6 +41,16 @@ user_settings (1 per user)
 | images | text[] | relative paths |
 | is_custom | bool | built-in rows: `user_id = null`, read-only, never synced |
 
+### exercise_prefs
+Per-user settings for **any** exercise, including built-in ones (which are read-only and never synced themselves):
+
+| Field | Type | Notes |
+|---|---|---|
+| exercise_id | uuid | built-in or custom |
+| hidden | bool | hidden from list and picker; history stays visible |
+
+Synced like other user data. One row per user and exercise, created on first change.
+
 ### routines → routine_exercises → routine_sets
 - **routines**: name, notes, position
 - **routine_exercises**: routine_id, exercise_id, position, notes
@@ -83,7 +93,9 @@ Rest-timer state (`restStartedAt`, the set it belongs to) is local UI state in D
 
 ## Derived metrics (computed, never stored)
 - **Heaviest-weight PR**: max `weight_kg` over the completed normal sets of an exercise. It is a PR when it beats every earlier session.
-- **e1RM** (Epley): `weight × (1 + reps / 30)`, reps ≤ 12 only. Charts only.
+- **Best set reps**: max `reps` over completed normal sets per session (Reps chart).
+- **e1RM** (Epley): `weight × (1 + reps / 30)`, reps ≤ 12 only. Shown only in the workout detail footer, not charted.
+- **Last used / session count** per exercise (for list sorting): derived from completed activities.
 - **Volume**: `weight × reps`, per set, per exercise per session, and per muscle group per week.
 
 Why derived: nothing extra to keep in sync, and editing an old workout automatically corrects all PRs and charts.

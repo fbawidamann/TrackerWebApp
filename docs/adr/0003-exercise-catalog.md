@@ -23,6 +23,9 @@ Use **[free-exercise-db](https://github.com/yuhonas/free-exercise-db)**:
 | `primaryMuscles[0]` | `primary_muscle` |
 | `secondaryMuscles` (+ remaining primaries) | `secondary_muscles` |
 | `equipment` "body only" | `bodyweight` |
+| `equipment` "e-z curl bar" | `barbell` |
+| `equipment` "machine" / "cable" / "dumbbell" / "barbell" / "kettlebells" / "bands" | same names (`kettlebell`, `band`) |
+| muscles | kept exactly (17 values) and grouped for filtering: see [exercises screen](../design/screens/exercises.md#muscle-groups) |
 | `equipment` null / unknown | `other` |
 | `category` strength, powerlifting, olympic weightlifting, strongman | `tracking_type = weight_reps` (`reps_only` if the equipment is bodyweight) |
 | `category` stretching, cardio, plyometrics | `tracking_type = duration` |

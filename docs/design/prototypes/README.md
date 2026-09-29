@@ -11,5 +11,6 @@ These files are **design references, not app code**. The real app is built with 
 | [03-a5-detail-picker.html](03-a5-detail-picker.html) | 23 detail options with a live preview | Choices recorded in [ui-guidelines.md](../ui-guidelines.md) | [link](https://claude.ai/artifact/5yNMNZeMTQuGPeYVzZW5DF) |
 | [04-active-workout.html](04-active-workout.html) | Active workout: logging, menus, rest timer, reorder, finish, summary | Approved; spec in [screens/active-workout.md](../screens/active-workout.md) | [link](https://claude.ai/artifact/8fUksA5BrRJ7BEkeS79xCo) |
 | [05-home.html](05-home.html) | Home on phone and desktop, 4 scenarios | Approved; spec in [screens/home.md](../screens/home.md) | [link](https://claude.ai/artifact/FahzKjEeG69YN6VRV44GeR) |
+| [06-exercises.html](06-exercises.html) | Exercise list, filter/sort, picker, detail with chart, custom exercises | Approved; spec in [screens/exercises.md](../screens/exercises.md) | [link](https://claude.ai/artifact/Gc9pbXBQ2jPjC5DtNr1vEx) |
 
 The published versions are private claude.ai pages. They're easy to open on the iPhone, but the files here are the permanent copy.

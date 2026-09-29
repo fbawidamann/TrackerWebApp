@@ -9,7 +9,7 @@ The order is deliberate: the app is fully usable offline on one device after **M
 - [ ] **Detailed frontend planning**: one spec + clickable prototype per screen → `docs/design/screens/`
   - [x] Active workout (incl. finish summary)
   - [x] Home
-  - [ ] Exercises (list, picker, detail with charts, custom exercises)
+  - [x] Exercises (list, picker, detail with charts, custom exercises)
   - [ ] History (list, workout detail, edit)
   - [ ] Routines (list, editor)
   - [ ] Profile / Settings
