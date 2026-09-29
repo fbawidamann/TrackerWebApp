@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Graphite Variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* ---------- Page (host) tokens ---------- */
+  :root {
+    --pg-bg: #f3f4f6;
+    --pg-surface: #ffffff;
+    --pg-text: #15191e;
+    --pg-muted: #5c6470;
+    --pg-border: #dce0e5;
+    --pg-accent: #3a6fd8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --pg-bg: #0d0f12;
+      --pg-surface: #15181c;
+      --pg-text: #e5e8ec;
+      --pg-muted: #929aa5;
+      --pg-border: #272c33;
+      --pg-accent: #82a7f1;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --pg-bg: #0d0f12;
+    --pg-surface: #15181c;
+    --pg-text: #e5e8ec;
+    --pg-muted: #929aa5;
+    --pg-border: #272c33;
+    --pg-accent: #82a7f1;
+  }
+
+  body {
+    background: var(--pg-bg);
+    color: var(--pg-text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 72px; display: grid; gap: 40px; }
+  header { display: grid; gap: 8px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 600; text-wrap: balance; }
+  header p { margin: 0; color: var(--pg-muted); max-width: 66ch; }
+
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px;
+    padding: 12px 16px; border: 1px solid var(--pg-border); border-radius: 12px;
+    background: color-mix(in oklab, var(--pg-surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .bar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .bar-label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-muted); font-weight: 500; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button, .jump a {
+    font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--pg-border); background: transparent; color: var(--pg-text); text-decoration: none;
+  }
+  .seg button[aria-pressed="true"] { border-color: var(--pg-accent); color: var(--pg-accent); font-weight: 600; }
+  .jump { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button:focus-visible, .jump a:focus-visible { outline: 2px solid var(--pg-accent); outline-offset: 2px; }
+
+  .variant { display: grid; gap: 22px; scroll-margin-top: 90px; }
+  .variant + .variant { border-top: 1px solid var(--pg-border); padding-top: 40px; }
+  .v-head { display: grid; gap: 10px; }
+  .v-title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .v-title h2 { margin: 0; font-size: 21px; font-weight: 600; }
+  .v-code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--pg-muted); }
+  .v-head p { margin: 0; color: var(--pg-muted); max-width: 70ch; }
+  .diffs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .diffs li { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--pg-border); color: var(--pg-text); background: var(--pg-surface); }
+  .swatches { display: flex; gap: 6px; align-items: center; }
+  .swatches span { width: 18px; height: 18px; border-radius: 5px; border: 1px solid var(--pg-border); }
+
+  .phones { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; }
+  .phone-col { display: grid; gap: 10px; justify-items: center; align-content: start; }
+  .phone-cap { font-size: 13px; color: var(--pg-muted); }
+
+  footer { color: var(--pg-muted); font-size: 14px; border-top: 1px solid var(--pg-border); padding-top: 20px; display: grid; gap: 6px; }
+  footer b { color: var(--pg-text); font-weight: 600; }
+
+  /* ---------- Mockup app ---------- */
+  .app {
+    width: 340px; max-width: 100%;
+    border-radius: 28px; overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--bg); color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 50px -24px rgba(0,0,0,.45);
+    --row: 13px; --sec: 28px; --pad: 20px;
+  }
+  .app[data-mode="dark"] { --on-acc: #0b0e12; --acc-text: var(--acc); }
+  .app[data-mode="light"] { --on-acc: #ffffff; --acc-text: color-mix(in oklab, var(--acc) 76%, black); --acc-fill: color-mix(in oklab, var(--acc) 86%, black); }
+  .app[data-mode="dark"] { --acc-fill: var(--acc); }
+
+  .num { font-family: var(--numfont); }
+  .app[data-heads="condensed"] .h-font { font-family: "IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif; }
+
+  .status { display: flex; justify-content: space-between; padding: 12px 22px 4px; font-size: 13px; font-weight: 600; }
+  .screen { flex: 1; padding: 10px var(--pad) var(--sec); display: grid; gap: var(--sec); align-content: start; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
+  .icon-btn { width: 36px; height: 36px; display: grid; place-items: center; color: var(--muted); border-radius: var(--r); }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .title { font-size: 24px; font-weight: 600; margin: 0; line-height: 1.2; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+  .lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .app[data-labels="upper"] .lbl { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+
+  .sec { display: grid; gap: 12px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .link { font-size: 13px; color: var(--acc-text); font-weight: 500; }
+
+  /* Buttons */
+  .btn { font: inherit; font-size: 14px; font-weight: 600; border-radius: var(--r); padding: 9px 16px; border: 1px solid var(--line); background: var(--surf); color: var(--text); cursor: default; }
+  .btn-primary { background: var(--acc-fill); color: var(--on-acc); border-color: transparent; }
+  .btn-block { width: 100%; padding: 14px; font-size: 15px; }
+  .btn-ghost { background: transparent; color: var(--acc-text); border-color: transparent; padding-inline: 0; }
+
+  /* Lists (home) */
+  .list { display: grid; }
+  .li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding-block: 13px; }
+  .li + .li { border-top: 1px solid var(--line); }
+  .li-name { font-weight: 500; }
+  .li-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .li-side { color: var(--muted); display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .li-side svg { width: 18px; height: 18px; }
+  .app[data-cards="yes"] .list { background: var(--surf); border-radius: var(--r); padding-inline: 16px; border: 1px solid var(--line); }
+
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+  .day { display: grid; gap: 8px; justify-items: center; font-size: 12px; color: var(--muted); }
+  .dot { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; }
+  .dot.on { background: var(--acc-fill); border-color: transparent; }
+  .dot.today { border-color: var(--acc); }
+  .week-sum { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+  .week-sum b { color: var(--text); font-weight: 600; font-size: 16px; margin-right: 4px; }
+  .app[data-cards="yes"] .week-card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 16px; }
+  .app[data-cards="no"] .week-card { display: grid; gap: 16px; }
+
+  .pr { font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--acc-text); border: 1px solid color-mix(in oklab, var(--acc) 55%, transparent); padding: 1px 7px; border-radius: calc(var(--r) * .6); }
+
+  /* Workout detail */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+  .stat { background: var(--surf); padding: 12px; display: grid; gap: 2px; }
+  .stat-v { font-size: 18px; font-weight: 600; }
+  .app[data-stats="inline"] .stats { display: flex; gap: 26px; background: none; border: 0; border-radius: 0; }
+  .app[data-stats="inline"] .stat { background: none; padding: 0; }
+
+  .exs { display: grid; gap: var(--sec); }
+  .ex { display: grid; gap: 8px; }
+  .app[data-cards="yes"] .ex { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+  .app[data-cards="no"] .ex + .ex { border-top: 1px solid var(--line); padding-top: var(--sec); }
+  .app[data-cards="yes"] .exs { gap: 14px; }
+  .ex-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .ex-name { font-size: 17px; font-weight: 600; margin: 0; }
+  .ex-meta { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+  .sets { display: grid; }
+  .set { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 12px; padding-block: var(--row); }
+  .app[data-sets="lines"] .set + .set { border-top: 1px solid color-mix(in oklab, var(--line) 70%, transparent); }
+  .app[data-sets="zebra"] .set { padding-inline: 10px; border-radius: calc(var(--r) * .7); }
+  .app[data-sets="zebra"] .set:nth-child(odd) { background: var(--raised); }
+  .app[data-sets="plain"] .set { padding-block: calc(var(--row) - 3px); }
+  .set-n { color: var(--muted); font-size: 14px; }
+  .set-n.w { color: var(--acc-text); font-weight: 600; }
+  .set-v { font-size: 16px; }
+  .set-v .x { color: var(--muted); padding-inline: 5px; }
+  .set-v .u { color: var(--muted); font-size: 13px; margin-left: 2px; font-family: "IBM Plex Sans", sans-serif; }
+  .ex-foot { font-size: 13px; color: var(--muted); display: flex; gap: 16px; padding-top: 4px; }
+
+  /* Active workout */
+  .timer-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .table { display: grid; }
+  .tr { display: grid; grid-template-columns: 28px 1fr 60px 50px 38px; align-items: center; gap: 8px; padding: 5px 4px; border-radius: calc(var(--r) * .7); }
+  .tr.th { padding-bottom: 6px; }
+  .c { text-align: center; }
+  .prev { color: var(--muted); font-size: 14px; }
+  .inp { height: 40px; display: grid; place-items: center; background: var(--raised); border-radius: calc(var(--r) * .7); font-size: 16px; font-weight: 500; }
+  .inp.ph { color: var(--muted); font-weight: 400; }
+  .chk { width: 36px; height: 36px; border-radius: calc(var(--r) * .7); display: grid; place-items: center; background: var(--raised); color: var(--muted); justify-self: end; }
+  .chk svg { width: 18px; height: 18px; }
+  .tr.done .chk { background: var(--acc-fill); color: var(--on-acc); }
+  .tr.done .inp { background: transparent; }
+  .app[data-done="tint"] .tr.done { background: color-mix(in oklab, var(--acc) 9%, transparent); }
+
+  .rest { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r); background: var(--surf); border: 1px solid var(--line); }
+  .rest-bar { flex: 1; height: 4px; background: var(--raised); border-radius: 2px; overflow: hidden; }
+  .rest-bar i { display: block; height: 100%; width: 62%; background: var(--acc); }
+  .rest-t { font-size: 16px; font-weight: 600; min-width: 40px; }
+  .next { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 14px; }
+  .next b { color: var(--text); font-weight: 600; font-size: 16px; display: block; }
+
+  /* Nav */
+  .nav { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); background: var(--surf); padding: 8px 6px 16px; }
+  .nav a { display: grid; justify-items: center; gap: 3px; font-size: 11px; color: var(--muted); text-decoration: none; padding: 4px 0; border-radius: 10px; }
+  .nav svg { width: 22px; height: 22px; }
+  .nav a.on { color: var(--acc-text); font-weight: 600; }
+  .app[data-nav="pill"] .nav a.on { background: color-mix(in oklab, var(--acc) 14%, transparent); }
+  .app[data-nav="bar"] .nav a { position: relative; }
+  .app[data-nav="bar"] .nav a.on::before { content: ""; position: absolute; top: -9px; left: 30%; right: 30%; height: 2px; background: var(--acc); border-radius: 2px; }
+
+  .app[data-livecard="no"] .ex.live { background: none; border: 0; padding: 0; }
+  .app[data-livecard="yes"] .ex.live { padding: 14px 12px; }
+  .app[data-livecard="yes"] .ex.live .tr { grid-template-columns: 26px 1fr 56px 48px 36px; gap: 7px; }
+
+  /* A5 light card treatments: token-driven */
+  .app[data-card] .ex,
+  .app[data-card] .list,
+  .app[data-card] .week-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+  .app[data-card] .ex { padding: 18px; }
+  .app[data-card] .stats { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; gap: 0; }
+  .app[data-card] .stat { background: none; padding: 14px; }
+  .app[data-card] .stat + .stat { border-left: 1px solid var(--card-div); }
+  .app[data-card] .li + .li { border-top-color: var(--card-div); }
+
+  .v-new { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--pg-accent); border: 1px solid var(--pg-accent); border-radius: 6px; padding: 1px 7px; }
+  .card-switch { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+
+  @media (max-width: 420px) {
+    .wrap { padding-inline: 16px; }
+    .tr { grid-template-columns: 24px 1fr 56px 46px 36px; gap: 6px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .app, .app * { transition: background-color .2s, color .2s, border-color .2s; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Graphite variants</h1>
+    <p>Variations of the chosen direction: Graphite, blue, spacious, dark. At the top is A5, your mix of A2 and A1 with three light card styles to compare. A1 to A4 follow below for reference.</p>
+  </header>
+
+  <div class="bar" role="region" aria-label="Options">
+    <div class="bar-group">
+      <span class="bar-label" id="l-mode">App theme</span>
+      <div class="seg" role="group" aria-labelledby="l-mode">
+        <button type="button" id="mode-dark" data-mode="dark" aria-pressed="true">Dark</button>
+        <button type="button" id="mode-light" data-mode="light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+    <div class="bar-group">
+      <span class="bar-label">Jump to</span>
+      <nav class="jump" aria-label="Variants">
+        <a href="#a5">A5 mix</a><a href="#a1">A1</a><a href="#a2">A2</a><a href="#a3">A3</a><a href="#a4">A4</a>
+      </nav>
+    </div>
+  </div>
+
+  <div id="variants"></div>
+
+  <footer>
+    <span><b>Tell me in chat</b> which variant you like, or mix details, e.g. "A1, but with the cards from A2 and the pill nav".</span>
+    <span>Everything shown is example data.</span>
+  </footer>
+</div>
+
+<script>
+  const I = {
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v14l11-7z"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    lift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+  };
+
+  const CARD_STYLES = {
+    fill: {
+      label: "Subtle fill",
+      text: "Card only slightly lighter than the background, no border.",
+      dark: { "card-bg": "#111419", "card-border": "transparent", "card-div": "#1d2228" },
+      light: { "card-bg": "#ffffff", "card-border": "transparent", "card-div": "#e6e9ed" }
+    },
+    outline: {
+      label: "Outline",
+      text: "No fill, just a thin border. The lightest option.",
+      dark: { "card-bg": "transparent", "card-border": "#22272e", "card-div": "#1b2026" },
+      light: { "card-bg": "transparent", "card-border": "#d3d8de", "card-div": "#e0e4e8" }
+    },
+    hair: {
+      label: "Hairline",
+      text: "Almost invisible fill plus a very faint border.",
+      dark: { "card-bg": "#0f1216", "card-border": "#1a1f25", "card-div": "#1a1f25" },
+      light: { "card-bg": "#f8f9fa", "card-border": "#e1e5e9", "card-div": "#e4e7eb" }
+    }
+  };
+  let cardStyle = "fill";
+  let currentMode = "dark";
+
+  const VARIANTS = [
+    {
+      id: "a5", code: "A5", name: "Your mix", isMix: true,
+      text: "The deep background and a card per exercise from A2, but with light cards, plus uppercase labels from A1. Completed sets are tinted, the nav uses a pill, and numbers stay in IBM Plex Sans.",
+      diffs: ["Background #0A0C0F (A2)", "Cobalt #4F86F7 (A2)", "Light cards per exercise", "Uppercase labels (A1)", "Completed sets tinted (A1)", "Nav: pill (A2)", "Corners 14 px"],
+      attrs: { labels: "upper", cards: "yes", sets: "plain", done: "tint", nav: "pill", stats: "grid", heads: "normal", livecard: "yes" },
+      num: '"IBM Plex Sans", sans-serif', r: 12,
+      dark: { bg: "#0a0c0f", surf: "#13171c", raised: "#1b2027", line: "#232930", text: "#eef1f5", muted: "#8a93a0", acc: "#4f86f7" },
+      light: { bg: "#eef0f3", surf: "#ffffff", raised: "#eceff2", line: "#dfe3e8", text: "#0f1216", muted: "#5a6370", acc: "#4f86f7" }
+    },
+    {
+      id: "a1", code: "A1", name: "Graphite Base",
+      text: "Your pick as it is, plus small uppercase column labels. Hairlines between sets, no cards. Everything sits directly on the background.",
+      diffs: ["Background #111418", "Blue #5B8DEF", "Lines between sets", "No cards", "Uppercase labels", "Completed sets tinted", "Nav: colour only"],
+      attrs: { labels: "upper", cards: "no", sets: "lines", done: "tint", nav: "plain", stats: "grid", heads: "normal" },
+      num: '"IBM Plex Sans", sans-serif', r: 10,
+      dark: { bg: "#111418", surf: "#181c22", raised: "#20252c", line: "#2a3038", text: "#e6e9ee", muted: "#8b94a1", acc: "#5b8def" },
+      light: { bg: "#f5f6f8", surf: "#ffffff", raised: "#eef0f3", line: "#dde1e6", text: "#14181d", muted: "#5e6773", acc: "#5b8def" }
+    },
+    {
+      id: "a2", code: "A2", name: "Graphite Deep",
+      text: "Darker background, with each exercise on its own card. More contrast and clearer blocks. No lines inside a card, so the spacing does the separating.",
+      diffs: ["Background #0A0C0F", "Cobalt #4F86F7", "Cards per exercise", "No lines between sets", "Normal labels", "Only the check is coloured", "Nav: pill"],
+      attrs: { labels: "normal", cards: "yes", sets: "plain", done: "check", nav: "pill", stats: "grid", heads: "normal", livecard: "no" },
+      num: '"IBM Plex Sans", sans-serif', r: 12,
+      dark: { bg: "#0a0c0f", surf: "#14181d", raised: "#1d2229", line: "#242a32", text: "#eef1f5", muted: "#8a93a0", acc: "#4f86f7" },
+      light: { bg: "#eceef1", surf: "#ffffff", raised: "#f0f2f5", line: "#dfe3e8", text: "#0f1216", muted: "#5a6370", acc: "#4f86f7" }
+    },
+    {
+      id: "a3", code: "A3", name: "Graphite Soft",
+      text: "A lifted, slightly lighter background with softer text contrast, easier on the eyes in a bright gym. Sets are separated by alternating stripes, with a calmer slate blue.",
+      diffs: ["Background #171A1F", "Slate blue #7C9CE0", "Striped sets", "No cards", "Normal labels", "Completed sets tinted", "Stats inline", "Nav: top bar"],
+      attrs: { labels: "normal", cards: "no", sets: "zebra", done: "tint", nav: "bar", stats: "inline", heads: "normal" },
+      num: '"IBM Plex Sans", sans-serif', r: 8,
+      dark: { bg: "#171a1f", surf: "#1d2127", raised: "#232830", line: "#2e343c", text: "#d9dde3", muted: "#8d95a0", acc: "#7c9ce0" },
+      light: { bg: "#f7f8f9", surf: "#ffffff", raised: "#f0f2f4", line: "#e3e6ea", text: "#1d2229", muted: "#646c77", acc: "#6b8bd4" }
+    },
+    {
+      id: "a4", code: "A4", name: "Graphite Data",
+      text: "Numbers set in IBM Plex Mono and headings in Plex Condensed, so weights and reps read like a logbook. Brighter sky blue, smaller corners, uppercase labels.",
+      diffs: ["Background #101317", "Sky blue #6AA8F5", "Mono numbers", "Condensed headings", "Lines between sets", "Uppercase labels", "Corners 6 px"],
+      attrs: { labels: "upper", cards: "no", sets: "lines", done: "tint", nav: "bar", stats: "grid", heads: "condensed" },
+      num: '"IBM Plex Mono", ui-monospace, monospace', r: 6,
+      dark: { bg: "#101317", surf: "#171b20", raised: "#1f242a", line: "#282e36", text: "#e4e8ed", muted: "#87909c", acc: "#6aa8f5" },
+      light: { bg: "#f4f6f8", surf: "#ffffff", raised: "#edf0f3", line: "#d9dee4", text: "#121820", muted: "#5a6472", acc: "#4f8fe0" }
+    }
+  ];
+
+  const n = s => '<span class="num">' + s + '</span>';
+  const kgx = (w, r) => n(w) + '<span class="u">kg</span><span class="x">×</span>' + n(r);
+
+  function nav(active) {
+    const items = [["home", "Home", I.home], ["hist", "History", I.hist], ["lift", "Workout", I.lift], ["list", "Exercises", I.list], ["user", "Profile", I.user]];
+    return '<nav class="nav" aria-hidden="true">' + items.map(([k, l, svg]) =>
+      '<a class="' + (k === active ? "on" : "") + '">' + svg + l + '</a>').join("") + '</nav>';
+  }
+
+  function home() {
+    const days = [["M", "on"], ["T", "on today"], ["W", ""], ["T", ""], ["F", ""], ["S", ""], ["S", ""]];
+    return '<div class="screen">' +
+      '<div><p class="lbl" style="margin:0">Tuesday, 29 September</p><h3 class="title h-font" style="margin-top:4px">Ready to train</h3></div>' +
+      '<button type="button" class="btn btn-primary btn-block" tabindex="-1">Start empty workout</button>' +
+      '<div class="sec"><div class="sec-head"><span class="lbl">This week</span></div>' +
+        '<div class="week-card"><div class="week">' + days.map(([d, c]) =>
+          '<div class="day"><span class="dot ' + c + '"></span>' + d + '</div>').join("") + '</div>' +
+          '<div class="week-sum"><span><b class="num">2</b>workouts</span><span><b class="num">18 310</b>kg</span><span><b class="num">2:02</b>h</span></div></div></div>' +
+      '<div class="sec"><div class="sec-head"><span class="lbl">Routines</span><span class="link">All</span></div><div class="list">' +
+        [["Push Day", "6 exercises · last Tue"], ["Pull Day", "6 exercises · last Mon"], ["Legs", "5 exercises · last Sat"]].map(([a, b]) =>
+          '<div class="li"><div><div class="li-name">' + a + '</div><div class="li-meta">' + b + '</div></div><span class="li-side">' + I.play + '</span></div>').join("") +
+      '</div></div>' +
+      '<div class="sec"><div class="sec-head"><span class="lbl">Recent</span><span class="link">History</span></div><div class="list">' +
+        [["Push Day", "Today · 58 min · " + n("9 840") + " kg", true], ["Pull Day", "Mon · 1 h 04 min · " + n("8 470") + " kg", false]].map(([a, b, pr]) =>
+          '<div class="li"><div><div class="li-name">' + a + '</div><div class="li-meta">' + b + '</div></div><span class="li-side">' + (pr ? '<span class="pr">PR</span>' : '') + I.chev + '</span></div>').join("") +
+      '</div></div>' +
+    '</div>' + nav("home");
+  }
+
+  function detail() {
+    const ex = (name, meta, sets, foot) =>
+      '<div class="ex"><div class="ex-head"><h4 class="ex-name h-font">' + name + '</h4><span class="ex-meta">' + meta + '</span></div>' +
+      '<div class="sets">' + sets.map(([nr, w, r, pr]) =>
+        '<div class="set"><span class="set-n ' + (nr === "W" ? "w" : "") + '">' + nr + '</span><span class="set-v">' + kgx(w, r) + '</span>' + (pr ? '<span class="pr">PR</span>' : '<span></span>') + '</div>').join("") +
+      '</div>' + (foot ? '<div class="ex-foot">' + foot + '</div>' : '') + '</div>';
+    return '<div class="screen">' +
+      '<div class="top"><span class="icon-btn" aria-hidden="true">' + I.back + '</span><span class="icon-btn" aria-hidden="true">' + I.more + '</span></div>' +
+      '<div><h3 class="title h-font">Push Day</h3><p class="sub">Tue, 29 Sep · 17:35</p></div>' +
+      '<div class="stats">' +
+        '<div class="stat"><span class="stat-v num">58 min</span><span class="lbl">Duration</span></div>' +
+        '<div class="stat"><span class="stat-v num">9 840 kg</span><span class="lbl">Volume</span></div>' +
+        '<div class="stat"><span class="stat-v num">1</span><span class="lbl">PR</span></div></div>' +
+      '<div class="exs">' +
+        ex("Bench Press (Barbell)", "4 sets", [["W", "60", "10"], ["1", "80", "8"], ["2", "80", "8"], ["3", "82.5", "6", true]], "<span>Best " + n("82.5") + " kg</span><span>e1RM " + n("99") + " kg</span>") +
+        ex("Incline Press (Dumbbell)", "3 sets", [["1", "28", "10"], ["2", "28", "10"], ["3", "30", "8"]]) +
+        ex("Triceps Pushdown (Cable)", "2 sets", [["1", "25", "12"], ["2", "25", "12"]]) +
+      '</div></div>' + nav("hist");
+  }
+
+  function active() {
+    const row = (nr, prev, w, r, done) =>
+      '<div class="tr ' + (done ? "done" : "") + '"><span class="set-n ' + (nr === "W" ? "w" : "") + '">' + nr + '</span><span class="prev num">' + prev + '</span>' +
+      '<span class="inp num ' + (done ? "" : "ph") + '">' + w + '</span><span class="inp num ' + (done ? "" : "ph") + '">' + r + '</span><span class="chk">' + I.check + '</span></div>';
+    return '<div class="screen">' +
+      '<div class="timer-row"><div><h3 class="title h-font">Push Day</h3><p class="sub num">34:12</p></div><button type="button" class="btn btn-primary" tabindex="-1">Finish</button></div>' +
+      '<div class="ex live"><div class="ex-head"><h4 class="ex-name h-font">Bench Press (Barbell)</h4><span class="icon-btn" aria-hidden="true" style="width:28px;height:28px">' + I.more + '</span></div>' +
+        '<div class="table"><div class="tr th"><span class="lbl">Set</span><span class="lbl">Previous</span><span class="lbl c">kg</span><span class="lbl c">Reps</span><span></span></div>' +
+          row("W", "60 × 10", "60", "10", true) + row("1", "80 × 8", "80", "8", true) + row("2", "80 × 8", "80", "8", false) + row("3", "80 × 7", "80", "7", false) +
+        '</div><button type="button" class="btn btn-ghost" tabindex="-1" style="justify-self:start">+ Add set</button></div>' +
+      '<div class="rest" aria-hidden="true"><span class="lbl">Rest</span><span class="rest-bar"><i></i></span><span class="rest-t num">0:56</span><span class="btn" style="padding:6px 10px">Skip</span></div>' +
+      '<div class="next"><div><span class="lbl">Next</span><b class="h-font">Incline Press (Dumbbell)</b></div><span>3 sets</span></div>' +
+      '<button type="button" class="btn btn-block" tabindex="-1">Add exercise</button>' +
+    '</div>' + nav("lift");
+  }
+
+  function phone(v, mode, body, time, cap) {
+    const t = Object.assign({}, v[mode], v.isMix ? CARD_STYLES[cardStyle][mode] : {});
+    const style = Object.entries(t).map(([k, val]) => "--" + k + ":" + val).join(";") + ";--r:" + v.r + "px;--numfont:" + v.num;
+    let attrs = Object.entries(v.attrs).map(([k, val]) => "data-" + k + '="' + val + '"').join(" ");
+    if (v.isMix) attrs += ' data-card="' + cardStyle + '"';
+    return '<div class="phone-col"><div class="app" data-mode="' + mode + '" ' + attrs + ' style=\'' + style + '\'>' +
+      '<div class="status"><span class="num">' + time + '</span><span class="num">86%</span></div>' + body + '</div>' +
+      '<span class="phone-cap">' + cap + '</span></div>';
+  }
+
+  function render(mode) {
+    document.getElementById("variants").innerHTML = VARIANTS.map(v => {
+      const t = v[mode];
+      return '<section class="variant" id="' + v.id + '" aria-labelledby="' + v.id + '-h">' +
+        '<div class="v-head"><div class="v-title"><h2 id="' + v.id + '-h">' + v.code + ' · ' + v.name + '</h2>' +
+        (v.isMix ? '<span class="v-new">New</span>' : '') +
+        '<span class="swatches" aria-hidden="true"><span style="background:' + t.bg + '"></span><span style="background:' + t.surf + '"></span><span style="background:' + t.text + '"></span><span style="background:' + t.acc + '"></span></span></div>' +
+        '<p>' + v.text + '</p><ul class="diffs">' + v.diffs.map(d => "<li>" + d + "</li>").join("") + '</ul>' +
+        (v.isMix ? '<div class="card-switch"><span class="bar-label" id="l-card">Card style</span><div class="seg" role="group" aria-labelledby="l-card">' +
+          Object.entries(CARD_STYLES).map(([k, c]) => '<button type="button" id="card-' + k + '" data-card-style="' + k + '" aria-pressed="' + (k === cardStyle) + '">' + c.label + '</button>').join("") +
+          '</div><span class="phone-cap">' + CARD_STYLES[cardStyle].text + '</span></div>' : '') +
+        '</div>' +
+        '<div class="phones">' +
+          phone(v, mode, home(), "07:48", "Home") +
+          phone(v, mode, detail(), "18:42", "Workout detail") +
+          phone(v, mode, active(), "17:09", "Active workout") +
+        '</div></section>';
+    }).join("");
+  }
+
+  document.querySelectorAll(".bar [data-mode]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".bar [data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    currentMode = b.dataset.mode;
+    render(currentMode);
+  }));
+  document.getElementById("variants").addEventListener("click", e => {
+    const b = e.target.closest("[data-card-style]");
+    if (!b) return;
+    cardStyle = b.dataset.cardStyle;
+    render(currentMode);
+    const again = document.getElementById("card-" + cardStyle);
+    if (again) again.focus();
+  });
+  render("dark");
+</script>

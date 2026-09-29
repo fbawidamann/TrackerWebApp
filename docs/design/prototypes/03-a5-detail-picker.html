@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>A5 Detail Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* ---------- Page (host) tokens ---------- */
+  :root {
+    --pg-bg: #f3f4f6;
+    --pg-surface: #ffffff;
+    --pg-raised: #eef0f3;
+    --pg-text: #15191e;
+    --pg-muted: #5c6470;
+    --pg-border: #dce0e5;
+    --pg-accent: #3a6fd8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --pg-bg: #0d0f12;
+      --pg-surface: #15181c;
+      --pg-raised: #1c2025;
+      --pg-text: #e5e8ec;
+      --pg-muted: #939ba6;
+      --pg-border: #272c33;
+      --pg-accent: #82a7f1;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --pg-bg: #0d0f12;
+    --pg-surface: #15181c;
+    --pg-raised: #1c2025;
+    --pg-text: #e5e8ec;
+    --pg-muted: #939ba6;
+    --pg-border: #272c33;
+    --pg-accent: #82a7f1;
+  }
+
+  body {
+    background: var(--pg-bg);
+    color: var(--pg-text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 72px; display: grid; gap: 28px; }
+  header { display: grid; gap: 8px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 600; text-wrap: balance; }
+  header p { margin: 0; color: var(--pg-muted); max-width: 70ch; }
+  .fixed { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .fixed li { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--pg-border); background: var(--pg-surface); }
+  .fixed li b { font-weight: 600; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 36px; align-items: start; }
+  .preview { grid-column: 2; grid-row: 1; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); display: grid; gap: 14px; justify-items: center; }
+  .options { grid-column: 1; grid-row: 1; display: grid; gap: 36px; min-width: 0; }
+
+  .pv-bar { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button {
+    font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--pg-border); background: var(--pg-surface); color: var(--pg-text);
+  }
+  .seg button[aria-pressed="true"] { border-color: var(--pg-accent); color: var(--pg-accent); font-weight: 600; }
+  button:focus-visible { outline: 2px solid var(--pg-accent); outline-offset: 2px; }
+
+  .section { display: grid; gap: 14px; }
+  .section h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--pg-muted); font-weight: 600; }
+  .groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .group { display: grid; gap: 10px; align-content: start; padding: 16px; border: 1px solid var(--pg-border); border-radius: 12px; background: var(--pg-surface); }
+  .g-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .g-title { font-weight: 600; font-size: 15px; margin: 0; }
+  .g-where { font-size: 12px; color: var(--pg-muted); white-space: nowrap; }
+  .g-note { margin: 0; font-size: 13px; color: var(--pg-muted); }
+  .opts { display: grid; gap: 6px; }
+  .opt {
+    font: inherit; font-size: 14px; text-align: left; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px; border: 1px solid var(--pg-border); background: transparent; color: var(--pg-text);
+  }
+  .opt:hover { background: var(--pg-raised); }
+  .opt[aria-pressed="true"] { border-color: var(--pg-accent); background: color-mix(in oklab, var(--pg-accent) 10%, transparent); font-weight: 600; }
+  .opt .sample { font-variant-numeric: tabular-nums; }
+  .rec { font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--pg-accent); white-space: nowrap; }
+
+  .summary { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--pg-border); border-radius: 12px; background: var(--pg-surface); }
+  .summary h2 { margin: 0; font-size: 18px; font-weight: 600; }
+  .summary p { margin: 0; color: var(--pg-muted); font-size: 14px; }
+  .sum-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px 24px; font-size: 14px; }
+  .sum-list li { display: flex; justify-content: space-between; gap: 12px; padding-block: 5px; border-bottom: 1px solid var(--pg-border); }
+  .sum-list span:first-child { color: var(--pg-muted); }
+  .sum-list .chg { color: var(--pg-accent); font-weight: 600; }
+  .sum-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .pbtn { font: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--pg-border); background: var(--pg-surface); color: var(--pg-text); }
+  .pbtn.primary { background: var(--pg-accent); color: var(--pg-bg); border-color: transparent; }
+  #copy-out { width: 100%; min-height: 120px; font: 13px/1.5 "IBM Plex Mono", ui-monospace, monospace; padding: 10px; border-radius: 8px; border: 1px solid var(--pg-border); background: var(--pg-bg); color: var(--pg-text); }
+  .toast { font-size: 13px; color: var(--pg-muted); }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    .preview { grid-column: 1; grid-row: 1; position: static; }
+    .options { grid-row: 2; }
+  }
+  @media (max-width: 420px) { .wrap { padding-inline: 16px; } }
+
+  /* ---------- Mockup app ---------- */
+  .app {
+    width: 360px; max-width: 100%; min-height: 740px;
+    border-radius: 30px; overflow: hidden; position: relative;
+    border: 1px solid var(--line);
+    background: var(--bg); color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: var(--fs); line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 50px -24px rgba(0,0,0,.5);
+  }
+  .app[data-mode="dark"] {
+    --bg:#0a0c0f; --surf:#13171c; --raised:#1b2027; --line:#232930; --text:#eef1f5; --muted:#8a93a0;
+    --card-bg:#0f1216; --card-border:#1a1f25; --card-div:#1a1f25;
+    --acc:#4f86f7; --acc-text:#6f9bf8; --acc-fill:#4f86f7; --on-acc:#0b0e12;
+  }
+  .app[data-mode="light"] {
+    --bg:#eef0f3; --surf:#ffffff; --raised:#e9ecf0; --line:#dfe3e8; --text:#0f1216; --muted:#5a6370;
+    --card-bg:#f8f9fa; --card-border:#e1e5e9; --card-div:#e4e7eb;
+    --acc:#4f86f7; --acc-text:#2f63cf; --acc-fill:#3569d6; --on-acc:#ffffff;
+  }
+  .app * { box-sizing: border-box; }
+  .nw { white-space: nowrap; }
+  .num { font-variant-numeric: tabular-nums; }
+  .u { color: var(--muted); margin-left: .2em; }
+  .u.small { font-size: .72em; font-weight: 500; }
+  .u.same { font-size: 1em; font-weight: 400; }
+
+  .status { display: flex; justify-content: space-between; padding: 12px 22px 4px; font-size: 13px; font-weight: 600; }
+  .screen { flex: 1; padding: 10px 20px 28px; display: grid; gap: 28px; align-content: start; }
+  .app[data-rest="float"] .screen.active-screen { padding-bottom: 92px; }
+
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--cr); }
+  .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+  .title { margin: 0; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; font-size: 24px; }
+  .app[data-title="compact"] .title { font-size: 21px; }
+  .app[data-title="large"] .title { font-size: 28px; letter-spacing: -.015em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; min-height: 36px; }
+  .ib { width: 36px; height: 36px; display: grid; place-items: center; color: var(--muted); }
+  .ib svg { width: 22px; height: 22px; }
+
+  .btn { font: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: var(--br); border: 1px solid var(--line); background: var(--surf); color: var(--text); }
+  .btn-primary { background: var(--acc-fill); color: var(--on-acc); border-color: transparent; }
+  .btn-block { width: 100%; padding: 14px; font-size: 15px; }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--acc-text); padding-inline: 0; }
+
+  /* Home */
+  .sec { display: grid; gap: 12px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .link { font-size: 13px; color: var(--acc-text); font-weight: 500; }
+  .list { padding-inline: 16px; }
+  .li { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding-block: 14px; }
+  .li + .li { border-top: 1px solid var(--card-div); }
+  .li-name { font-weight: 500; }
+  .li-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .li-side { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .li-side svg { width: 18px; height: 18px; }
+  .week-card { padding: 16px; display: grid; gap: 16px; }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+  .day { display: grid; gap: 8px; justify-items: center; font-size: 12px; color: var(--muted); }
+  .day.today { color: var(--acc-text); font-weight: 600; }
+  .dot { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); }
+  .dot.on { background: var(--acc-fill); border-color: transparent; }
+  .day.today .dot { border-color: var(--acc); }
+  .day.today .dot.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--acc); }
+  .bars { display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; height: 64px; gap: 10px; }
+  .bars i { display: block; border-radius: 4px; background: var(--raised); height: 3px; }
+  .bars i.on { background: var(--acc-fill); }
+  .bar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; font-size: 12px; color: var(--muted); }
+  .bar-days .today { color: var(--acc-text); font-weight: 600; }
+  .week-sum { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+  .week-sum b { color: var(--text); font-weight: 600; font-size: 16px; margin-right: 4px; }
+  .week-big { display: grid; gap: 4px; }
+  .week-big .big { font-size: 30px; font-weight: 600; line-height: 1.1; }
+  .week-big .big .u { font-size: 16px; }
+
+  /* Workout detail */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .stat { padding: 14px 12px; display: grid; gap: 2px; min-width: 0; }
+  .stat + .stat { border-left: 1px solid var(--card-div); }
+  .stat-v { font-size: 18px; font-weight: 600; }
+  .stats-inline { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+  .stats-inline .stat { padding: 0; border: 0; }
+  .stats-inline .stat-v { font-size: 20px; }
+  .stats-hero { padding: 18px; display: grid; gap: 12px; }
+  .stats-hero .hero-v { font-size: 34px; font-weight: 600; line-height: 1.05; letter-spacing: -.01em; }
+  .stats-hero .hero-v .u { font-size: 17px; }
+  .stats-hero .hero-row { display: flex; gap: 24px; color: var(--muted); font-size: 14px; }
+  .stats-hero .hero-row b { color: var(--text); font-weight: 600; }
+
+  .exs { display: grid; gap: 14px; }
+  .ex { padding: 18px; display: grid; gap: 8px; }
+  .ex-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .ex-name { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
+  .ex-eq { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .ex-suf { font-weight: 400; color: var(--muted); }
+  .ex-meta { font-size: 13px; color: var(--muted); white-space: nowrap; padding-top: 3px; }
+  .sets { display: grid; }
+  .set { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 12px; padding-block: 11px; }
+  .set.cols { grid-template-columns: 30px 88px 1fr auto; }
+  .set.head { padding-block: 2px 4px; }
+  .app[data-div="lines"] .set:not(.head) + .set { border-top: 1px solid var(--card-div); }
+  .set-n { color: var(--muted); font-size: 14px; }
+  .set-n.w { color: var(--acc-text); font-weight: 600; }
+  .set-n.badge { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; background: var(--raised); font-size: 13px; }
+  .set-n.badge.w { background: color-mix(in oklab, var(--acc) 18%, transparent); }
+  .set-v { font-size: calc(var(--fs) + 1px); }
+  .set-v .x { color: var(--muted); padding-inline: 6px; }
+  .set-v.hl { color: var(--acc-text); font-weight: 600; }
+  .set-v.hl .u, .set-v.hl .x { color: color-mix(in oklab, var(--acc-text) 70%, transparent); }
+  .ex-foot { display: flex; gap: 18px; font-size: 13px; color: var(--muted); padding-top: 4px; }
+
+  .pr { font-size: 11px; font-weight: 600; letter-spacing: .05em; padding: 2px 8px; border-radius: 6px; }
+  .pr.outline { color: var(--acc-text); border: 1px solid color-mix(in oklab, var(--acc) 55%, transparent); }
+  .pr.filled { color: var(--on-acc); background: var(--acc-fill); }
+  .pr.txt { color: var(--acc-text); padding: 0; }
+  .pr-icon { color: var(--acc-text); display: grid; place-items: center; }
+  .pr-icon svg { width: 18px; height: 18px; }
+
+  /* Active workout */
+  .timer-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .live { padding: 14px 12px; display: grid; gap: 8px; }
+  .live .ex-head { padding-inline: 4px; }
+  .tr { display: grid; grid-template-columns: 26px 1fr 58px 48px 38px; gap: 7px; align-items: center; padding: 5px 4px; border-radius: 8px; }
+  .tr.th { padding-bottom: 4px; }
+  .c { text-align: center; }
+  .prev { color: var(--muted); font-size: 14px; }
+  .inp { height: 40px; display: grid; place-items: center; font-size: calc(var(--fs) + 1px); font-weight: 500; border-radius: 8px; }
+  .inp.ph { color: var(--muted); font-weight: 400; }
+  .app[data-input="filled"] .inp { background: var(--raised); }
+  .app[data-input="outline"] .inp { border: 1px solid var(--line); }
+  .app[data-input="line"] .inp { border-radius: 0; border-bottom: 1.5px solid var(--line); height: 36px; }
+  .tr.done .inp { background: transparent; border-color: transparent; }
+  .chk { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; background: var(--raised); color: var(--muted); justify-self: end; }
+  .app[data-check="round"] .chk { border-radius: 50%; }
+  .chk svg { width: 18px; height: 18px; }
+  .tr.done .chk { background: var(--acc-fill); color: var(--on-acc); }
+  .app[data-tint="light"] .tr.done { background: color-mix(in oklab, var(--acc) 6%, transparent); }
+  .app[data-tint="medium"] .tr.done { background: color-mix(in oklab, var(--acc) 11%, transparent); }
+  .app[data-tint="bar"] .tr.done { background: color-mix(in oklab, var(--acc) 8%, transparent); box-shadow: inset 3px 0 0 var(--acc); border-radius: 2px 8px 8px 2px; }
+
+  .rest-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .rest-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--raised); overflow: hidden; }
+  .rest-bar i { display: block; height: 100%; width: 62%; background: var(--acc); }
+  .rest-t { font-size: 16px; font-weight: 600; min-width: 40px; }
+  .rest-float { position: absolute; left: 20px; right: 20px; bottom: 86px; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 18px; border-radius: 999px; background: var(--surf); border: 1px solid var(--line); box-shadow: 0 12px 30px -10px rgba(0,0,0,.55); }
+  .rest-strip { display: flex; align-items: center; gap: 12px; margin-top: -14px; }
+  .skip { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: var(--br); background: var(--raised); color: var(--text); }
+  .next { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; font-size: 14px; color: var(--muted); }
+  .next b { display: block; color: var(--text); font-weight: 600; font-size: 16px; }
+
+  /* Nav */
+  .nav { display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px 16px; border-top: 1px solid var(--line); background: var(--surf); }
+  .nav a { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); }
+  .nav a.on { color: var(--acc-text); font-weight: 600; background: color-mix(in oklab, var(--acc) 14%, transparent); }
+  .nav svg { width: 22px; height: 22px; }
+  .app[data-nav="active"] .nav a:not(.on) .t { visibility: hidden; }
+  .app[data-nav="icons"] .nav a .t { display: none; }
+  .app[data-nav="icons"] .nav a { padding: 9px 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>A5 detail picker</h1>
+    <p>Choose every detail of your mix. Each group changes the live preview, which jumps to the screen the detail affects. My recommendation is marked "Rec" and preselected. The summary at the bottom collects everything to paste into chat. All data shown is example data.</p>
+    <ul class="fixed" aria-label="Already decided">
+      <li><b>Decided:</b> Graphite · IBM Plex Sans</li>
+      <li>Deep background #0A0C0F</li>
+      <li>Cobalt #4F86F7</li>
+      <li>Hairline cards</li>
+      <li>Uppercase labels</li>
+      <li>Completed sets tinted</li>
+      <li>Pill nav</li>
+      <li>Number and unit never wrap apart</li>
+    </ul>
+  </header>
+
+  <div class="layout">
+    <aside class="preview" aria-label="Live preview">
+      <div class="pv-bar">
+        <div class="seg" role="group" aria-label="Screen">
+          <button type="button" id="scr-home" data-screen="home">Home</button>
+          <button type="button" id="scr-detail" data-screen="detail">Workout detail</button>
+          <button type="button" id="scr-active" data-screen="active">Active workout</button>
+        </div>
+        <div class="seg" role="group" aria-label="App theme">
+          <button type="button" id="th-dark" data-appmode="dark">Dark</button>
+          <button type="button" id="th-light" data-appmode="light">Light</button>
+        </div>
+      </div>
+      <div id="phone"></div>
+    </aside>
+
+    <div class="options" id="options"></div>
+  </div>
+
+  <section class="summary" aria-labelledby="sum-h">
+    <h2 id="sum-h">Your choices</h2>
+    <p>Blue entries differ from my recommendation. Copy the list and paste it into chat, or just tell me the changes.</p>
+    <ul class="sum-list" id="sum-list"></ul>
+    <div class="sum-actions">
+      <button type="button" class="pbtn primary" id="copy-btn">Copy choices</button>
+      <button type="button" class="pbtn" id="reset-btn">Reset to recommended</button>
+      <span class="toast" id="toast" aria-live="polite"></span>
+    </div>
+    <textarea id="copy-out" readonly aria-label="Choices as text"></textarea>
+  </section>
+</div>
+
+<script>
+  const I = {
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v14l11-7z"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    medal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.2 13.8-1.7 7.2L12 18l5.5 3-1.7-7.2"/></svg>',
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    lift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+  };
+
+  const WHERE = { all: "All screens", home: "Home", detail: "Workout detail", active: "Active workout" };
+
+  const GROUPS = [
+    { section: "Text and numbers", key: "fs", title: "Base text size", where: "all", rec: "16",
+      note: "Size of body text, list rows and set values.",
+      opts: [["15", "15 px"], ["16", "16 px"], ["17", "17 px"]] },
+    { section: "Text and numbers", key: "title", title: "Screen title size", where: "detail", rec: "regular",
+      opts: [["compact", "21 px"], ["regular", "24 px"], ["large", "28 px"]] },
+    { section: "Text and numbers", key: "numfmt", title: "Thousands separator", where: "detail", rec: "space",
+      note: "How large numbers like volume are written.",
+      opts: [["space", "9 840"], ["comma", "9,840"], ["dot", "9.840"], ["none", "9840"]] },
+    { section: "Text and numbers", key: "unit", title: "Units next to numbers", where: "detail", rec: "small",
+      note: "In all cases, the number and its unit never wrap onto separate lines.",
+      opts: [["small", "Small grey kg"], ["same", "Same size kg"], ["label", "Unit only in the label"]] },
+    { section: "Text and numbers", key: "date", title: "Date format", where: "detail", rec: "short",
+      opts: [["short", "Tue, 29 Sep"], ["num", "29.09.2026"], ["long", "Tuesday, 29 September"]] },
+    { section: "Text and numbers", key: "dur", title: "Duration format", where: "home", rec: "min",
+      opts: [["min", "1 h 04 min"], ["colon", "1:04 h"], ["short", "1h 4m"]] },
+
+    { section: "Workout detail", key: "stats", title: "Workout summary", where: "detail", rec: "tiles",
+      opts: [["tiles", "Three tiles in a card"], ["inline", "Inline, no card"], ["hero", "Volume large"]] },
+    { section: "Workout detail", key: "exname", title: "Exercise name", where: "detail", rec: "stacked",
+      opts: [["inline", "Bench Press (Barbell)"], ["stacked", "Equipment on 2nd line"], ["suffix", "Bench Press · Barbell"]] },
+    { section: "Workout detail", key: "setrow", title: "Set rows", where: "detail", rec: "kgx",
+      opts: [["kgx", "80 kg × 8"], ["bare", "80 × 8, header above"], ["cols", "80 kg   8 reps"]] },
+    { section: "Workout detail", key: "setnum", title: "Set number", where: "detail", rec: "plain",
+      opts: [["plain", "Plain number"], ["badge", "Small box"]] },
+    { section: "Workout detail", key: "div", title: "Lines between sets", where: "detail", rec: "none",
+      opts: [["none", "None, spacing only"], ["lines", "Faint lines"]] },
+    { section: "Workout detail", key: "pr", title: "PR marker", where: "detail", rec: "outline",
+      opts: [["outline", "Outlined badge"], ["filled", "Filled badge"], ["icon", "Medal icon"], ["hl", "Blue value"]] },
+    { section: "Workout detail", key: "foot", title: "Exercise footer", where: "detail", rec: "on",
+      note: "Best weight and estimated 1RM under each exercise.",
+      opts: [["on", "Show"], ["off", "Hide"]] },
+
+    { section: "Active workout", key: "input", title: "Input fields", where: "active", rec: "filled",
+      opts: [["filled", "Filled"], ["outline", "Outlined"], ["line", "Underline"]] },
+    { section: "Active workout", key: "check", title: "Done button", where: "active", rec: "square",
+      opts: [["square", "Rounded square"], ["round", "Circle"]] },
+    { section: "Active workout", key: "tint", title: "Completed set tint", where: "active", rec: "medium",
+      opts: [["light", "Light"], ["medium", "Medium"], ["bar", "Light + side bar"]] },
+    { section: "Active workout", key: "rest", title: "Rest timer", where: "active", rec: "float",
+      note: "Low priority for you, so it should stay out of the way.",
+      opts: [["card", "Card in the list"], ["float", "Floating above nav"], ["strip", "Thin strip under title"]] },
+    { section: "Active workout", key: "next", title: "Next exercise preview", where: "active", rec: "on",
+      opts: [["on", "Show"], ["off", "Hide"]] },
+
+    { section: "Home and navigation", key: "week", title: "This week", where: "home", rec: "dots",
+      opts: [["dots", "Day dots"], ["bars", "Volume bars"], ["text", "Numbers only"]] },
+    { section: "Home and navigation", key: "start", title: "Start button", where: "home", rec: "top",
+      opts: [["top", "Full width at top"], ["bottom", "Above the nav"]] },
+    { section: "Home and navigation", key: "nav", title: "Nav labels", where: "home", rec: "labels",
+      opts: [["labels", "Always"], ["active", "Active tab only"], ["icons", "Icons only"]] },
+
+    { section: "Shapes", key: "cr", title: "Card corners", where: "detail", rec: "14",
+      opts: [["10", "10 px"], ["14", "14 px"], ["18", "18 px"]] },
+    { section: "Shapes", key: "br", title: "Button corners", where: "active", rec: "12",
+      opts: [["8", "8 px"], ["12", "12 px"], ["pill", "Pill"]] }
+  ];
+
+  const REC = Object.fromEntries(GROUPS.map(g => [g.key, g.rec]));
+  let S = Object.assign({}, REC);
+  let screen = "detail";
+  let mode = "dark";
+  try {
+    const saved = JSON.parse(localStorage.getItem("a5-choices") || "null");
+    if (saved && typeof saved === "object") {
+      for (const g of GROUPS) if (saved[g.key] && g.opts.some(o => o[0] === saved[g.key])) S[g.key] = saved[g.key];
+    }
+  } catch (e) {}
+  function save() { try { localStorage.setItem("a5-choices", JSON.stringify(S)); } catch (e) {} }
+
+  /* ---------- formatting ---------- */
+  function fmtNum(x) {
+    const neg = x < 0; x = Math.abs(x);
+    const [int, dec] = String(x).split(".");
+    const sep = { space: " ", comma: ",", dot: ".", none: "" }[S.numfmt];
+    const decSep = S.numfmt === "dot" ? "," : ".";
+    const grouped = int.length > 3 ? int.replace(/\B(?=(\d{3})+(?!\d))/g, sep) : int;
+    return (neg ? "-" : "") + grouped + (dec ? decSep + dec : "");
+  }
+  function u(unit) { return '<span class="u ' + (S.unit === "same" ? "same" : "small") + '">' + unit + '</span>'; }
+  function val(x, unit, force) {
+    const showUnit = force || S.unit !== "label";
+    return '<span class="nw">' + fmtNum(x) + (showUnit && unit ? u(unit) : "") + '</span>';
+  }
+  function dur(min, plain) {
+    const h = Math.floor(min / 60), m = min % 60, mm = String(m).padStart(2, "0");
+    let parts;
+    if (S.dur === "min") parts = h ? [[h, " h"], [mm, " min"]] : [[m, " min"]];
+    else if (S.dur === "colon") parts = [[h + ":" + mm, " h"]];
+    else parts = h ? [[h, "h"], [m, "m"]] : [[m, "m"]];
+    if (plain) return parts.map(p => p[0] + p[1]).join(" ");
+    return '<span class="nw">' + parts.map(p => p[0] + '<span class="u ' + (S.unit === "same" ? "same" : "small") + '">' + p[1].trim() + '</span>').join(" ") + '</span>';
+  }
+  function date(kind) {
+    if (S.date === "num") return "29.09.2026";
+    if (S.date === "long") return "Tuesday, 29 September";
+    return "Tue, 29 Sep";
+  }
+  function lblUnit(label, unit) { return S.unit === "label" ? label + " · " + unit : label; }
+
+  /* ---------- data ---------- */
+  const EXS = [
+    { n: "Bench Press", eq: "Barbell", sets: [["W", 60, 10], [1, 80, 8], [2, 80, 8], [3, 82.5, 6, true]], best: 82.5, e1rm: 99 },
+    { n: "Incline Press", eq: "Dumbbell", sets: [[1, 28, 10], [2, 28, 10], [3, 30, 8]], best: 30, e1rm: 38 },
+    { n: "Triceps Pushdown", eq: "Cable", sets: [[1, 25, 12], [2, 25, 12]], best: 25, e1rm: 35 }
+  ];
+
+  function exName(e) {
+    if (S.exname === "inline") return e.n + " (" + e.eq + ")";
+    if (S.exname === "suffix") return e.n + ' <span class="ex-suf">· ' + e.eq + '</span>';
+    return e.n + '<span class="ex-eq">' + e.eq + '</span>';
+  }
+  function prMark() {
+    if (S.pr === "filled") return '<span class="pr filled">PR</span>';
+    if (S.pr === "icon") return '<span class="pr-icon" aria-label="PR">' + I.medal + '</span>';
+    if (S.pr === "hl") return '<span class="pr txt">PR</span>';
+    return '<span class="pr outline">PR</span>';
+  }
+  function setNum(nr) {
+    const w = nr === "W" ? " w" : "";
+    return '<span class="set-n' + w + (S.setnum === "badge" ? " badge" : "") + '">' + nr + '</span>';
+  }
+
+  /* ---------- screens ---------- */
+  function nav(active) {
+    const items = [["home", "Home", I.home], ["hist", "History", I.hist], ["lift", "Workout", I.lift], ["list", "Exercises", I.list], ["user", "Profile", I.user]];
+    return '<nav class="nav" aria-hidden="true">' + items.map(([k, l, svg]) =>
+      '<a class="' + (k === active ? "on" : "") + '">' + svg + '<span class="t">' + l + '</span></a>').join("") + '</nav>';
+  }
+
+  function home() {
+    const days = ["M", "T", "W", "T", "F", "S", "S"];
+    const vols = [8470, 9840, 0, 0, 0, 0, 0];
+    let week;
+    if (S.week === "bars") {
+      const max = 12000;
+      week = '<div class="card week-card"><div class="bars">' + vols.map(v => '<i class="' + (v ? "on" : "") + '" style="height:' + (v ? Math.round(v / max * 64) : 3) + 'px"></i>').join("") + '</div>' +
+        '<div class="bar-days">' + days.map((d, i) => '<span class="' + (i === 1 ? "today" : "") + '">' + d + '</span>').join("") + '</div>' +
+        '<div class="week-sum"><span><b>2</b>workouts</span><span><b>' + val(18310, "kg", true) + '</b></span></div></div>';
+    } else if (S.week === "text") {
+      week = '<div class="card week-card"><div class="week-big"><span class="big">2<span class="u">workouts</span></span>' +
+        '<span class="week-sum"><span><b>' + val(18310, "kg", true) + '</b></span><span><b>' + dur(122) + '</b></span></span></div></div>';
+    } else {
+      week = '<div class="card week-card"><div class="week">' + days.map((d, i) =>
+        '<div class="day' + (i === 1 ? " today" : "") + '"><span class="dot' + (vols[i] ? " on" : "") + '"></span>' + d + '</div>').join("") + '</div>' +
+        '<div class="week-sum"><span><b>2</b>workouts</span><span><b>' + val(18310, "kg", true) + '</b></span><span><b>' + dur(122) + '</b></span></div></div>';
+    }
+    const startBtn = '<button type="button" class="btn btn-primary btn-block" tabindex="-1">Start empty workout</button>';
+    return '<div class="screen">' +
+      '<div><span class="lbl">' + date() + '</span><h3 class="title" style="margin-top:4px">Ready to train</h3></div>' +
+      (S.start === "top" ? startBtn : "") +
+      '<div class="sec"><div class="sec-head"><span class="lbl">This week</span></div>' + week + '</div>' +
+      '<div class="sec"><div class="sec-head"><span class="lbl">Routines</span><span class="link">All</span></div><div class="card list">' +
+        [["Push Day", "6 exercises · last Tue"], ["Pull Day", "6 exercises · last Mon"], ["Legs", "5 exercises · last Sat"]].map(([a, b]) =>
+          '<div class="li"><div><div class="li-name">' + a + '</div><div class="li-meta">' + b + '</div></div><span class="li-side">' + I.play + '</span></div>').join("") +
+      '</div></div>' +
+      '<div class="sec"><div class="sec-head"><span class="lbl">Recent</span><span class="link">History</span></div><div class="card list">' +
+        '<div class="li"><div><div class="li-name">Push Day</div><div class="li-meta">Today · ' + dur(58, true) + ' · <span class="nw">' + fmtNum(9840) + ' kg</span></div></div><span class="li-side">' + prMark() + I.chev + '</span></div>' +
+        '<div class="li"><div><div class="li-name">Pull Day</div><div class="li-meta">Mon · ' + dur(64, true) + ' · <span class="nw">' + fmtNum(8470) + ' kg</span></div></div><span class="li-side">' + I.chev + '</span></div>' +
+      '</div></div>' +
+      (S.start === "bottom" ? startBtn : "") +
+    '</div>' + nav("home");
+  }
+
+  function stats() {
+    if (S.stats === "hero") {
+      return '<div class="card stats-hero"><div><span class="lbl">' + lblUnit("Volume", "kg") + '</span><div class="hero-v">' + val(9840, "kg") + '</div></div>' +
+        '<div class="hero-row"><span><b>' + dur(58) + '</b></span><span><b>1</b> PR</span><span><b>3</b> exercises</span></div></div>';
+    }
+    const tiles = '<div class="stat"><span class="stat-v">' + dur(58) + '</span><span class="lbl">Duration</span></div>' +
+      '<div class="stat"><span class="stat-v">' + val(9840, "kg") + '</span><span class="lbl">' + lblUnit("Volume", "kg") + '</span></div>' +
+      '<div class="stat"><span class="stat-v">1</span><span class="lbl">PR</span></div>';
+    return S.stats === "inline" ? '<div class="stats-inline">' + tiles + '</div>' : '<div class="card stats">' + tiles + '</div>';
+  }
+
+  function setRow(s) {
+    const [nr, w, r, pr] = s;
+    const hl = pr && S.pr === "hl" ? " hl" : "";
+    const side = pr ? prMark() : "<span></span>";
+    if (S.setrow === "cols") {
+      return '<div class="set cols">' + setNum(nr) + '<span class="set-v' + hl + '">' + val(w, "kg", true) + '</span><span class="set-v' + hl + '"><span class="nw">' + r + u("reps") + '</span></span>' + side + '</div>';
+    }
+    const showKg = S.setrow === "kgx" && S.unit !== "label";
+    return '<div class="set">' + setNum(nr) + '<span class="set-v nw' + hl + '">' + fmtNum(w) + (showKg ? u("kg") : "") + '<span class="x">×</span>' + r + '</span>' + side + '</div>';
+  }
+
+  function detail() {
+    const exs = EXS.map(e => {
+      const head = S.setrow === "bare" || (S.setrow === "kgx" && S.unit === "label")
+        ? '<div class="set head"><span></span><span class="lbl">kg × reps</span><span></span></div>' : "";
+      const foot = S.foot === "on" ? '<div class="ex-foot"><span>Best ' + val(e.best, "kg", true) + '</span><span>e1RM ' + val(e.e1rm, "kg", true) + '</span></div>' : "";
+      return '<div class="card ex"><div class="ex-head"><h4 class="ex-name">' + exName(e) + '</h4><span class="ex-meta">' + e.sets.length + ' sets</span></div>' +
+        '<div class="sets">' + head + e.sets.map(setRow).join("") + '</div>' + foot + '</div>';
+    }).join("");
+    return '<div class="screen">' +
+      '<div class="top"><span class="ib">' + I.back + '</span><span class="ib">' + I.more + '</span></div>' +
+      '<div><h3 class="title">Push Day</h3><p class="sub">' + date() + ' · 17:35</p></div>' +
+      stats() +
+      '<div class="exs">' + exs + '</div>' +
+    '</div>' + nav("hist");
+  }
+
+  function active() {
+    const row = (nr, prev, w, r, done) =>
+      '<div class="tr' + (done ? " done" : "") + '">' + setNum(nr) + '<span class="prev nw">' + prev + '</span>' +
+      '<span class="inp' + (done ? "" : " ph") + '">' + fmtNum(w) + '</span><span class="inp' + (done ? "" : " ph") + '">' + r + '</span><span class="chk">' + I.check + '</span></div>';
+    const restInner = '<span class="lbl">Rest</span><span class="rest-bar"><i></i></span><span class="rest-t">0:56</span><span class="skip">Skip</span>';
+    const e = { n: "Bench Press", eq: "Barbell" };
+    return '<div class="screen active-screen">' +
+      '<div class="timer-row"><div><h3 class="title">Push Day</h3><p class="sub">34:12</p></div><button type="button" class="btn btn-primary" tabindex="-1">Finish</button></div>' +
+      (S.rest === "strip" ? '<div class="rest-strip" aria-hidden="true">' + restInner + '</div>' : "") +
+      '<div class="card live"><div class="ex-head"><h4 class="ex-name">' + exName(e) + '</h4><span class="ib" style="width:28px;height:28px">' + I.more + '</span></div>' +
+        '<div><div class="tr th"><span class="lbl">Set</span><span class="lbl">Previous</span><span class="lbl c">kg</span><span class="lbl c">Reps</span><span></span></div>' +
+        row("W", "60 × 10", 60, 10, true) + row(1, "80 × 8", 80, 8, true) + row(2, "80 × 8", 80, 8, false) + row(3, "80 × 7", 80, 7, false) +
+        '</div><button type="button" class="btn btn-ghost" tabindex="-1" style="justify-self:start;padding-left:4px">+ Add set</button></div>' +
+      (S.rest === "card" ? '<div class="card rest-card" aria-hidden="true">' + restInner + '</div>' : "") +
+      (S.next === "on" ? '<div class="card next"><div><span class="lbl">Next</span><b>' + exName({ n: "Incline Press", eq: "Dumbbell" }) + '</b></div><span>3 sets</span></div>' : "") +
+      '<button type="button" class="btn btn-block" tabindex="-1">Add exercise</button>' +
+    '</div>' +
+    (S.rest === "float" ? '<div class="rest-float" aria-hidden="true">' + restInner + '</div>' : "") +
+    nav("lift");
+  }
+
+  /* ---------- render ---------- */
+  function renderPhone() {
+    const body = screen === "home" ? home() : screen === "active" ? active() : detail();
+    const time = screen === "home" ? "07:48" : screen === "active" ? "17:09" : "18:42";
+    const br = S.br === "pill" ? "999px" : S.br + "px";
+    document.getElementById("phone").innerHTML =
+      '<div class="app" data-mode="' + mode + '" data-title="' + S.title + '" data-div="' + S.div + '" data-input="' + S.input +
+      '" data-check="' + S.check + '" data-tint="' + S.tint + '" data-rest="' + S.rest + '" data-nav="' + S.nav +
+      '" style="--fs:' + S.fs + 'px;--cr:' + S.cr + 'px;--br:' + br + '">' +
+      '<div class="status"><span>' + time + '</span><span>86%</span></div>' + body + '</div>';
+    document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.screen === screen)));
+    document.querySelectorAll("[data-appmode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.appmode === mode)));
+  }
+
+  function renderOptions() {
+    const sections = [...new Set(GROUPS.map(g => g.section))];
+    document.getElementById("options").innerHTML = sections.map(sec =>
+      '<section class="section"><h2>' + sec + '</h2><div class="groups">' +
+      GROUPS.filter(g => g.section === sec).map(g =>
+        '<div class="group" role="group" aria-labelledby="g-' + g.key + '">' +
+          '<div class="g-head"><h3 class="g-title" id="g-' + g.key + '">' + g.title + '</h3><span class="g-where">' + WHERE[g.where] + '</span></div>' +
+          (g.note ? '<p class="g-note">' + g.note + '</p>' : '') +
+          '<div class="opts">' + g.opts.map(([v, l]) =>
+            '<button type="button" class="opt" id="o-' + g.key + '-' + v + '" data-key="' + g.key + '" data-val="' + v + '" aria-pressed="' + (S[g.key] === v) + '">' +
+            '<span class="sample">' + l + '</span>' + (g.rec === v ? '<span class="rec">Rec</span>' : '') + '</button>').join("") +
+          '</div></div>').join("") +
+      '</div></section>').join("");
+  }
+
+  function renderSummary() {
+    const lines = GROUPS.map(g => {
+      const label = g.opts.find(o => o[0] === S[g.key])[1];
+      return { title: g.title, label, changed: S[g.key] !== g.rec };
+    });
+    document.getElementById("sum-list").innerHTML = lines.map(l =>
+      '<li><span>' + l.title + '</span><span class="' + (l.changed ? "chg" : "") + '">' + l.label + '</span></li>').join("");
+    const changed = lines.filter(l => l.changed);
+    document.getElementById("copy-out").value =
+      "A5 choices (Hairline, deep bg, cobalt, uppercase labels, tinted sets, pill nav)\n" +
+      lines.map(l => "- " + l.title + ": " + l.label + (l.changed ? "  (changed)" : "")).join("\n") +
+      (changed.length ? "" : "\n(all as recommended)");
+  }
+
+  function renderAll() { renderPhone(); renderSummary(); }
+
+  document.getElementById("options").addEventListener("click", e => {
+    const b = e.target.closest(".opt");
+    if (!b) return;
+    S[b.dataset.key] = b.dataset.val;
+    save();
+    const g = GROUPS.find(x => x.key === b.dataset.key);
+    if (g.where !== "all") screen = g.where;
+    b.closest(".opts").querySelectorAll(".opt").forEach(o => o.setAttribute("aria-pressed", String(o === b)));
+    renderAll();
+  });
+  document.querySelectorAll("[data-screen]").forEach(b => b.addEventListener("click", () => { screen = b.dataset.screen; renderPhone(); }));
+  document.querySelectorAll("[data-appmode]").forEach(b => b.addEventListener("click", () => { mode = b.dataset.appmode; renderPhone(); }));
+
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    S = Object.assign({}, REC); save(); renderOptions(); renderAll();
+    document.getElementById("toast").textContent = "Reset to recommended.";
+  });
+  document.getElementById("copy-btn").addEventListener("click", () => {
+    const ta = document.getElementById("copy-out");
+    const toast = document.getElementById("toast");
+    const fallback = () => { ta.focus(); ta.select(); toast.textContent = "Selected. Press Ctrl+C to copy."; };
+    try {
+      navigator.clipboard.writeText(ta.value).then(() => { toast.textContent = "Copied."; }, fallback);
+    } catch (err) { fallback(); }
+  });
+
+  renderOptions();
+  renderAll();
+</script>
