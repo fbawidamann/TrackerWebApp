@@ -34,6 +34,21 @@ Chosen after comparing three directions (Graphite / Chalk / Iron) and five Graph
 | `accent-fill` | `#4F86F7` | `#3569D6` | Primary buttons, done checkbox, active dots |
 | `on-accent` | `#0B0E12` | `#FFFFFF` | Text/icons on `accent-fill` |
 
+### Accent colour is a user setting
+Cobalt is the default. The user can choose among 5 accents in Profile, each with values for both themes. Every component uses the `accent*` tokens, so switching only swaps these four values:
+
+| Accent | `accent` | `accent-text` dark / light | `accent-fill` light |
+|---|---|---|---|
+| **Cobalt** (default) | `#4F86F7` | `#6F9BF8` / `#2F63CF` | `#3569D6` |
+| Teal | `#2FB39F` | `#3CC7B2` / `#1E7F71` | `#23907F` |
+| Amber | `#E08A3C` | `#EBA05D` / `#A65E1C` | `#B8691F` |
+| Rose | `#E0607E` | `#EC7D96` / `#B23D5A` | `#C4455F` |
+| Violet | `#8B7CF6` | `#A194F8` / `#5B4BC4` | `#6A5AD8` |
+
+In dark mode `accent-fill` = `accent`, and `on-accent` stays `#0B0E12` (dark) / `#FFFFFF` (light). Check contrast for each accent when implementing (the text on primary buttons must pass at least WCAG AA large text).
+
+**Text size setting**: Large adds +2 px to every size in the type scale (base 19, set values 20, titles 30).
+
 Derived:
 - completed-set tint = `accent` at **11 %** over the card.
 - active nav pill = `accent` at 14 %.

@@ -73,7 +73,18 @@ Status: agreed on 2026-09-29.
 - Any exercise can be hidden from the list and picker.
 
 ### Units
-- Stored as kg. The UI shows **kg only** for now. A lb setting exists in the data model and will be added later.
+- Stored as kg. The UI shows kg by default, and **lb can be chosen in Settings** (decided 2026-09-30; this replaces "kg only for now").
+
+### Profile and Settings (details in [design/screens/profile.md](design/screens/profile.md))
+- The header shows the name, "Training since", and tiles for Workouts, This year and Streak.
+- There are many personalization settings, all with defaults:
+  - **Training:** weekly goal, week start, default sets, weight step, warm-ups in PRs.
+  - **Workout screen:** rest timer on/off, rest time, auto-start, keep screen on, vibration.
+  - **Appearance:** theme, accent colour (5), text size, navigation labels, History card style.
+  - **Units and formats:** kg/lb, decimal comma, date format.
+  - **Home:** start screen, and which Home sections to show.
+- Data: export backup (JSON) and import backup (replace). No CSV, no delete-all.
+- Account: "Saved on this device" until the backend exists.
 
 ## Design
 Dark by default + light theme. Plain and calm, not "AI style". Readability first. Details in [design/ui-guidelines.md](design/ui-guidelines.md).

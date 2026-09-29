@@ -6,15 +6,15 @@ The order is deliberate: the app is fully usable offline on one device after **M
 - [x] Requirements and stack ([requirements.md](requirements.md), [ADR 0001](adr/0001-tech-stack.md))
 - [x] Data model and sync design
 - [x] Visual design: direction, tokens, formats, components ([design/ui-guidelines.md](design/ui-guidelines.md))
-- [ ] **Detailed frontend planning**: one spec + clickable prototype per screen → `docs/design/screens/`
+- [x] **Detailed frontend planning**: one spec + clickable prototype per screen → `docs/design/screens/`
   - [x] Active workout (incl. finish summary)
   - [x] Home
   - [x] Exercises (list, picker, detail with charts, custom exercises)
   - [x] History (list, calendar, workout detail, edit, log past workout)
   - [x] Routines (list, editor, starter routines)
-  - [ ] Profile / Settings
-  - [ ] Stats (desktop)
-  - [ ] Login / Register (M7)
+  - [x] Profile / Settings (personalization, backup)
+  - [ ] Stats (desktop) (deferred: charts already live in the exercise detail)
+  - [ ] Login / Register (planned together with the backend, M7)
 
 ## Phase 1: Gym (frontend, local-only)
 - [ ] **M0: Scaffold**: monorepo, TypeScript, ESLint/Prettier, Vitest, Vite + Tailwind + shadcn, TanStack Router, app shell (bottom nav / sidebar, theme), GitHub Actions CI

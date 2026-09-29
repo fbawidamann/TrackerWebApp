@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Profile Settings Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --pg-bg:#f3f4f6; --pg-surface:#ffffff; --pg-text:#15191e; --pg-muted:#5c6470; --pg-border:#dce0e5; --pg-accent:#3a6fd8; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  }
+  :root[data-theme="dark"] { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  body { background: var(--pg-bg); color: var(--pg-text); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 24px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 600; }
+  header p { margin: 6px 0 0; color: var(--pg-muted); max-width: 70ch; }
+  .layout { display: grid; grid-template-columns: 382px minmax(0, 1fr); gap: 40px; align-items: start; }
+  .panel { display: grid; gap: 20px; }
+  .panel section { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--pg-border); border-radius: 12px; background: var(--pg-surface); }
+  .panel h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--pg-muted); font-weight: 600; }
+  .panel ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .panel p { margin: 0; color: var(--pg-muted); font-size: 14px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; justify-items: center; } .panel { width: 100%; } }
+  @media (max-width: 420px) { .wrap { padding-inline: 16px; } }
+
+  .app {
+    --d: 0px;
+    width: 380px; max-width: 100%; height: min(800px, calc(100dvh - 32px)); min-height: 560px;
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    border-radius: 32px; border: 1px solid var(--line); background: var(--bg); color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: calc(17px + var(--d)); line-height: 1.45;
+    font-variant-numeric: tabular-nums; box-shadow: 0 28px 60px -28px rgba(0,0,0,.55);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .app[data-size="large"] { --d: 2px; }
+  @media (max-width: 480px) { .app { border-radius: 22px; } }
+  .app[data-mode="dark"] {
+    color-scheme: dark;
+    --bg:#0a0c0f; --surf:#13171c; --raised:#1b2027; --line:#232930;
+    --card-bg:#0f1216; --card-border:#1a1f25; --card-div:#1a1f25;
+    --text:#eef1f5; --muted:#8a93a0; --on-acc:#0b0e12;
+    --danger:#e5534b; --scrim: rgba(0,0,0,.6);
+  }
+  .app[data-mode="light"] {
+    color-scheme: light;
+    --bg:#eef0f3; --surf:#ffffff; --raised:#e9ecf0; --line:#dfe3e8;
+    --card-bg:#f8f9fa; --card-border:#e1e5e9; --card-div:#e4e7eb;
+    --text:#0f1216; --muted:#5a6370; --on-acc:#ffffff;
+    --danger:#c93c37; --scrim: rgba(15,18,22,.35);
+  }
+  .app *, .app *::before, .app *::after { box-sizing: border-box; }
+  :where(.app button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+  .app button:focus-visible, .app input:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+  .status { display: flex; justify-content: space-between; padding: 12px 24px 4px; font-size: 13px; font-weight: 600; flex: none; }
+  .scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .screen { padding: 14px 20px 40px; display: grid; gap: 26px; align-content: start; }
+  .lbl { font-size: calc(11px + var(--d) / 2); font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .title { margin: 0; font-size: calc(28px + var(--d)); font-weight: 600; line-height: 1.2; letter-spacing: -.015em; }
+  .sub { margin: 4px 0 0; font-size: calc(15px + var(--d)); color: var(--muted); }
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+  .muted { color: var(--muted); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--surf); color: var(--text); }
+  .btn-primary { background: var(--acc-fill); color: var(--on-acc); border-color: transparent; }
+  .btn-block { width: 100%; padding: 14px; }
+
+  .name-btn { display: block; border-radius: 8px; }
+  .name-btn .title.placeholder { color: var(--muted); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .stat { padding: 14px 12px; display: grid; gap: 2px; min-width: 0; }
+  .stat + .stat { border-left: 1px solid var(--card-div); }
+  .stat-v { font-size: calc(18px + var(--d)); font-weight: 600; white-space: nowrap; }
+  .stat-v .u { color: var(--muted); font-weight: 400; font-size: .85em; margin-left: .2em; }
+
+  .sec { display: grid; gap: 10px; }
+  .rows { padding-inline: 16px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 54px; padding-block: 8px; width: 100%; font-size: calc(16px + var(--d)); }
+  .row + .row { border-top: 1px solid var(--card-div); }
+  .row .val { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: calc(15px + var(--d)); white-space: nowrap; }
+  .row .val svg { width: 18px; height: 18px; }
+  .row-sub { display: block; font-size: calc(13px + var(--d)); color: var(--muted); }
+  .info { display: flex; gap: 12px; align-items: center; padding: 16px; }
+  .info svg { width: 22px; height: 22px; color: var(--muted); flex: none; }
+  .example { font-size: calc(14px + var(--d)); color: var(--muted); padding: 12px 0 14px; border-top: 1px solid var(--card-div); }
+  .example b { color: var(--text); font-weight: 500; }
+
+  .sw { width: 50px; height: 30px; border-radius: 15px; background: var(--raised); position: relative; flex: none; border: 1px solid var(--line); transition: background-color .15s; }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--muted); transition: transform .15s, background-color .15s; }
+  .row[aria-checked="true"] .sw { background: var(--acc-fill); border-color: transparent; }
+  .row[aria-checked="true"] .sw::after { transform: translateX(20px); background: var(--on-acc); }
+  .seg { display: flex; padding: 3px; border-radius: 10px; background: var(--raised); flex: none; }
+  .seg button { font-size: calc(14px + var(--d)); padding: 6px 11px; border-radius: 8px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .seg button[aria-pressed="true"] { background: var(--card-bg); color: var(--text); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .swatches { display: flex; gap: 10px; }
+  .swatch { width: 30px; height: 30px; border-radius: 50%; background: var(--c); display: grid; place-items: center; color: #fff; }
+  .swatch svg { width: 16px; height: 16px; opacity: 0; }
+  .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--c); }
+  .swatch[aria-pressed="true"] svg { opacity: 1; }
+  .stack { display: grid; gap: 10px; padding-block: 12px; }
+  .stack + .row, .row + .stack { border-top: 1px solid var(--card-div); }
+
+  .scrim { position: absolute; inset: 0; z-index: 10; background: var(--scrim); animation: fade .15s ease; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; max-height: 85%; overflow-y: auto; padding: 10px 20px 22px; border-radius: 22px 22px 0 0; background: var(--surf); display: grid; gap: 14px; animation: up .2s ease; }
+  .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+  .sheet h3 { margin: 0; font-size: 20px; font-weight: 600; }
+  .sheet p { margin: 0; color: var(--muted); font-size: 15px; }
+  .radio { display: flex; justify-content: space-between; align-items: center; padding: 14px 4px; width: 100%; font-size: 17px; }
+  .radio + .radio { border-top: 1px solid var(--card-div); }
+  .radio svg { width: 20px; height: 20px; color: var(--acc-text); opacity: 0; }
+  .radio[aria-checked="true"] { font-weight: 600; }
+  .radio[aria-checked="true"] svg { opacity: 1; }
+  .field { width: 100%; font: 17px "IBM Plex Sans", sans-serif; color: var(--text); background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 11px 14px; }
+  .field:focus { outline: none; border-color: var(--acc); }
+  .acts { display: grid; gap: 10px; }
+  .toast { position: absolute; left: 16px; right: 16px; bottom: 86px; z-index: 12; padding: 12px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 15px; }
+
+  .nav { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px 14px; border-top: 1px solid var(--line); background: var(--surf); }
+  .nav button { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); }
+  .nav button.on { color: var(--acc-text); font-weight: 600; background: color-mix(in oklab, var(--acc) 14%, transparent); }
+  .nav svg { width: 22px; height: 22px; }
+  .app[data-nav="active"] .nav button:not(.on) span { visibility: hidden; }
+
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .sheet, .scrim { animation: none; } .sw, .sw::after { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Profile and settings prototype</h1>
+    <p>A clickable version of <b>docs/design/screens/profile.md</b>, for mobile. Theme, accent colour, text size and navigation labels take effect in the prototype right away. The formats show a live example line. Nothing is saved.</p>
+  </header>
+  <div class="layout">
+    <div id="root"></div>
+    <div class="panel">
+      <section>
+        <h2>Things to try</h2>
+        <ul>
+          <li>Tap the name to rename.</li>
+          <li>Appearance: switch the accent colour, text size and theme, and watch the whole app change.</li>
+          <li>Turn the rest timer off: the two rows below it disappear.</li>
+          <li>Units and formats: kg/lb, decimal comma and date format. See the example line.</li>
+          <li>Rows with › open a bottom sheet (weekly goal, weight step, rest time, and so on).</li>
+          <li>Import backup: pick a file, or use "Try with example backup".</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Note</h2>
+        <p>Downloads are blocked in this preview, so Export backup only shows a message. In the app it saves or shares the file.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const I = {
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+    ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    lift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+  };
+  const ACC = {
+    cobalt: { name: "Cobalt", c: "#4f86f7", dt: "#6f9bf8", lt: "#2f63cf", lf: "#3569d6" },
+    teal:   { name: "Teal",   c: "#2fb39f", dt: "#3cc7b2", lt: "#1e7f71", lf: "#23907f" },
+    amber:  { name: "Amber",  c: "#e08a3c", dt: "#eba05d", lt: "#a65e1c", lf: "#b8691f" },
+    rose:   { name: "Rose",   c: "#e0607e", dt: "#ec7d96", lt: "#b23d5a", lf: "#c4455f" },
+    violet: { name: "Violet", c: "#8b7cf6", dt: "#a194f8", lt: "#5b4bc4", lf: "#6a5ad8" }
+  };
+  const DEF = {
+    name: "Florian", goal: 3, weekStart: "Monday", defSets: 3, step: 2.5, warmPr: false,
+    rest: true, restSec: 90, restAuto: true, screenOn: true, vibrate: true,
+    theme: "System", accent: "cobalt", size: "standard", navLabels: "always", cards: "names",
+    unit: "kg", dec: "point", date: "long", start: "Home", hGoal: true, hRoutines: true, hRecent: true, hPrs: true
+  };
+  let S = Object.assign({}, DEF), sheet = null, toast = null, toastTimer = null, preview = null;
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const clock = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  const dec = x => S.dec === "comma" ? String(x).replace(".", ",") : String(x);
+  const stepText = () => S.unit === "kg" ? dec(S.step) + " kg" : dec({ 2.5: 5, 1.25: 2.5, 1: 2, 0.5: 1 }[S.step]) + " lb";
+  const exampleWeight = () => S.unit === "kg" ? dec(82.5) + " kg" : dec(182.5) + " lb";
+  const exampleDate = () => S.date === "long" ? "Tuesday, 29 September" : "29.09.2026";
+  const sysDark = () => { try { return window.matchMedia("(prefers-color-scheme: dark)").matches; } catch (e) { return true; } };
+  const mode = () => S.theme === "Dark" ? "dark" : S.theme === "Light" ? "light" : (sysDark() ? "dark" : "light");
+
+  const root = document.getElementById("root");
+  const tog = (key, label, sub) => '<button type="button" class="row" role="switch" data-act="tog" data-k="' + key + '" aria-checked="' + S[key] + '"><span>' + label + (sub ? '<span class="row-sub">' + sub + '</span>' : '') + '</span><span class="sw"></span></button>';
+  const pick = (key, label, value) => '<button type="button" class="row" data-act="pick" data-k="' + key + '"><span>' + label + '</span><span class="val">' + value + I.chev + '</span></button>';
+  const seg = (key, label, opts) => '<div class="row"><span>' + label + '</span><span class="seg" role="group" aria-label="' + label + '">' + opts.map(([v, l]) => '<button type="button" data-act="seg" data-k="' + key + '" data-v="' + v + '" aria-pressed="' + (S[key] === v) + '">' + l + '</button>').join("") + '</span></div>';
+  const section = (title, inner) => '<div class="sec"><span class="lbl">' + title + '</span><div class="card rows">' + inner + '</div></div>';
+
+  function view() {
+    return '<div class="screen">' +
+      '<div><button type="button" class="name-btn" data-act="rename" aria-label="Change name"><h1 class="title' + (S.name ? '' : ' placeholder') + '">' + (S.name ? esc(S.name) : "Your name") + '</h1></button><p class="sub">Training since March 2026</p></div>' +
+      '<div class="card stats"><div class="stat"><span class="stat-v">142</span><span class="lbl">Workouts</span></div><div class="stat"><span class="stat-v">96</span><span class="lbl">This year</span></div><div class="stat"><span class="stat-v">6<span class="u">weeks</span></span><span class="lbl">Streak</span></div></div>' +
+      '<div class="sec"><span class="lbl">Account</span><div class="card info">' + I.phone + '<span><span style="display:block;font-weight:500">Saved on this device</span><span class="row-sub">Back up with Export backup</span></span></div></div>' +
+      section("Training",
+        pick("goal", "Weekly goal", S.goal) + pick("weekStart", "Week starts on", S.weekStart) + pick("defSets", "Default sets", S.defSets) +
+        pick("step", "Weight step", stepText()) + tog("warmPr", "Warm-ups in PRs & charts")) +
+      section("Workout screen",
+        tog("rest", "Rest timer") + (S.rest ? pick("restSec", "Rest time", clock(S.restSec)) + tog("restAuto", "Start automatically", S.restAuto ? "" : "Start it from the set row") : "") +
+        tog("screenOn", "Keep screen on") + tog("vibrate", "Vibrate on set complete")) +
+      section("Appearance",
+        pick("theme", "Theme", S.theme) +
+        '<div class="stack"><span>Accent colour</span><span class="swatches" role="group" aria-label="Accent colour">' + Object.entries(ACC).map(([k, a]) => '<button type="button" class="swatch" data-act="accent" data-v="' + k + '" style="--c:' + a.c + '" aria-label="' + a.name + '" aria-pressed="' + (S.accent === k) + '">' + I.check + '</button>').join("") + '</span></div>' +
+        seg("size", "Text size", [["standard", "Standard"], ["large", "Large"]]) +
+        seg("navLabels", "Nav labels", [["always", "Always"], ["active", "Active"]]) +
+        seg("cards", "History cards", [["names", "Names"], ["detailed", "Detailed"]])) +
+      section("Units and formats",
+        seg("unit", "Weight unit", [["kg", "kg"], ["lb", "lb"]]) +
+        seg("dec", "Decimal", [["point", "82.5"], ["comma", "82,5"]]) +
+        pick("date", "Date format", S.date === "long" ? "Tue, 29 Sep" : "29.09.2026") +
+        '<div class="example">Example: <b>' + exampleWeight() + '</b> · <b>' + exampleDate() + '</b></div>') +
+      section("Home",
+        seg("start", "Start screen", [["Home", "Home"], ["Workout", "Workout"]]) +
+        tog("hGoal", "Weekly goal") + tog("hRoutines", "Routines") + tog("hRecent", "Recent workouts") + tog("hPrs", "Latest PRs")) +
+      '<div class="sec"><span class="lbl">Data</span><div class="card rows">' +
+        '<button type="button" class="row" data-act="export"><span>Export backup</span><span class="val">' + I.chev + '</span></button>' +
+        '<button type="button" class="row" data-act="import"><span>Import backup</span><span class="val">' + I.chev + '</span></button></div>' +
+        '<input type="file" id="file" accept=".json,application/json" hidden></div>' +
+      '<div class="sec"><span class="lbl">About</span><div class="card rows"><div class="row"><span>Version</span><span class="val">0.1.0</span></div>' +
+        '<a class="row" href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span>Exercise data</span><span class="val">free-exercise-db ' + I.ext + '</span></a></div></div>' +
+    '</div>';
+  }
+
+  const OPTIONS = {
+    goal: { title: "Weekly goal", sub: "Workouts per week", opts: [1, 2, 3, 4, 5, 6, 7].map(n => [n, String(n)]) },
+    weekStart: { title: "Week starts on", opts: [["Monday", "Monday"], ["Sunday", "Sunday"]] },
+    defSets: { title: "Default sets", sub: "For exercises added without history", opts: [1, 2, 3, 4, 5].map(n => [n, String(n)]) },
+    step: { title: "Weight step", sub: "Smallest plate increment", opts: () => [2.5, 1.25, 1, 0.5].map(n => [n, S.unit === "kg" ? dec(n) + " kg" : dec({ 2.5: 5, 1.25: 2.5, 1: 2, 0.5: 1 }[n]) + " lb"]) },
+    restSec: { title: "Rest time", opts: [30, 45, 60, 75, 90, 105, 120, 150, 180, 240, 300].map(n => [n, clock(n)]) },
+    theme: { title: "Theme", opts: [["System", "System"], ["Dark", "Dark"], ["Light", "Light"]] },
+    date: { title: "Date format", opts: [["long", "Tuesday, 29 September"], ["numeric", "29.09.2026"]] }
+  };
+
+  function sheetView() {
+    const wrap = inner => '<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>' + inner + '</div>';
+    if (sheet.kind === "pick") {
+      const o = OPTIONS[sheet.k]; const opts = typeof o.opts === "function" ? o.opts() : o.opts;
+      return wrap('<div><h3>' + o.title + '</h3>' + (o.sub ? '<p>' + o.sub + '</p>' : '') + '</div><div role="radiogroup">' +
+        opts.map(([v, l]) => '<button type="button" class="radio" role="radio" data-act="choose" data-v="' + v + '" aria-checked="' + (String(S[sheet.k]) === String(v)) + '"><span>' + l + '</span>' + I.check + '</button>').join("") + '</div>');
+    }
+    if (sheet.kind === "rename") return wrap('<h3>Your name</h3><input class="field" id="nm" maxlength="30" value="' + esc(S.name) + '" aria-label="Name"><div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="rename-save">Save</button></div>');
+    if (sheet.kind === "import") return wrap('<h3>Import backup</h3><p>Choose a backup file (.json) exported from this app.</p><div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="choose-file">Choose file</button><button type="button" class="btn btn-block" data-act="example-backup">Try with example backup</button></div>');
+    if (sheet.kind === "preview") return wrap('<h3>Replace all data on this device?</h3><p>Backup from ' + preview.date + ' · ' + preview.workouts + ' workouts · ' + preview.routines + ' routines.</p><p>Your current data will be replaced.</p><div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="replace">Replace</button><button type="button" class="btn btn-block" data-act="close">Cancel</button></div>');
+    return "";
+  }
+
+  function render() {
+    const sc = root.querySelector(".scroll"); const top = sc ? sc.scrollTop : 0;
+    const m = mode(), a = ACC[S.accent];
+    const accVars = "--acc:" + a.c + ";--acc-text:" + (m === "dark" ? a.dt : a.lt) + ";--acc-fill:" + (m === "dark" ? a.c : a.lf);
+    const NAV = [["home", "Home", I.home], ["history", "History", I.hist], ["workout", "Workout", I.lift], ["exercises", "Exercises", I.list], ["profile", "Profile", I.user]];
+    root.innerHTML = '<div class="app" data-mode="' + m + '" data-size="' + S.size + '" data-nav="' + S.navLabels + '" style="' + accVars + '"><div class="status"><span>19:12</span><span>86%</span></div>' +
+      '<div class="scroll">' + view() + '</div>' +
+      '<nav class="nav" aria-label="Main">' + NAV.map(([k, l, svg]) => '<button type="button" class="' + (k === "profile" ? "on" : "") + '" data-act="nav"' + (k === "profile" ? ' aria-current="page"' : '') + '>' + svg + '<span>' + l + '</span></button>').join("") + '</nav>' +
+      (sheet ? sheetView() : '') + (toast ? '<div class="toast" role="status">' + toast + '</div>' : '') + '</div>';
+    const nsc = root.querySelector(".scroll"); if (nsc) nsc.scrollTop = top;
+  }
+  function say(msg) { toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast = null; render(); }, 3500); }
+
+  root.addEventListener("click", ev => {
+    const t = ev.target.closest("[data-act]"); if (!t) return;
+    const k = t.dataset.k, v = t.dataset.v;
+    switch (t.dataset.act) {
+      case "tog": S[k] = !S[k]; break;
+      case "seg": S[k] = v; break;
+      case "accent": S.accent = v; break;
+      case "pick": sheet = { kind: "pick", k }; break;
+      case "choose": { const cur = S[sheet.k]; S[sheet.k] = typeof cur === "number" ? Number(v) : v; sheet = null; break; }
+      case "close": sheet = null; break;
+      case "rename": sheet = { kind: "rename" }; render(); setTimeout(() => { const el = root.querySelector("#nm"); if (el) { el.focus(); el.select(); } }, 30); return;
+      case "rename-save": S.name = root.querySelector("#nm").value.trim(); sheet = null; break;
+      case "export": say("Backup saved: fitness-backup-2026-09-30.json"); break;
+      case "import": sheet = { kind: "import" }; break;
+      case "choose-file": root.querySelector("#file").click(); return;
+      case "example-backup": preview = { date: "29 September 2026", workouts: 142, routines: 6 }; sheet = { kind: "preview" }; break;
+      case "replace": sheet = null; say("Backup restored"); break;
+      case "nav": if (!t.classList.contains("on")) say("Other tabs have their own prototypes."); break;
+      default: return;
+    }
+    render();
+  });
+  root.addEventListener("change", ev => {
+    if (ev.target.id !== "file" || !ev.target.files[0]) return;
+    const f = ev.target.files[0];
+    f.text().then(txt => {
+      try {
+        const j = JSON.parse(txt);
+        if (j.app !== "fitness-tracker" || !j.data) throw new Error("not a backup");
+        preview = { date: new Date(j.exportedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }), workouts: (j.data.activities || []).length, routines: (j.data.routines || []).length };
+        sheet = { kind: "preview" };
+      } catch (e) { sheet = null; say("This file isn't a valid backup"); }
+      render();
+    });
+  });
+  root.addEventListener("keydown", ev => {
+    if (ev.key === "Escape" && sheet) { sheet = null; render(); }
+    if (ev.key === "Enter" && ev.target.id === "nm") root.querySelector('[data-act="rename-save"]').click();
+  });
+  try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (S.theme === "System") render(); }); } catch (e) {}
+
+  render();
+})();
+</script>

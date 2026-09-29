@@ -14,6 +14,7 @@ These files are **design references, not app code**. The real app is built with 
 | [06-exercises.html](06-exercises.html) | Exercise list, filter/sort, picker, detail with chart, custom exercises | Approved; spec in [screens/exercises.md](../screens/exercises.md) | [link](https://claude.ai/artifact/Gc9pbXBQ2jPjC5DtNr1vEx) |
 | [07-history.html](07-history.html) | History by week, calendar, 4 card styles (B chosen), search/filter, workout detail, edit mode, log past workout | Approved (card style B); spec in [screens/history.md](../screens/history.md) | [link](https://claude.ai/artifact/3UG3JA7QxC7TycbGFdN4C3) |
 | [08-routines.html](08-routines.html) | Workout tab (idle), routines list, ⋯ menu, reordering, preview, editor with steppers, starter routines | Approved; spec in [screens/routines.md](../screens/routines.md) | [link](https://claude.ai/artifact/BH5EUAkSuhrs2UHtafCSrj) |
+| [09-profile.html](09-profile.html) | Profile header, all settings (theme/accent/text size applied live), backup export/import | Approved; spec in [screens/profile.md](../screens/profile.md) | [link](https://claude.ai/artifact/EWqYPHDNhFYZh9FZD6mKQu) |
 
 Note: prototypes 04 and 05 still show volume in a few places. Volume was removed from the UI on 2026-09-30, and the specs are the source of truth.
 

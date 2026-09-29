@@ -46,13 +46,13 @@ npm run db:generate -w apps/api      # drizzle-kit migration (M7+)
 - **IDs are generated on the client**: UUIDv7 for user data; deterministic UUIDv5 for built-in exercises (never synced).
 - **Zod schemas in `packages/shared` are the single source of truth** for entity shapes; derive types with `z.infer`.
 - **Activity model:** a generic `activity` (type `gym | run | swim`) is the timeline spine. Type-specific data lives in child tables. New activity types add a type value plus child tables. They never add nullable columns to `activities`. Nutrition is a separate domain. See [docs/architecture/data-model.md](docs/architecture/data-model.md) and the `add-activity-type` skill.
-- **SI units only in storage** (kg, m, s, UTC ISO timestamps). Format at display time via `packages/shared` helpers (`formatWeight` etc.). The UI shows kg only for now.
+- **SI units only in storage** (kg, m, s, UTC ISO timestamps). Format at display time via `packages/shared` helpers (`formatWeight`, dates, decimals), which read the user's settings (kg/lb, decimal comma, date format). Never format numbers or dates inline in components.
 - **Derived, not stored:** PRs (heaviest weight only), e1RM (Epley), volume are computed from sets.
 
 ## Design rules (see [docs/design/ui-guidelines.md](docs/design/ui-guidelines.md))
 
 The visual design ("Graphite A5") is **decided**. Colour tokens, type scale, formats, spacing and component specs are in the guidelines. Use those tokens and don't invent new colours or sizes. Key points:
-- Dark by default (`#0A0C0F`), cobalt accent `#4F86F7`, light Hairline cards, IBM Plex Sans with tabular numbers, base size 17 px, uppercase 11 px labels.
+- Dark by default (`#0A0C0F`), cobalt accent `#4F86F7` (default; the user can pick one of 5 accents, so always use the `accent*` tokens), light Hairline cards, IBM Plex Sans with tabular numbers, base size 17 px, uppercase 11 px labels.
 - Plain and calm: no emojis, little text. **Readability is the top priority**, especially in workout history/detail.
 - A number and its unit never wrap apart (`9 840 kg`).
 

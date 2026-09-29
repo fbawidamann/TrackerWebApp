@@ -84,7 +84,10 @@ Routines store **no target weights or reps** (decided 2026-09-30). Placeholders 
 | completed_at | timestamp? | set is "done" when not null |
 
 ### user_settings
-weight_unit (`kg`, `lb` later), default_rest_seconds (90), keep_screen_on (true), weekly_goal (1–7, default 3), week_start (monday).
+Synced per-user settings (full list and defaults in [profile.md](../design/screens/profile.md#settings-reference)):
+display_name, weekly_goal (3), week_start (monday), default_sets (3), weight_step_kg (2.5), warmups_in_prs (false), rest_timer_enabled (true), default_rest_seconds (90), rest_autostart (true), theme (system), accent (cobalt), nav_labels (always), history_card_style (names), weight_unit (kg | lb), decimal_separator (point | comma), date_format (long | numeric), start_screen (home), home_show_goal / home_show_routines / home_show_recent / home_show_prs (true).
+
+Device-only settings (Dexie `meta`, never synced): keep_screen_on (true), vibrate_on_complete (true), text_size (standard | large).
 
 Rest-timer state (`restStartedAt`, the set it belongs to) is local UI state in Dexie `meta`. It is not synced.
 
