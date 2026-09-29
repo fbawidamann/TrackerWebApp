@@ -1,0 +1,26 @@
+{
+  "name": "@fitness/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./catalog": "./data/exercises.json",
+    "./catalog-version": "./data/catalog-version.json"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "catalog:import": "tsx scripts/import-exercises.ts",
+    "catalog:images": "tsx scripts/import-exercises.ts --images-only"
+  },
+  "dependencies": {
+    "uuid": "^14.0.2",
+    "zod": "^4.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.2"
+  }
+}

@@ -17,13 +17,15 @@ The order is deliberate: the app is fully usable offline on one device after **M
   - [ ] Login / Register (planned together with the backend, M7)
 
 ## Phase 1: Gym (frontend, local-only)
-- [ ] **M0: Scaffold**: monorepo, TypeScript, ESLint/Prettier, Vitest, Vite + Tailwind + shadcn, TanStack Router, app shell (bottom nav / sidebar, theme), GitHub Actions CI
-- [ ] **M1: Data foundation**: shared Zod schemas, ID/unit/metric helpers, Dexie DB + outbox write path, exercise catalog import, Exercises screen (list, search, filter, detail)
-- [ ] **M2: Workout logging**: start empty workout, add exercises, set table with Previous, complete sets, simple rest timer, finish/discard, resume after reload
-- [ ] **M3: Routines**: create/edit routines, start from routine, save workout as routine
-- [ ] **M4: History**: list grouped by week, workout detail, edit past workouts
-- [ ] **M5: Progress**: exercise charts (heaviest weight, e1RM, volume), heaviest-weight PRs, finish summary, stats page
-- [ ] **M6: PWA and polish**: installable, offline app shell, image caching, JSON/CSV export, settings
+- [x] **M0: Scaffold**: npm workspaces monorepo, TypeScript, ESLint, Vitest, Vite + design-token CSS, TanStack Router, app shell (bottom nav / desktop sidebar, theme), CI workflow file
+- [x] **M1: Data foundation**: shared Zod schemas, ID/unit/metric helpers, Dexie DB + outbox write path, exercise catalog import, Exercises screen (list, search, filter, detail)
+- [x] **M2: Workout logging**: start empty workout, add exercises, set table with Previous, complete sets, simple rest timer, finish/discard, resume after reload
+- [x] **M3: Routines**: create/edit routines, start from routine, save workout as routine
+- [x] **M4: History**: list grouped by week, workout detail, edit past workouts
+- [x] **M5: Progress**: exercise chart (heaviest weight / best set reps, 3M–All), heaviest-weight PRs, PR history, finish summary (the Stats page is deferred)
+- [x] **M6: PWA and polish**: installable PWA, offline app shell, runtime image caching, JSON backup export/import, all Profile settings
+
+Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation changes). Not done yet: the desktop master–detail layouts (low priority), and pushing the CI workflow to GitHub (the repo has no remote yet).
 
 ## Phase 1b: Backend and sync
 - [ ] **M7: Backend**: Postgres (Docker), Drizzle schema + migrations, Hono API, Better Auth (email + password), login/register screens

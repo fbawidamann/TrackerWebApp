@@ -78,7 +78,7 @@ ABOUT
 | Training | Weekly goal | 1–7 (**3**) | synced |
 | Training | Week starts on | **Monday**, Sunday | synced |
 | Training | Default sets | 1–5 (**3**): sets for an exercise added without history or routine | synced |
-| Training | Weight step | **2.5**, 1.25, 1, 0.5 kg (lb: 5, 2.5, 2, 1): smallest valid increment; input is validated against it | synced |
+| Training | Weight step | **2.5**, 1.25, 1, 0.5 kg (lb: 5, 2.5, 2, 1): the smallest plate increment, used for lb rounding and future ± buttons. Input accepts any multiple of 0.25 kg / 0.5 lb, so dumbbell weights like 22 kg are always valid (changed while building, 2026-09-30) | synced |
 | Training | Warm-ups in PRs & charts | **off**, on | synced |
 | Workout screen | Rest timer | **on**, off (off hides the floating pill entirely) | synced |
 | Workout screen | Rest time | 0:30–5:00 in 15 s steps (**1:30**) | synced |

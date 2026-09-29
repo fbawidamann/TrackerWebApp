@@ -50,3 +50,17 @@ TypeScript everywhere, in an npm-workspaces monorepo (`apps/web`, `apps/api`, `p
 - The shared Zod schemas mean a field change happens in one place, and the compiler finds every usage.
 - The frontend is fully usable before the backend exists (local-only mode).
 - Postgres runs in Docker locally and on the VPS; backups are our own responsibility.
+
+## Implementation changes (2026-09-30, while building phase 1)
+
+The table above is the plan. These deliberate changes were made when implementing the frontend:
+
+| Planned | Built | Why |
+|---|---|---|
+| Tailwind v4 + shadcn/ui | **Plain CSS with design tokens** (`apps/web/src/styles/app.css`) | The design was already fully specified as CSS tokens and components in the approved prototypes. Porting it 1:1 is exact and needs no extra dependencies or config |
+| Recharts | **Small custom SVG chart** (`ui/LineChart.tsx`) | The spec needs one simple line chart with tap-to-select. About 100 lines instead of a large library |
+| TanStack Router file-based routing | **TanStack Router with code-based routes** (`app/router.tsx`) | 14 routes, with no code generation step. Links are still type-checked |
+| React Hook Form | **Plain React state** | The forms are tiny (name, a few chips) |
+| Virtualised exercise list | **`content-visibility: auto`** on list rows | 876 rows render fast enough on the phone, with no extra library |
+
+Versions used: React 19, Vite 8, Zod 4, Dexie 4, vite-plugin-pwa 1, Vitest 5, TypeScript 5.9.

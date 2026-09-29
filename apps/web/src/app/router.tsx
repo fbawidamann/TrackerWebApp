@@ -1,0 +1,42 @@
+import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
+import { ExerciseDetailScreen } from "@/features/exercises/ExerciseDetailScreen";
+import { ExercisesScreen } from "@/features/exercises/ExercisesScreen";
+import { CalendarScreen } from "@/features/history/CalendarScreen";
+import { HistoryScreen } from "@/features/history/HistoryScreen";
+import { WorkoutDetailScreen } from "@/features/history/WorkoutDetailScreen";
+import { WorkoutEditor } from "@/features/history/WorkoutEditor";
+import { HomeScreen } from "@/features/home/HomeScreen";
+import { ProfileScreen } from "@/features/profile/ProfileScreen";
+import { RoutineEditor } from "@/features/routines/RoutineEditor";
+import { RoutinesScreen } from "@/features/routines/RoutinesScreen";
+import { SummaryScreen } from "@/features/workout/SummaryScreen";
+import { WorkoutScreen } from "@/features/workout/WorkoutScreen";
+import { Layout } from "./Layout";
+
+const root = createRootRoute({ component: Layout, notFoundComponent: () => <div className="page"><p className="muted">Page not found.</p></div> });
+const home = createRoute({ getParentRoute: () => root, path: "/", component: HomeScreen });
+const workout = createRoute({ getParentRoute: () => root, path: "/workout", component: WorkoutScreen });
+const summary = createRoute({ getParentRoute: () => root, path: "/workout/done/$activityId", component: SummaryScreen });
+const exercises = createRoute({ getParentRoute: () => root, path: "/exercises", component: ExercisesScreen });
+const exerciseDetail = createRoute({ getParentRoute: () => root, path: "/exercises/$exerciseId", component: ExerciseDetailScreen });
+const history = createRoute({ getParentRoute: () => root, path: "/history", component: HistoryScreen });
+const calendar = createRoute({ getParentRoute: () => root, path: "/history/calendar", component: CalendarScreen });
+const logPast = createRoute({ getParentRoute: () => root, path: "/history/new", component: WorkoutEditor });
+const workoutDetail = createRoute({ getParentRoute: () => root, path: "/history/$activityId", component: WorkoutDetailScreen });
+const workoutEdit = createRoute({ getParentRoute: () => root, path: "/history/$activityId/edit", component: WorkoutEditor });
+const routines = createRoute({ getParentRoute: () => root, path: "/routines", component: RoutinesScreen });
+const routineNew = createRoute({ getParentRoute: () => root, path: "/routines/new", component: RoutineEditor });
+const routineEdit = createRoute({ getParentRoute: () => root, path: "/routines/$routineId/edit", component: RoutineEditor });
+const profile = createRoute({ getParentRoute: () => root, path: "/profile", component: ProfileScreen });
+
+const routeTree = root.addChildren([
+  home, workout, summary, exercises, exerciseDetail, history, calendar, logPast, workoutDetail, workoutEdit, routines, routineNew, routineEdit, profile,
+]);
+
+export const router = createRouter({ routeTree, defaultPreload: false });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}

@@ -11,3 +11,7 @@ coverage/
 playwright-report/
 test-results/
 .claude/settings.local.json
+
+# Downloaded catalog images (npm run catalog:images)
+apps/web/public/exercise-images/
+dev-dist/
