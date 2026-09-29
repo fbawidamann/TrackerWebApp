@@ -21,7 +21,7 @@ The same model exists twice: in the browser (Dexie/IndexedDB) and on the server 
 ```
 exercises ─────────────┐
                        │
-routines ─< routine_exercises ─< routine_sets
+routines ─< routine_exercises (warm-up / working set counts, note)
                        │
 activities ─< activity_exercises ─< sets
    (type = gym | run | swim …)
@@ -51,10 +51,11 @@ Per-user settings for **any** exercise, including built-in ones (which are read-
 
 Synced like other user data. One row per user and exercise, created on first change.
 
-### routines → routine_exercises → routine_sets
-- **routines**: name, notes, position
-- **routine_exercises**: routine_id, exercise_id, position, notes
-- **routine_sets**: routine_exercise_id, position, set_type, target_reps?, target_weight_kg?
+### routines → routine_exercises
+- **routines**: name, position (the user's manual order)
+- **routine_exercises**: routine_id, exercise_id, position, warmup_sets (0–5), working_sets (1–10), note
+
+Routines store **no target weights or reps** (decided 2026-09-30). Placeholders always come from the last session. The earlier `routine_sets` table was dropped.
 
 ### activities (timeline spine)
 | Field | Type | Notes |

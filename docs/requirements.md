@@ -38,14 +38,17 @@ Status: agreed on 2026-09-29.
 - Edit mode uses the logging layout without ✓ and can change the name, date, start time, duration and notes.
 - Workouts can be logged afterwards ("Log past workout").
 
-### Routines
-- Create and edit routines: an ordered list of exercises with planned sets (optional target reps/weight).
+### Routines (details in [design/screens/routines.md](design/screens/routines.md))
+- A routine is an ordered list of exercises, each with a number of warm-up and working sets (− / + steppers) and an optional note. There are **no target weights or reps**.
+- The Routines screen is reached from Home "All" and the Workout tab "Manage" (no own nav tab). It's in your own order (Change order → drag).
+- Tapping a routine opens the preview (Start / Edit). The ⋯ menu has Rename, Duplicate, Share (copy as text) and Delete (with Undo).
+- With no routines, 3 starter sets are offered: Push/Pull/Legs, Full Body, Upper/Lower.
 - A finished workout can be saved as a new routine.
 
 ### Prefill ("Previous")
 - The **Previous** column shows the same set of the **last completed session** of that exercise, e.g. `80 kg × 8`.
 - Empty inputs show that value as a grey **placeholder**. Completing the set with ✓ takes the placeholder as the real value.
-- Routine target sets decide how many sets are created, and their targets are used when there is no previous data.
+- A routine decides how many warm-up and working sets are created. Routines have no target values.
 
 ### Personal records
 - Only one PR type: **heaviest weight** per exercise (completed, normal sets only).

@@ -31,6 +31,9 @@ Clickable prototype: [Active workout prototype](https://claude.ai/artifact/8fUks
 
 There is **no separate "Next exercise" card**. All exercises are shown as full cards one below the other, so a preview card would only repeat the card below it (confirmed with the prototype).
 
+## Workout tab when no workout is running
+It shows **Start empty workout** and your routines with a **Manage** link. See [routines.md](routines.md#workout-tab-idle-no-workout-running).
+
 ## Starting a workout
 - **Empty workout** (Home → "Start empty workout"): the name comes from the time of day: *Morning workout* (before 12:00), *Afternoon workout* (12–17), *Evening workout* (from 17:00). Tap the title to rename.
 - **From a routine** (M3): the name is the routine name. One card is created per routine exercise, with the routine's number of sets.
@@ -43,12 +46,12 @@ There is **no separate "Next exercise" card**. All exercises are shown as full c
 `SET · PREVIOUS · KG · REPS · ✓`
 - **SET**: `W` for a warm-up, drawn lighter than the numbers (13 px, weight 500, accent blended towards muted). Otherwise `1, 2, 3…`, counting only non-warm-up sets.
 - **PREVIOUS**: the same set position (same type) from the **last completed session** of this exercise, e.g. `80 × 8`. Shows `–` if there is none.
-- **KG / REPS**: outlined inputs, **empty by default**, showing the previous values as grey placeholders. With no previous data, a routine's target values are the placeholder.
+- **KG / REPS**: outlined inputs, **empty by default**, showing the previous values as grey placeholders. With no previous data, the row above is used; otherwise the fields stay empty.
   - Inputs use the phone keyboard: `inputmode="decimal"` for kg, `inputmode="numeric"` for reps. Enter/Next moves kg → reps → the next set's kg.
 - The columns depend on the exercise's `tracking_type`: `reps_only` → REPS only; `duration` → TIME (mm:ss); `weight_duration` → KG + TIME.
 
 ### The ✓ (done) button
-- **Empty fields take the grey placeholder values** (previous session, the row above, or routine target). Repeating last time is one tap, and you only type what changed.
+- **Empty fields take the grey placeholder values** (previous session or the row above; routines have no targets). Repeating last time is one tap, and you only type what changed.
 - Only when there is no placeholder at all (e.g. an exercise never done before) does the button look inactive. Tapping it then briefly highlights the empty field.
 - Tapping ✓ sets `completedAt`, tints the row, removes the input outlines and **starts the rest timer**.
 - Tapping ✓ again un-completes the set (the tint goes away, the values stay).

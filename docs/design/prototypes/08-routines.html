@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Routines Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --pg-bg:#f3f4f6; --pg-surface:#ffffff; --pg-text:#15191e; --pg-muted:#5c6470; --pg-border:#dce0e5; --pg-accent:#3a6fd8; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  }
+  :root[data-theme="dark"] { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  body { background: var(--pg-bg); color: var(--pg-text); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 24px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 600; }
+  header p { margin: 6px 0 0; color: var(--pg-muted); max-width: 70ch; }
+  .layout { display: grid; grid-template-columns: 382px minmax(0, 1fr); gap: 40px; align-items: start; }
+  .panel { display: grid; gap: 20px; }
+  .panel section { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--pg-border); border-radius: 12px; background: var(--pg-surface); }
+  .panel h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--pg-muted); font-weight: 600; }
+  .panel ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .panel p { margin: 0; color: var(--pg-muted); font-size: 14px; }
+  .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pbtn { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 8px; cursor: pointer; border: 1px solid var(--pg-border); background: transparent; color: var(--pg-text); }
+  .pbtn[aria-pressed="true"] { border-color: var(--pg-accent); color: var(--pg-accent); font-weight: 600; }
+  .pbtn:focus-visible { outline: 2px solid var(--pg-accent); outline-offset: 2px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; justify-items: center; } .panel { width: 100%; } }
+  @media (max-width: 420px) { .wrap { padding-inline: 16px; } }
+
+  .app {
+    width: 380px; max-width: 100%; height: min(800px, calc(100dvh - 32px)); min-height: 560px;
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    border-radius: 32px; border: 1px solid var(--line); background: var(--bg); color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.45;
+    font-variant-numeric: tabular-nums; box-shadow: 0 28px 60px -28px rgba(0,0,0,.55);
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (max-width: 480px) { .app { border-radius: 22px; } }
+  .app[data-mode="dark"] {
+    color-scheme: dark;
+    --bg:#0a0c0f; --surf:#13171c; --raised:#1b2027; --line:#232930;
+    --card-bg:#0f1216; --card-border:#1a1f25; --card-div:#1a1f25;
+    --text:#eef1f5; --muted:#8a93a0;
+    --acc:#4f86f7; --acc-text:#6f9bf8; --acc-fill:#4f86f7; --on-acc:#0b0e12;
+    --danger:#e5534b; --scrim: rgba(0,0,0,.6);
+  }
+  .app[data-mode="light"] {
+    color-scheme: light;
+    --bg:#eef0f3; --surf:#ffffff; --raised:#e9ecf0; --line:#dfe3e8;
+    --card-bg:#f8f9fa; --card-border:#e1e5e9; --card-div:#e4e7eb;
+    --text:#0f1216; --muted:#5a6370;
+    --acc:#4f86f7; --acc-text:#2f63cf; --acc-fill:#3569d6; --on-acc:#ffffff;
+    --danger:#c93c37; --scrim: rgba(15,18,22,.35);
+  }
+  .app *, .app *::before, .app *::after { box-sizing: border-box; }
+  :where(.app button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+  .app button:focus-visible, .app input:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .app button:disabled { cursor: default; }
+
+  .status { display: flex; justify-content: space-between; padding: 12px 24px 4px; font-size: 13px; font-weight: 600; flex: none; }
+  .scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .screen { padding: 8px 20px 36px; display: grid; gap: 22px; align-content: start; }
+  .nw { white-space: nowrap; }
+  .u { color: var(--muted); margin-left: .2em; }
+  .lbl { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .title { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -.015em; }
+  .sub { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+  .muted { color: var(--muted); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--surf); color: var(--text); }
+  .btn-primary { background: var(--acc-fill); color: var(--on-acc); border-color: transparent; }
+  .btn-block { width: 100%; padding: 14px; }
+  .ghost { color: var(--acc-text); font-size: 15px; font-weight: 600; padding: 8px 4px; }
+  .link { font-size: 13px; font-weight: 500; color: var(--acc-text); padding: 2px 0; }
+  .ib { width: 40px; height: 40px; display: grid; place-items: center; color: var(--muted); border-radius: 10px; flex: none; }
+  .ib svg { width: 22px; height: 22px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+
+  .sec { display: grid; gap: 12px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .list { padding-inline: 16px; }
+  .li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 12px; width: 100%; }
+  .li + .li { border-top: 1px solid var(--card-div); }
+  .li-main { min-width: 0; display: grid; gap: 2px; flex: 1; text-align: left; padding-block: 2px; }
+  .li-name { font-weight: 500; }
+  .li-meta { font-size: 13px; color: var(--muted); }
+  .li-side { display: flex; align-items: center; color: var(--muted); flex: none; }
+  .li-side svg { width: 18px; height: 18px; }
+  .empty { padding: 8px 16px; }
+  .starter { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 14px; }
+  .starter + .starter { border-top: 1px solid var(--card-div); }
+  .add-chip { font-size: 14px; font-weight: 600; color: var(--acc-text); padding: 7px 14px; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--acc) 50%, transparent); }
+
+  /* Reorder */
+  .ro-list { display: grid; gap: 8px; }
+  .ro-item { display: flex; align-items: center; gap: 12px; padding: 12px 8px 12px 16px; user-select: none; }
+  .ro-item.dragging { border-color: var(--acc); box-shadow: 0 10px 24px -12px rgba(0,0,0,.6); position: relative; z-index: 2; }
+  .ro-item .grow { flex: 1; min-width: 0; font-weight: 500; }
+  .handle { width: 40px; height: 40px; display: grid; place-items: center; color: var(--muted); cursor: grab; touch-action: none; }
+  .handle svg { width: 22px; height: 22px; }
+
+  /* Editor */
+  .ehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px 4px; }
+  .ehead h1 { margin: 0; font-size: 17px; font-weight: 600; }
+  .tbtn { font-size: 16px; padding: 8px 10px; border-radius: 8px; }
+  .tbtn.save { color: var(--acc-text); font-weight: 600; }
+  .tbtn.save:disabled { color: var(--muted); opacity: .6; }
+  .field { width: 100%; font: 17px "IBM Plex Sans", sans-serif; color: var(--text); background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 11px 14px; }
+  .field:focus { outline: none; border-color: var(--acc); }
+  .exs { display: grid; gap: 14px; }
+  .ex { padding: 16px 16px 12px; display: grid; gap: 4px; }
+  .ex-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .ex-name { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
+  .ex-eq { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .ex-last { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
+  .ex-note { font-size: 14px; color: var(--muted); font-style: italic; margin: 2px 0 0; }
+  .ex-head .ib { margin: -6px -8px 0 0; }
+  .steps { display: grid; margin-top: 8px; }
+  .step { display: flex; justify-content: space-between; align-items: center; padding-block: 8px; }
+  .step + .step { border-top: 1px solid var(--card-div); }
+  .stepper { display: flex; align-items: center; gap: 6px; }
+  .stepper button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--raised); color: var(--text); font-size: 22px; line-height: 1; }
+  .stepper button:disabled { opacity: .35; }
+  .stepper b { min-width: 34px; text-align: center; font-size: 18px; font-weight: 600; }
+
+  /* Overlays */
+  .scrim { position: absolute; inset: 0; z-index: 10; background: var(--scrim); animation: fade .15s ease; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; max-height: 88%; overflow-y: auto; padding: 10px 20px 22px; border-radius: 22px 22px 0 0; background: var(--surf); display: grid; gap: 16px; animation: up .2s ease; }
+  .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+  .sheet h3 { margin: 0; font-size: 20px; font-weight: 600; }
+  .sheet p { margin: 0; color: var(--muted); font-size: 15px; }
+  .acts { display: grid; gap: 10px; }
+  .menu { display: grid; }
+  .mi { display: flex; justify-content: space-between; align-items: center; padding: 15px 4px; font-size: 17px; width: 100%; }
+  .mi + .mi { border-top: 1px solid var(--card-div); }
+  .mi.danger { color: var(--danger); }
+  .pv-list { padding-inline: 16px; }
+  .pv-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 12px; }
+  .pv-row + .pv-row { border-top: 1px solid var(--card-div); }
+  .pv-row .eq { display: block; font-size: 13px; color: var(--muted); }
+  .pk-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 4px; }
+  .pk-row + .pk-row { border-top: 1px solid var(--card-div); }
+  .pk-row .grow { flex: 1; min-width: 0; }
+  .tick { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--line); display: grid; place-items: center; color: transparent; flex: none; }
+  .tick svg { width: 15px; height: 15px; }
+  .pk-row[aria-pressed="true"] .tick { background: var(--acc-fill); border-color: transparent; color: var(--on-acc); }
+  textarea.field { resize: none; min-height: 150px; font-size: 14px; line-height: 1.5; }
+  .toast { position: absolute; left: 16px; right: 16px; bottom: 86px; z-index: 12; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 15px; }
+  .toast button { color: #2f63cf; font-weight: 600; padding: 4px 8px; }
+  .app[data-mode="light"] .toast button { color: #82a7f1; }
+
+  .nav { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px 14px; border-top: 1px solid var(--line); background: var(--surf); }
+  .nav button { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); }
+  .nav button.on { color: var(--acc-text); font-weight: 600; background: color-mix(in oklab, var(--acc) 14%, transparent); }
+  .nav svg { width: 22px; height: 22px; }
+
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .sheet, .scrim { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Routines prototype</h1>
+    <p>A clickable version of <b>docs/design/screens/routines.md</b>, for mobile. It opens on the Workout tab. Tap <b>Manage</b> to reach the Routines screen. Everything is example data.</p>
+  </header>
+  <div class="layout">
+    <div id="root"></div>
+    <div class="panel">
+      <section>
+        <h2>Scenario</h2>
+        <div class="pbtns">
+          <button type="button" class="pbtn" id="sc-normal" aria-pressed="true">4 routines</button>
+          <button type="button" class="pbtn" id="sc-empty" aria-pressed="false">No routines yet</button>
+        </div>
+      </section>
+      <section>
+        <h2>App theme</h2>
+        <div class="pbtns">
+          <button type="button" class="pbtn" id="th-dark" aria-pressed="true">Dark</button>
+          <button type="button" class="pbtn" id="th-light" aria-pressed="false">Light</button>
+        </div>
+      </section>
+      <section>
+        <h2>Things to try</h2>
+        <ul>
+          <li>Workout tab: tap a routine for the preview. Tap <b>Manage</b> for the Routines screen.</li>
+          <li>Row ⋯: Rename, Duplicate, Share (copies text), Delete, then Undo.</li>
+          <li>"Change order": drag the handles, then Done.</li>
+          <li>Edit a routine: − / + for warm-up and sets, a note via ⋯, Add exercise, Remove. Then Save, or Cancel after a change.</li>
+          <li>+ to create a new routine: Save only works with a name and at least one exercise.</li>
+          <li>"No routines yet": add starter routines with one tap.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const I = {
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    grip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h16M4 15h16"/></svg>',
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    lift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+  };
+
+  const EX = {
+    bench: ["Bench Press", "Barbell", "82.5 kg × 6"], ohp: ["Overhead Press", "Barbell", "47.5 kg × 6"], incline: ["Incline Press", "Dumbbell", "30 kg × 9"],
+    lateral: ["Lateral Raise", "Dumbbell", "12 kg × 12"], pushdown: ["Triceps Pushdown", "Cable", "27.5 kg × 10"], row: ["Bent-over Row", "Barbell", "75 kg × 8"],
+    pullup: ["Pull-up", "Bodyweight", "9 reps"], latpull: ["Lat Pulldown", "Cable", "65 kg × 9"], facepull: ["Face Pull", "Cable", null], curl: ["Biceps Curl", "Dumbbell", "16 kg × 8"],
+    squat: ["Squat", "Barbell", "105 kg × 5"], rdl: ["Romanian Deadlift", "Barbell", "100 kg × 8"], legpress: ["Leg Press", "Machine", "200 kg × 10"], legcurl: ["Leg Curl", "Machine", "45 kg × 10"],
+    calf: ["Calf Raise", "Machine", "90 kg × 12"], plank: ["Plank", "Bodyweight", null], cablerow: ["Seated Cable Row", "Cable", "62.5 kg × 10"], dips: ["Dips", "Bodyweight", "12 reps"], hammer: ["Hammer Curl", "Dumbbell", null]
+  };
+  const e = (id, w, s, note) => ({ id, w, s, note: note || "" });
+  const START = {
+    ppl: { name: "Push / Pull / Legs", routines: [
+      ["Push", [e("bench", 1, 3), e("ohp", 0, 3), e("incline", 0, 3), e("lateral", 0, 3), e("pushdown", 0, 3)]],
+      ["Pull", [e("row", 0, 3), e("pullup", 0, 3), e("latpull", 0, 3), e("facepull", 0, 3), e("curl", 0, 3)]],
+      ["Legs", [e("squat", 1, 3), e("rdl", 0, 3), e("legpress", 0, 3), e("legcurl", 0, 3), e("calf", 0, 3)]]] },
+    full: { name: "Full Body", routines: [["Full Body", [e("squat", 1, 3), e("bench", 0, 3), e("row", 0, 3), e("ohp", 0, 2), e("rdl", 0, 2), e("plank", 0, 2)]]] },
+    ul: { name: "Upper / Lower", routines: [
+      ["Upper", [e("bench", 1, 3), e("row", 0, 3), e("ohp", 0, 3), e("latpull", 0, 3), e("curl", 0, 2), e("pushdown", 0, 2)]],
+      ["Lower", [e("squat", 1, 3), e("rdl", 0, 3), e("legpress", 0, 3), e("legcurl", 0, 3), e("calf", 0, 3)]]] }
+  };
+  let rid = 1;
+  const mkR = (name, ex, last) => ({ id: "r" + rid++, name, ex: JSON.parse(JSON.stringify(ex)), last: last || null, deleted: false });
+  function sampleRoutines() {
+    return [
+      mkR("Push Day", [e("bench", 1, 3, "Grip one finger wider"), e("incline", 0, 3, "Bench on notch 3"), e("pushdown", 0, 3), e("lateral", 0, 3), e("ohp", 0, 2)], { s: "Tue", l: "Tuesday, 29 September" }),
+      mkR("Pull Day", [e("row", 0, 3), e("latpull", 0, 3), e("pullup", 0, 3), e("curl", 0, 3)], { s: "Mon", l: "Monday, 28 September" }),
+      mkR("Legs", [e("squat", 1, 3), e("rdl", 0, 3), e("legpress", 0, 3, "Seat position 4"), e("calf", 0, 3), e("legcurl", 0, 3)], { s: "Sat", l: "Saturday, 26 September" }),
+      mkR("Upper Body", [e("ohp", 0, 3), e("pullup", 0, 3), e("incline", 0, 3), e("cablerow", 0, 3), e("curl", 0, 2), e("dips", 0, 3)], { s: "17 Sep", l: "Thursday, 17 September" })
+    ];
+  }
+
+  let mode = "dark", S, toastTimer = null;
+  function reset(empty) {
+    S = { view: "workout", routines: empty ? [] : sampleRoutines(), sheet: null, editor: null, reorder: null, toast: null, undo: null, pick: [], pickMode: "add", pickEx: null };
+  }
+  reset(false);
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const alive = () => S.routines.filter(r => !r.deleted);
+  const sets = r => r.ex.reduce((a, x) => a + x.w + x.s, 0);
+  const meta = r => r.ex.length + " exercises · " + sets(r) + " sets · " + (r.last ? "last " + r.last.s : "never done");
+  const setsText = x => (x.w ? x.w + " warm-up + " : "") + x.s + (x.s === 1 ? " set" : " sets");
+  const byId = id => S.routines.find(r => r.id === id);
+  const clone = o => JSON.parse(JSON.stringify(o));
+
+  const root = document.getElementById("root");
+  const NAV = [["home", "Home", I.home], ["history", "History", I.hist], ["workout", "Workout", I.lift], ["exercises", "Exercises", I.list], ["profile", "Profile", I.user]];
+
+  function starterCard() {
+    return '<div class="card list">' + Object.entries(START).map(([k, s]) =>
+      '<div class="starter"><span class="li-main"><span class="li-name">' + s.name + '</span><span class="li-meta">' + s.routines.length + (s.routines.length === 1 ? " routine" : " routines") + ' · ' + s.routines.map(r => r[0]).join(", ") + '</span></span>' +
+      '<button type="button" class="add-chip" data-act="starter" data-k="' + k + '">Add</button></div>').join("") + '</div>';
+  }
+
+  function workoutTab() {
+    const rs = alive();
+    return '<div class="screen" style="padding-top:14px"><h1 class="title">Workout</h1>' +
+      '<button type="button" class="btn btn-primary btn-block" data-act="toast" data-msg="Starts an empty workout (see the Active workout prototype).">Start empty workout</button>' +
+      '<div class="sec"><div class="sec-head"><span class="lbl">Routines</span><button type="button" class="link" data-act="manage">Manage</button></div>' +
+      (rs.length ? '<div class="card list">' + rs.map(r =>
+        '<button type="button" class="li" data-act="preview" data-id="' + r.id + '"><span class="li-main"><span class="li-name">' + esc(r.name) + '</span><span class="li-meta">' + meta(r) + '</span></span><span class="li-side">' + I.chev + '</span></button>').join("") + '</div>'
+        : '<p class="muted" style="margin:0;font-size:15px">No routines yet</p>' + starterCard()) +
+      '</div></div>';
+  }
+
+  function routinesScreen() {
+    const rs = alive();
+    if (S.reorder === "list") return reorderView("Routines", rs.map(r => [r.id, esc(r.name)]));
+    return '<div class="top" style="padding:6px 12px 0"><button type="button" class="ib" data-act="to-workout" aria-label="Back">' + I.back + '</button><span style="font-size:17px;font-weight:600">Routines</span><button type="button" class="ib" data-act="new" aria-label="New routine">' + I.plus + '</button></div>' +
+      '<div class="screen" style="padding-top:8px">' +
+      (rs.length
+        ? '<div class="card list">' + rs.map(r =>
+            '<div class="li"><button type="button" class="li-main" data-act="preview" data-id="' + r.id + '"><span class="li-name">' + esc(r.name) + '</span><span class="li-meta">' + meta(r) + '</span></button>' +
+            '<button type="button" class="ib" data-act="rowmenu" data-id="' + r.id + '" aria-label="' + esc(r.name) + ' options" style="margin-right:-10px">' + I.more + '</button></div>').join("") + '</div>' +
+          (rs.length > 1 ? '<button type="button" class="ghost" data-act="reorder-list" style="justify-self:center">Change order</button>' : '')
+        : '<div class="sec"><span class="lbl">No routines yet</span>' + starterCard() + '</div><button type="button" class="btn btn-block" data-act="new">Create routine</button>') +
+      '</div>';
+  }
+
+  function reorderView(title, items) {
+    return '<div class="ehead"><span style="width:60px"></span><h1>Change order</h1><button type="button" class="tbtn save" data-act="reorder-done">Done</button></div>' +
+      '<div class="screen" style="padding-top:8px"><p class="muted" style="margin:0;font-size:14px">Drag the handles</p><div class="ro-list" id="ro-list">' +
+      items.map(([id, label], i) => '<div class="card ro-item" data-id="' + id + '" data-idx="' + i + '"><span class="grow">' + label + '</span><span class="handle" data-handle aria-label="Drag to reorder">' + I.grip + '</span></div>').join("") + '</div></div>';
+  }
+
+  function editorView() {
+    const E = S.editor, d = E.draft;
+    if (S.reorder === "editor") return reorderView("Exercises", d.ex.map((x, i) => [String(i), EX[x.id][0] + ' <span class="muted" style="font-weight:400;font-size:14px">' + EX[x.id][1] + '</span>']));
+    const valid = d.name.trim() && d.ex.length;
+    const card = (x, i) => {
+      const [n, eq, last] = EX[x.id];
+      return '<section class="card ex"><div class="ex-head"><h2 class="ex-name">' + n + '<span class="ex-eq">' + eq + '</span></h2><button type="button" class="ib" data-act="exmenu" data-i="' + i + '" aria-label="' + n + ' options">' + I.more + '</button></div>' +
+        (last ? '<p class="ex-last">Last: ' + last + '</p>' : '') + (x.note ? '<p class="ex-note">' + esc(x.note) + '</p>' : '') +
+        '<div class="steps"><div class="step"><span class="lbl">Warm-up</span><span class="stepper"><button type="button" data-act="step" data-i="' + i + '" data-k="w" data-d="-1" aria-label="Fewer warm-up sets"' + (x.w <= 0 ? " disabled" : "") + '>−</button><b>' + x.w + '</b><button type="button" data-act="step" data-i="' + i + '" data-k="w" data-d="1" aria-label="More warm-up sets"' + (x.w >= 5 ? " disabled" : "") + '>+</button></span></div>' +
+        '<div class="step"><span class="lbl">Sets</span><span class="stepper"><button type="button" data-act="step" data-i="' + i + '" data-k="s" data-d="-1" aria-label="Fewer sets"' + (x.s <= 1 ? " disabled" : "") + '>−</button><b>' + x.s + '</b><button type="button" data-act="step" data-i="' + i + '" data-k="s" data-d="1" aria-label="More sets"' + (x.s >= 10 ? " disabled" : "") + '>+</button></span></div></div></section>';
+    };
+    return '<div class="ehead"><button type="button" class="tbtn" data-act="ed-cancel">Cancel</button><h1>' + (E.isNew ? "New routine" : "Edit routine") + '</h1><button type="button" class="tbtn save" data-act="ed-save" id="ed-save"' + (valid ? "" : " disabled") + '>Save</button></div>' +
+      '<div class="screen" style="padding-top:8px"><div class="sec" style="gap:8px"><label class="lbl" for="r-name">Name</label><input class="field" id="r-name" maxlength="40" autocomplete="off" placeholder="e.g. Push Day" value="' + esc(d.name) + '"></div>' +
+      (d.ex.length ? '<div class="exs">' + d.ex.map(card).join("") + '</div>' : '') +
+      '<button type="button" class="btn btn-block" data-act="picker">Add exercise</button></div>';
+  }
+
+  function sheetView() {
+    const sh = S.sheet;
+    const wrap = inner => '<div class="scrim" data-act="sheet-close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>' + inner + '</div>';
+    const mi = (act, label, cls = "") => '<button type="button" class="mi ' + cls + '" data-act="' + act + '">' + label + '</button>';
+    switch (sh.kind) {
+      case "preview": {
+        const r = byId(sh.id);
+        return wrap('<div><h3>' + esc(r.name) + '</h3><p class="sub" style="font-size:14px">' + (r.last ? "last done " + r.last.l : "not done yet") + '</p></div>' +
+          '<div class="card pv-list">' + r.ex.map(x => '<div class="pv-row"><span>' + EX[x.id][0] + '<span class="eq">' + EX[x.id][1] + '</span></span><span class="muted nw" style="font-size:14px">' + setsText(x) + '</span></div>').join("") + '</div>' +
+          '<div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="toast" data-msg="Starts the workout (see the Active workout prototype).">Start workout</button><button type="button" class="btn btn-block" data-act="edit" data-id="' + r.id + '">Edit routine</button></div>');
+      }
+      case "rowmenu":
+        return wrap('<h3>' + esc(byId(sh.id).name) + '</h3><div class="menu">' + mi("rename", "Rename") + mi("dup", "Duplicate") + mi("share", "Share") + mi("del-open", "Delete", "danger") + '</div>');
+      case "rename":
+        return wrap('<h3>Rename</h3><input class="field" id="rn" maxlength="40" value="' + esc(byId(sh.id).name) + '" aria-label="Routine name"><div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="rename-save">Save</button></div>');
+      case "delete":
+        return wrap('<h3>Delete ' + esc(byId(sh.id).name) + '?</h3><p>Past workouts stay in History.</p><div class="acts"><button type="button" class="btn btn-block" style="color:var(--danger)" data-act="del-confirm">Delete routine</button><button type="button" class="btn btn-block" data-act="sheet-close">Cancel</button></div>');
+      case "share-text":
+        return wrap('<h3>Share</h3><p>Copying isn\'t allowed here. Select the text and copy it.</p><textarea class="field" id="share-ta" readonly>' + esc(sh.text) + '</textarea>');
+      case "discard":
+        return wrap('<h3>Discard changes?</h3><p>Your edits will be lost.</p><div class="acts"><button type="button" class="btn btn-block" style="color:var(--danger)" data-act="discard">Discard</button><button type="button" class="btn btn-block" data-act="sheet-close">Keep editing</button></div>');
+      case "exmenu":
+        return wrap('<h3>' + EX[S.editor.draft.ex[sh.i].id][0] + '</h3><div class="menu">' + mi("note-open", "Note") + mi("replace", "Replace exercise") + mi("reorder-ex", "Reorder exercises") + mi("ex-remove", "Remove exercise", "danger") + '</div>');
+      case "note":
+        return wrap('<h3>Note</h3><input class="field" id="note" maxlength="120" placeholder="e.g. Seat 4, grip wide" value="' + esc(S.editor.draft.ex[sh.i].note) + '" aria-label="Note"><div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="note-save">Save</button></div>');
+      case "picker": {
+        const add = S.pickMode === "add";
+        return wrap('<h3>' + (add ? "Add exercises" : "Replace exercise") + '</h3><div>' + Object.entries(EX).map(([id, x]) =>
+          '<button type="button" class="pk-row" data-act="' + (add ? "pk" : "pk-replace") + '" data-id="' + id + '"' + (add ? ' aria-pressed="' + S.pick.includes(id) + '"' : '') + '><span class="grow"><span style="display:block;font-weight:500">' + x[0] + '</span><span class="muted" style="font-size:13px">' + x[1] + '</span></span>' + (add ? '<span class="tick">' + I.check + '</span>' : '') + '</button>').join("") + '</div>' +
+          (add ? '<div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="pk-add" id="pk-add"' + (S.pick.length ? '' : ' disabled') + '>' + (S.pick.length ? 'Add ' + S.pick.length : 'Select exercises') + '</button></div>' : ''));
+      }
+    }
+    return "";
+  }
+
+  function render(keep = true) {
+    const sc = root.querySelector(".scroll");
+    const top = sc ? sc.scrollTop : 0;
+    const body = S.editor ? editorView() : S.view === "routines" ? routinesScreen() : workoutTab();
+    const showNav = !S.editor && !S.reorder;
+    root.innerHTML = '<div class="app" data-mode="' + mode + '"><div class="status"><span>19:12</span><span>86%</span></div><div class="scroll">' + body + '</div>' +
+      (showNav ? '<nav class="nav" aria-label="Main">' + NAV.map(([k, l, svg]) => '<button type="button" class="' + (k === "workout" ? "on" : "") + '" data-act="nav" data-to="' + k + '"' + (k === "workout" ? ' aria-current="page"' : '') + '>' + svg + '<span>' + l + '</span></button>').join("") + '</nav>' : '') +
+      (S.sheet ? sheetView() : '') +
+      (S.toast ? '<div class="toast" role="status"><span>' + S.toast + '</span>' + (S.undo ? '<button type="button" data-act="undo">Undo</button>' : '') + '</div>' : '') + '</div>';
+    const nsc = root.querySelector(".scroll");
+    if (nsc) nsc.scrollTop = keep ? top : 0;
+  }
+  function toast(msg, undo) { S.toast = msg; S.undo = undo || null; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; S.undo = null; render(); }, 5000); }
+  const focusSoon = sel => setTimeout(() => { const el = root.querySelector(sel); if (el) { el.focus(); if (el.select) el.select(); } }, 30);
+  function shareText(r) {
+    return r.name + "\n" + r.ex.map((x, i) => (i + 1) + ". " + EX[x.id][0] + " (" + EX[x.id][1] + ") · " + setsText(x) + (x.note ? "\n   Note: " + x.note : "")).join("\n");
+  }
+
+  root.addEventListener("click", ev => {
+    const t = ev.target.closest("[data-act]");
+    if (!t) return;
+    let keep = true;
+    const E = S.editor;
+    switch (t.dataset.act) {
+      case "manage": S.view = "routines"; keep = false; break;
+      case "to-workout": S.view = "workout"; keep = false; break;
+      case "preview": S.sheet = { kind: "preview", id: t.dataset.id }; break;
+      case "sheet-close": S.sheet = null; break;
+      case "rowmenu": S.sheet = { kind: "rowmenu", id: t.dataset.id }; break;
+      case "rename": S.sheet = { kind: "rename", id: S.sheet.id }; render(); focusSoon("#rn"); return;
+      case "rename-save": { const v = root.querySelector("#rn").value.trim(); if (v) byId(S.sheet.id).name = v; S.sheet = null; toast("Renamed"); break; }
+      case "dup": {
+        const r = byId(S.sheet.id), idx = S.routines.indexOf(r);
+        S.routines.splice(idx + 1, 0, mkR(r.name + " (copy)", r.ex, null));
+        S.sheet = null; toast("Duplicated"); break;
+      }
+      case "share": {
+        const text = shareText(byId(S.sheet.id));
+        const fallback = () => { S.sheet = { kind: "share-text", text }; render(); focusSoon("#share-ta"); };
+        try { navigator.clipboard.writeText(text).then(() => { S.sheet = null; toast("Copied"); render(); }, fallback); } catch (err) { fallback(); }
+        return;
+      }
+      case "del-open": S.sheet = { kind: "delete", id: S.sheet.id }; break;
+      case "del-confirm": { const r = byId(S.sheet.id); r.deleted = true; S.sheet = null; toast("Routine deleted", r.id); break; }
+      case "undo": { const r = byId(S.undo); if (r) r.deleted = false; S.toast = null; S.undo = null; clearTimeout(toastTimer); break; }
+      case "starter": {
+        START[t.dataset.k].routines.forEach(([n, ex]) => S.routines.push(mkR(n, ex, null)));
+        toast(START[t.dataset.k].name + " added"); break;
+      }
+      case "reorder-list": S.reorder = "list"; keep = false; break;
+      case "reorder-ex": S.sheet = null; S.reorder = "editor"; keep = false; break;
+      case "reorder-done": {
+        const els = [...root.querySelectorAll("#ro-list .ro-item")];
+        if (S.reorder === "list") {
+          const order = els.map(el => el.dataset.id);
+          const dead = S.routines.filter(r => r.deleted);
+          S.routines = order.map(id => byId(id)).concat(dead);
+        } else {
+          const order = els.map(el => +el.dataset.idx);
+          E.draft.ex = order.map(i => E.draft.ex[i]); E.dirty = true;
+        }
+        S.reorder = null; keep = false; break;
+      }
+      case "new": S.editor = { isNew: true, id: null, draft: { name: "", ex: [] }, dirty: false }; keep = false; render(false); focusSoon("#r-name"); return;
+      case "edit": { const r = byId(t.dataset.id); S.sheet = null; S.editor = { isNew: false, id: r.id, draft: { name: r.name, ex: clone(r.ex) }, dirty: false }; keep = false; break; }
+      case "ed-cancel": if (E.dirty) { S.sheet = { kind: "discard" }; break; } S.editor = null; keep = false; break;
+      case "discard": S.sheet = null; S.editor = null; keep = false; break;
+      case "ed-save": {
+        const d = E.draft; if (!d.name.trim() || !d.ex.length) return;
+        if (E.isNew) S.routines.push(mkR(d.name.trim(), d.ex, null));
+        else { const r = byId(E.id); r.name = d.name.trim(); r.ex = clone(d.ex); }
+        S.editor = null; keep = false; toast("Routine saved"); break;
+      }
+      case "step": { const x = E.draft.ex[+t.dataset.i]; const k = t.dataset.k; x[k] = Math.min(k === "w" ? 5 : 10, Math.max(k === "w" ? 0 : 1, x[k] + Number(t.dataset.d))); E.dirty = true; break; }
+      case "exmenu": S.sheet = { kind: "exmenu", i: +t.dataset.i }; break;
+      case "note-open": S.sheet = { kind: "note", i: S.sheet.i }; render(); focusSoon("#note"); return;
+      case "note-save": E.draft.ex[S.sheet.i].note = root.querySelector("#note").value.trim(); E.dirty = true; S.sheet = null; break;
+      case "ex-remove": E.draft.ex.splice(S.sheet.i, 1); E.dirty = true; S.sheet = null; break;
+      case "replace": S.pickMode = "replace"; S.pickEx = S.sheet.i; S.sheet = { kind: "picker" }; break;
+      case "pk-replace": E.draft.ex[S.pickEx].id = t.dataset.id; E.dirty = true; S.sheet = null; break;
+      case "picker": S.pickMode = "add"; S.pick = []; S.sheet = { kind: "picker" }; break;
+      case "pk": {
+        const id = t.dataset.id; S.pick = S.pick.includes(id) ? S.pick.filter(x => x !== id) : S.pick.concat(id);
+        t.setAttribute("aria-pressed", String(S.pick.includes(id)));
+        const b = root.querySelector("#pk-add"); b.disabled = !S.pick.length; b.textContent = S.pick.length ? "Add " + S.pick.length : "Select exercises";
+        return;
+      }
+      case "pk-add": S.pick.forEach(id => E.draft.ex.push(e(id, 0, 3))); E.dirty = true; S.sheet = null; break;
+      case "nav": if (t.dataset.to === "workout") { S.view = "workout"; keep = false; } else toast("Other tabs have their own prototypes."); break;
+      case "toast": S.sheet = null; toast(t.dataset.msg); break;
+      default: return;
+    }
+    render(keep);
+  });
+
+  root.addEventListener("input", ev => {
+    if (ev.target.id === "r-name" && S.editor) {
+      S.editor.draft.name = ev.target.value; S.editor.dirty = true;
+      root.querySelector("#ed-save").disabled = !(ev.target.value.trim() && S.editor.draft.ex.length);
+    }
+  });
+  root.addEventListener("keydown", ev => {
+    if (ev.key === "Escape" && S.sheet) { S.sheet = null; render(); }
+    if (ev.key === "Enter" && ev.target.id === "rn") root.querySelector('[data-act="rename-save"]').click();
+  });
+
+  /* Drag to reorder */
+  let drag = null;
+  root.addEventListener("pointerdown", ev => {
+    const h = ev.target.closest("[data-handle]"); if (!h) return;
+    const item = h.closest(".ro-item");
+    drag = { item, list: item.parentElement };
+    item.classList.add("dragging");
+    try { h.setPointerCapture(ev.pointerId); } catch (err) {}
+    ev.preventDefault();
+  });
+  root.addEventListener("pointermove", ev => {
+    if (!drag) return;
+    const { item, list } = drag;
+    const before = [...list.children].filter(c => c !== item).find(c => { const r = c.getBoundingClientRect(); return ev.clientY < r.top + r.height / 2; });
+    if (before) { if (item.nextElementSibling !== before) list.insertBefore(item, before); }
+    else if (list.lastElementChild !== item) list.appendChild(item);
+  });
+  const endDrag = () => { if (drag) { drag.item.classList.remove("dragging"); drag = null; } };
+  root.addEventListener("pointerup", endDrag);
+  root.addEventListener("pointercancel", endDrag);
+
+  const sN = document.getElementById("sc-normal"), sE = document.getElementById("sc-empty");
+  sN.addEventListener("click", () => { reset(false); sN.setAttribute("aria-pressed", "true"); sE.setAttribute("aria-pressed", "false"); render(false); });
+  sE.addEventListener("click", () => { reset(true); sE.setAttribute("aria-pressed", "true"); sN.setAttribute("aria-pressed", "false"); render(false); });
+  const tD = document.getElementById("th-dark"), tL = document.getElementById("th-light");
+  tD.addEventListener("click", () => { mode = "dark"; tD.setAttribute("aria-pressed", "true"); tL.setAttribute("aria-pressed", "false"); render(); });
+  tL.addEventListener("click", () => { mode = "light"; tL.setAttribute("aria-pressed", "true"); tD.setAttribute("aria-pressed", "false"); render(); });
+
+  render(false);
+})();
+</script>

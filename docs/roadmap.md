@@ -11,7 +11,7 @@ The order is deliberate: the app is fully usable offline on one device after **M
   - [x] Home
   - [x] Exercises (list, picker, detail with charts, custom exercises)
   - [x] History (list, calendar, workout detail, edit, log past workout)
-  - [ ] Routines (list, editor)
+  - [x] Routines (list, editor, starter routines)
   - [ ] Profile / Settings
   - [ ] Stats (desktop)
   - [ ] Login / Register (M7)
