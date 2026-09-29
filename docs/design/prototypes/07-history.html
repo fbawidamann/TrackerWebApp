@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>History Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --pg-bg:#f3f4f6; --pg-surface:#ffffff; --pg-text:#15191e; --pg-muted:#5c6470; --pg-border:#dce0e5; --pg-accent:#3a6fd8; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  }
+  :root[data-theme="dark"] { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  body { background: var(--pg-bg); color: var(--pg-text); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 24px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 600; }
+  header p { margin: 6px 0 0; color: var(--pg-muted); max-width: 70ch; }
+  .layout { display: grid; grid-template-columns: 382px minmax(0, 1fr); gap: 40px; align-items: start; }
+  .panel { display: grid; gap: 20px; }
+  .panel section { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--pg-border); border-radius: 12px; background: var(--pg-surface); }
+  .panel h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--pg-muted); font-weight: 600; }
+  .panel ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .panel p { margin: 0; color: var(--pg-muted); font-size: 14px; }
+  .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pbtn { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 8px; cursor: pointer; border: 1px solid var(--pg-border); background: transparent; color: var(--pg-text); }
+  .pbtn[aria-pressed="true"] { border-color: var(--pg-accent); color: var(--pg-accent); font-weight: 600; }
+  .pbtn:focus-visible { outline: 2px solid var(--pg-accent); outline-offset: 2px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; justify-items: center; } .panel { width: 100%; } }
+  @media (max-width: 420px) { .wrap { padding-inline: 16px; } }
+
+  /* ---------- App ---------- */
+  .app {
+    width: 380px; max-width: 100%; height: min(800px, calc(100dvh - 32px)); min-height: 560px;
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    border-radius: 32px; border: 1px solid var(--line); background: var(--bg); color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.45;
+    font-variant-numeric: tabular-nums; box-shadow: 0 28px 60px -28px rgba(0,0,0,.55);
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (max-width: 480px) { .app { border-radius: 22px; } }
+  .app[data-mode="dark"] {
+    color-scheme: dark;
+    --bg:#0a0c0f; --surf:#13171c; --raised:#1b2027; --line:#232930;
+    --card-bg:#0f1216; --card-border:#1a1f25; --card-div:#1a1f25;
+    --text:#eef1f5; --muted:#8a93a0;
+    --acc:#4f86f7; --acc-text:#6f9bf8; --acc-fill:#4f86f7; --on-acc:#0b0e12;
+    --danger:#e5534b; --scrim: rgba(0,0,0,.6);
+  }
+  .app[data-mode="light"] {
+    color-scheme: light;
+    --bg:#eef0f3; --surf:#ffffff; --raised:#e9ecf0; --line:#dfe3e8;
+    --card-bg:#f8f9fa; --card-border:#e1e5e9; --card-div:#e4e7eb;
+    --text:#0f1216; --muted:#5a6370;
+    --acc:#4f86f7; --acc-text:#2f63cf; --acc-fill:#3569d6; --on-acc:#ffffff;
+    --danger:#c93c37; --scrim: rgba(15,18,22,.35);
+  }
+  .app *, .app *::before, .app *::after { box-sizing: border-box; }
+  :where(.app button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+  .app button:focus-visible, .app input:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .app button:disabled { cursor: default; }
+
+  .status { display: flex; justify-content: space-between; padding: 12px 24px 4px; font-size: 13px; font-weight: 600; flex: none; }
+  .scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .screen { padding: 8px 20px 36px; display: grid; gap: 22px; align-content: start; }
+
+  .nw { white-space: nowrap; }
+  .u { color: var(--muted); margin-left: .2em; }
+  .lbl { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .title { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -.015em; }
+  .sub { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+  .muted { color: var(--muted); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--surf); color: var(--text); }
+  .btn-primary { background: var(--acc-fill); color: var(--on-acc); border-color: transparent; }
+  .btn-block { width: 100%; padding: 14px; }
+  .ghost { color: var(--acc-text); font-size: 15px; font-weight: 600; padding: 8px 4px; }
+  .ib { width: 40px; height: 40px; display: grid; place-items: center; color: var(--muted); border-radius: 10px; flex: none; position: relative; }
+  .ib svg { width: 22px; height: 22px; }
+  .medal { color: var(--acc-text); display: inline-grid; place-items: center; flex: none; }
+  .medal svg { width: 18px; height: 18px; }
+  .medal.sm svg { width: 15px; height: 15px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+  .sticky { position: sticky; top: 0; z-index: 3; background: var(--bg); padding: 8px 20px 10px; display: grid; gap: 10px; }
+  .searchrow { display: flex; gap: 8px; align-items: center; }
+  .search { flex: 1; position: relative; }
+  .search svg { position: absolute; left: 12px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .field { width: 100%; font: 17px "IBM Plex Sans", sans-serif; color: var(--text); background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 11px 14px; }
+  .search .field { padding-left: 38px; }
+  .field:focus { outline: none; border-color: var(--acc); }
+  .field.need { border-color: var(--acc); box-shadow: 0 0 0 2px var(--acc); }
+  .filter-btn { width: 46px; height: 46px; border-radius: 12px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text); }
+  .filter-btn.active { border-color: var(--acc); color: var(--acc-text); }
+  .badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--acc-fill); color: var(--on-acc); font-size: 11px; font-weight: 600; display: grid; place-items: center; }
+  .chiprow { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .fchip { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; padding: 5px 8px 5px 12px; border-radius: 999px; background: color-mix(in oklab, var(--acc) 12%, transparent); color: var(--acc-text); white-space: nowrap; font-weight: 500; }
+  .fchip svg { width: 14px; height: 14px; }
+
+  /* History list */
+  .week { display: grid; gap: 12px; }
+  .wcard { width: 100%; padding: 18px; display: grid; gap: 14px; }
+  .wc-head { display: grid; gap: 3px; }
+  .wc-name { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; }
+  .wc-date { font-size: 14px; color: var(--muted); }
+  .exlines { display: grid; gap: 9px; }
+  .exline { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 16px; }
+  .exline .n { min-width: 0; display: inline-flex; align-items: center; gap: 6px; }
+  .exline .m { font-size: 14px; color: var(--muted); white-space: nowrap; }
+  .exline.hit .n { color: var(--acc-text); font-weight: 500; }
+  .more { font-size: 14px; color: var(--muted); }
+  .wcard { cursor: pointer; text-align: left; }
+  .wcard:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .names { font-size: 15px; line-height: 1.55; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .names .hit { color: var(--acc-text); font-weight: 500; }
+  .dotsep { opacity: .6; }
+  .prlines { display: grid; gap: 6px; padding-top: 12px; border-top: 1px solid var(--card-div); }
+  .prline { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 15px; }
+  .prline .n { display: inline-flex; align-items: center; gap: 8px; }
+  .prline .v { font-weight: 600; }
+  .expand { justify-self: start; font-size: 14px; font-weight: 600; color: var(--acc-text); padding: 2px 0; }
+  .empty { padding: 24px 16px; display: grid; gap: 12px; justify-items: start; }
+  .empty p { margin: 0; color: var(--muted); }
+
+  /* Calendar */
+  .cal { padding: 10px 10px 14px; display: grid; gap: 8px; }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; }
+  .cal-head .ib:disabled { opacity: .3; }
+  .cal-title { display: grid; justify-items: center; gap: 1px; }
+  .cal-title b { font-size: 17px; font-weight: 600; }
+  .cgrid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; }
+  .cwd { text-align: center; font-size: 11px; font-weight: 500; letter-spacing: .08em; color: var(--muted); padding-bottom: 6px; }
+  .cday { height: 48px; display: grid; justify-items: center; align-content: center; gap: 3px; border-radius: 12px; }
+  .cday:disabled { opacity: .35; }
+  .cnum { width: 34px; height: 30px; display: grid; place-items: center; border-radius: 10px; font-size: 16px; }
+  .cdot { width: 5px; height: 5px; border-radius: 50%; background: transparent; }
+  .cday.has .cdot { background: var(--acc); }
+  .cday:not(.has) .cnum { color: var(--muted); }
+  .cday.today .cnum { color: var(--acc-text); font-weight: 600; }
+  .cday.sel .cnum { background: color-mix(in oklab, var(--acc) 18%, transparent); color: var(--text); font-weight: 600; }
+  .cday.sel.today .cnum { color: var(--acc-text); }
+
+  /* Detail */
+  .stats { display: grid; grid-template-columns: auto 1fr auto; }
+  .stat { padding: 14px 16px; display: grid; gap: 2px; }
+  .stat + .stat { border-left: 1px solid var(--card-div); }
+  .stat-v { font-size: 18px; font-weight: 600; white-space: nowrap; }
+  .exs { display: grid; gap: 14px; }
+  .ex { padding: 18px; display: grid; gap: 6px; }
+  .ex-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .ex-name { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
+  .ex-name-btn { text-align: left; }
+  .ex-eq { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .ex-note { margin: 4px 0 0; font-size: 14px; color: var(--muted); font-style: italic; }
+  .sets { display: grid; }
+  .set { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 12px; padding-block: 11px; }
+  .set + .set { border-top: 1px solid var(--card-div); }
+  .set-n { color: var(--muted); font-size: 14px; }
+  .set-n.w { color: color-mix(in oklab, var(--acc-text) 75%, var(--muted)); font-size: 13px; font-weight: 500; }
+  .set-v { font-size: 18px; }
+  .x { color: var(--muted); padding-inline: 6px; }
+  .ex-foot { display: flex; gap: 18px; font-size: 13px; color: var(--muted); padding-top: 4px; }
+
+  /* Edit */
+  .ehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px 4px; }
+  .ehead h1 { margin: 0; font-size: 17px; font-weight: 600; }
+  .tbtn { font-size: 16px; padding: 8px 10px; border-radius: 8px; }
+  .tbtn.save { color: var(--acc-text); font-weight: 600; }
+  .details { padding: 16px; display: grid; gap: 14px; }
+  .drow { display: grid; gap: 6px; }
+  .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .dur { display: flex; gap: 8px; align-items: center; }
+  .dur .field { text-align: center; padding-inline: 6px; }
+  .dur span { color: var(--muted); font-size: 15px; }
+  input[type="date"].field, input[type="time"].field { min-height: 46px; }
+  .from { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .chip { font-size: 15px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+  .chip[aria-pressed="true"] { border-color: var(--acc); color: var(--acc-text); background: color-mix(in oklab, var(--acc) 12%, transparent); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .live { padding: 14px 12px; display: grid; gap: 8px; }
+  .live .ex-head { padding-inline: 4px; }
+  .tr { display: grid; grid-template-columns: 30px 1fr 64px 56px; gap: 8px; align-items: center; padding: 5px 4px; }
+  .tr.r { grid-template-columns: 30px 1fr 64px; }
+  .tr.th { padding-bottom: 4px; }
+  .c { text-align: center; }
+  .prev { font-size: 15px; color: var(--muted); white-space: nowrap; }
+  .setn { width: 28px; height: 32px; display: grid; place-items: center; font-size: 15px; color: var(--muted); border-radius: 6px; }
+  .setn.w { color: color-mix(in oklab, var(--acc-text) 75%, var(--muted)); font-size: 13px; font-weight: 500; }
+  .inp { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--text); font: 500 18px "IBM Plex Sans", sans-serif; font-variant-numeric: tabular-nums; text-align: center; padding: 0 4px; }
+  .inp::placeholder { color: var(--muted); opacity: .75; font-weight: 400; }
+  .inp:focus { outline: none; border-color: var(--acc); }
+  .inp.need { box-shadow: 0 0 0 2px var(--acc); border-color: var(--acc); }
+
+  /* Overlays */
+  .scrim { position: absolute; inset: 0; z-index: 10; background: var(--scrim); animation: fade .15s ease; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; max-height: 88%; overflow-y: auto; padding: 10px 20px 22px; border-radius: 22px 22px 0 0; background: var(--surf); display: grid; gap: 16px; animation: up .2s ease; }
+  .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+  .sheet h3 { margin: 0; font-size: 20px; font-weight: 600; }
+  .sheet p { margin: 0; color: var(--muted); font-size: 15px; }
+  .grp { display: grid; gap: 10px; }
+  .acts { display: grid; gap: 10px; }
+  .acts.two { grid-template-columns: auto 1fr; }
+  .menu { display: grid; }
+  .mi { display: flex; justify-content: space-between; align-items: center; padding: 15px 4px; font-size: 17px; width: 100%; }
+  .mi + .mi { border-top: 1px solid var(--card-div); }
+  .mi.danger { color: var(--danger); }
+  .mi .on svg { width: 18px; height: 18px; color: var(--acc-text); }
+  .pk-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 4px; }
+  .pk-row + .pk-row { border-top: 1px solid var(--card-div); }
+  .pk-row .grow { flex: 1; min-width: 0; }
+  .tick { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--line); display: grid; place-items: center; color: transparent; flex: none; }
+  .tick svg { width: 15px; height: 15px; }
+  .pk-row[aria-pressed="true"] .tick { background: var(--acc-fill); border-color: transparent; color: var(--on-acc); }
+  .toast { position: absolute; left: 16px; right: 16px; bottom: 86px; z-index: 12; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 15px; }
+  .toast button { color: #2f63cf; font-weight: 600; padding: 4px 8px; }
+  .app[data-mode="light"] .toast button { color: #82a7f1; }
+
+  .nav { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px 14px; border-top: 1px solid var(--line); background: var(--surf); }
+  .nav button { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); }
+  .nav button.on { color: var(--acc-text); font-weight: 600; background: color-mix(in oklab, var(--acc) 14%, transparent); }
+  .nav svg { width: 22px; height: 22px; }
+
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .sheet, .scrim { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>History prototype</h1>
+    <p>A clickable version of <b>docs/design/screens/history.md</b>, for mobile. The example data is 10 weeks of training up to today, Wednesday, 30 September. Nothing is saved.</p>
+  </header>
+  <div class="layout">
+    <div id="root"></div>
+    <div class="panel">
+      <section>
+        <h2>Card style in the list</h2>
+        <div class="pbtns">
+          <button type="button" class="pbtn" data-cs="full" aria-pressed="false">A · Current</button>
+          <button type="button" class="pbtn" data-cs="names" aria-pressed="true">B · Names only (rec.)</button>
+          <button type="button" class="pbtn" data-cs="top3" aria-pressed="false">C · Top 3</button>
+          <button type="button" class="pbtn" data-cs="expand" aria-pressed="false">D · Expandable</button>
+        </div>
+        <p><b>A</b> every exercise with "sets · best". <b>B</b> exercise names as one calm line (max 2 lines), numbers only for PRs. <b>C</b> at most 3 lines, PR exercises first, "+3 more exercises". <b>D</b> like B, with "Show sets and best" to expand a single card.</p>
+      </section>
+      <section>
+        <h2>App theme</h2>
+        <div class="pbtns">
+          <button type="button" class="pbtn" id="th-dark" aria-pressed="true">Dark</button>
+          <button type="button" class="pbtn" id="th-light" aria-pressed="false">Light</button>
+          <button type="button" class="pbtn" id="reset">Reset data</button>
+        </div>
+      </section>
+      <section>
+        <h2>Things to try</h2>
+        <ul>
+          <li>Scroll the weeks. Every card shows exercise lines with "sets · best" and a medal for PRs.</li>
+          <li>Search <b>squat</b> or <b>curl</b>: only matching workouts stay, with the exercise highlighted.</li>
+          <li>Filter button: pick routines or "Freeform", then remove them with the chips.</li>
+          <li>Open a workout: Duration · Sets · PRs, then the exercise cards.</li>
+          <li>⋯ → <b>Edit workout</b>: change name, date, time, duration, kg/reps, add a set or exercise, then Save. Also try Cancel after a change.</li>
+          <li>⋯ → Delete workout, then Undo. ⋯ → Save as routine.</li>
+          <li><b>+</b> (top right in History): log a past workout, and try "Start from Push Day".</li>
+          <li><b>Calendar icon</b> (top right): blue dots mark training days. Tap a day to see its workouts, and switch months with ‹ ›.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Same as the workout prototype</h2>
+        <p>Swipe-to-delete, reorder and replace behave as in the Active workout prototype, so here they only show a note.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const I = {
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+    chevR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+    sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    medal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.2 13.8-1.7 7.2L12 18l5.5 3-1.7-7.2"/></svg>',
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    hist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    lift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+  };
+
+  /* ---------- Example data ---------- */
+  const EX = {
+    bench: { n: "Bench Press", eq: "Barbell", a: 70, inc: 1.25, reps: [8, 8, 7], warm: true },
+    incline: { n: "Incline Press", eq: "Dumbbell", a: 24, inc: 0.5, reps: [10, 10, 9], step: 2 },
+    pushdown: { n: "Triceps Pushdown", eq: "Cable", a: 22.5, inc: 0.5, reps: [12, 12, 10] },
+    lateral: { n: "Lateral Raise", eq: "Dumbbell", a: 9, inc: 0.3, reps: [15, 14, 12], step: 1 },
+    row: { n: "Bent-over Row", eq: "Barbell", a: 62.5, inc: 1.25, reps: [8, 8, 8] },
+    latpull: { n: "Lat Pulldown", eq: "Cable", a: 52.5, inc: 1.25, reps: [10, 10, 9] },
+    pullup: { n: "Pull-up", eq: "Bodyweight", r: true, a: 6, inc: 0.35 },
+    curl: { n: "Biceps Curl", eq: "Dumbbell", a: 12, inc: 0.4, reps: [10, 10, 8], step: 2 },
+    squat: { n: "Squat", eq: "Barbell", a: 85, inc: 2, reps: [5, 5, 5], warm: true },
+    rdl: { n: "Romanian Deadlift", eq: "Barbell", a: 80, inc: 2, reps: [8, 8, 8] },
+    legpress: { n: "Leg Press", eq: "Machine", a: 160, inc: 4, reps: [10, 10, 10], step: 5 },
+    calf: { n: "Calf Raise", eq: "Machine", a: 70, inc: 2, reps: [12, 12, 12], step: 5 },
+    legcurl: { n: "Leg Curl", eq: "Machine", a: 35, inc: 1, reps: [12, 12, 10], step: 5 },
+    ohp: { n: "Overhead Press", eq: "Barbell", a: 42.5, inc: 0.6, reps: [8, 8, 6] },
+    cablerow: { n: "Seated Cable Row", eq: "Cable", a: 50, inc: 1.2, reps: [10, 10, 10] },
+    dips: { n: "Dips", eq: "Bodyweight", r: true, a: 8, inc: 0.4 },
+    hammer: { n: "Hammer Curl", eq: "Dumbbell", a: 12, inc: 0.4, reps: [10, 10, 10], step: 2 },
+    facepull: { n: "Face Pull", eq: "Cable", a: 15, inc: 0.4, reps: [15, 15, 15] }
+  };
+  const ROUT = {
+    push: { name: "Push Day", ex: [["bench", 4], ["incline", 3], ["pushdown", 3], ["lateral", 3]] },
+    pull: { name: "Pull Day", ex: [["row", 3], ["latpull", 3], ["pullup", 3], ["curl", 3]] },
+    legs: { name: "Legs", ex: [["squat", 4], ["rdl", 3], ["legpress", 3], ["calf", 3], ["legcurl", 3]] },
+    upper: { name: "Upper Body", ex: [["ohp", 3], ["pullup", 3], ["incline", 3], ["cablerow", 3], ["curl", 2], ["dips", 3]] }
+  };
+  const TODAY = new Date(2026, 8, 30);
+  const DAY = 86400000;
+  const MON = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const WD = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  let seed = 11;
+  const rng = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const round = (v, s) => Math.round(v / s) * s;
+  let uid = 1;
+
+  function makeData() {
+    seed = 11; uid = 1;
+    const counts = {};
+    const W = [];
+    const mk = (routine, name, date, hh, mm, dur, exList) => {
+      const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hh, mm);
+      const exercises = exList.map(([id, nSets]) => {
+        const e = EX[id]; counts[id] = (counts[id] || 0) + 1;
+        const k = counts[id];
+        const sets = [];
+        if (e.r) {
+          const r = Math.floor(e.a + e.inc * k);
+          for (let i = 0; i < nSets; i++) sets.push({ id: uid++, type: "n", kg: null, reps: Math.max(1, r - (i > 0 ? (rng() < .5 ? 1 : i) : 0)) });
+        } else {
+          const step = e.step || 2.5;
+          let w = round(e.a + e.inc * k, step);
+          if (rng() < .12) w -= step;
+          if (e.warm) sets.push({ id: uid++, type: "w", kg: round(w * .6, 2.5), reps: 10 });
+          const base = nSets - (e.warm ? 1 : 0);
+          for (let i = 0; i < base; i++) sets.push({ id: uid++, type: "n", kg: w, reps: (e.reps[i] || e.reps[e.reps.length - 1]) - (i === base - 1 && rng() < .3 ? 1 : 0) });
+        }
+        return { exId: id, note: id === "legpress" && k % 3 === 0 ? "Seat position 4" : "", sets };
+      });
+      W.push({ id: "w" + uid++, name, routine, start, dur, exercises, deleted: false });
+    };
+    const weeks = 10;
+    for (let wk = weeks - 1; wk >= 0; wk--) {
+      const monday = new Date(2026, 8, 28 - wk * 7);
+      const d = off => new Date(monday.getTime() + off * DAY);
+      mk("pull", "Pull Day", d(0), 18, 5, 62 + Math.round(rng() * 8), ROUT.pull.ex);
+      mk("push", "Push Day", d(1), 17, 35, 55 + Math.round(rng() * 8), ROUT.push.ex);
+      if (wk === 0) continue;
+      if (wk % 2 === 0) mk("upper", "Upper Body", d(3), 18, 20, 66 + Math.round(rng() * 8), ROUT.upper.ex);
+      mk("legs", "Legs", d(5), 10, 15, 68 + Math.round(rng() * 10), ROUT.legs.ex);
+      if (wk === 2 || wk === 5 || wk === 8) mk(null, "Evening workout", d(6), 19, 10, 38, [["hammer", 3], ["facepull", 3], ["dips", 3]]);
+    }
+    return W.sort((a, b) => b.start - a.start);
+  }
+
+  /* ---------- State ---------- */
+  let mode = "dark";
+  let cardStyle = "names";
+  let DATA, S, toastTimer = null;
+  function reset() {
+    DATA = makeData();
+    S = { view: "list", detail: null, q: "", routines: [], sheet: null, edit: null, toast: null, undo: null, pickSel: [], expanded: [] };
+  }
+  reset();
+
+  /* ---------- Helpers ---------- */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmtNum = x => { const [i, d] = String(x).split("."); return (i.length > 3 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, " ") : i) + (d ? "." + d : ""); };
+  const kg = x => '<span class="nw">' + fmtNum(x) + '<span class="u">kg</span></span>';
+  const longDate = d => WD[d.getDay()] + ", " + d.getDate() + " " + MON[d.getMonth()] + (d.getFullYear() !== TODAY.getFullYear() ? " " + d.getFullYear() : "");
+  const hhmm = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  const durText = m => { const h = Math.floor(m / 60), r = m % 60; return h ? h + " h " + String(r).padStart(2, "0") + " min" : r + " min"; };
+  const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const clone = o => JSON.parse(JSON.stringify(o), (k, v) => (k === "start" ? new Date(v) : v));
+  const mondayOf = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const wd = (x.getDay() + 6) % 7; return new Date(x.getTime() - wd * DAY); };
+  const alive = () => DATA.filter(w => !w.deleted);
+  const workSets = ex => { const n = ex.sets.filter(s => s.type === "n"); return n.length ? n : ex.sets; };
+  const maxKg = ex => Math.max(0, ...workSets(ex).map(s => s.kg || 0));
+  const maxReps = ex => Math.max(0, ...workSets(ex).map(s => s.reps || 0));
+
+  function prMap() {
+    const best = {}, prs = new Set();
+    alive().slice().sort((a, b) => a.start - b.start).forEach(w => {
+      w.exercises.forEach((ex, i) => {
+        if (EX[ex.exId].r || !ex.sets.some(s => s.type === "n")) return;
+        const m = maxKg(ex);
+        if (best[ex.exId] !== undefined && m > best[ex.exId]) prs.add(w.id + ":" + i);
+        if (best[ex.exId] === undefined || m > best[ex.exId]) best[ex.exId] = m;
+      });
+    });
+    return prs;
+  }
+
+  function weekLabel(monday) {
+    const thisMon = mondayOf(TODAY);
+    if (monday.getTime() === thisMon.getTime()) return "This week";
+    if (monday.getTime() === thisMon.getTime() - 7 * DAY) return "Last week";
+    const sun = new Date(monday.getTime() + 6 * DAY);
+    const y = sun.getFullYear() !== TODAY.getFullYear() ? " " + sun.getFullYear() : "";
+    return monday.getMonth() === sun.getMonth()
+      ? monday.getDate() + "–" + sun.getDate() + " " + MON[sun.getMonth()] + y
+      : monday.getDate() + " " + MON[monday.getMonth()] + " – " + sun.getDate() + " " + MON[sun.getMonth()] + y;
+  }
+
+  const norm = s => s.toLowerCase().replace(/[-']/g, "");
+  const exMatch = id => {
+    const q = norm(S.q.trim()); if (!q) return false;
+    const words = norm(EX[id].n).split(/\s+/), joined = words.join("");
+    return q.split(/\s+/).every(t => words.some(w => w.startsWith(t)) || joined.includes(t));
+  };
+  function filtered() {
+    return alive().filter(w => {
+      if (S.routines.length && !S.routines.includes(w.routine || "free")) return false;
+      if (S.q.trim() && !w.exercises.some(e => exMatch(e.exId))) return false;
+      return true;
+    });
+  }
+
+  function prevSession(exId, before, excludeId) {
+    const w = alive().filter(x => x.id !== excludeId && x.start < before && x.exercises.some(e => e.exId === exId)).sort((a, b) => b.start - a.start)[0];
+    return w ? w.exercises.find(e => e.exId === exId) : null;
+  }
+  function prevFor(exId, sets, j, before, excludeId) {
+    const p = prevSession(exId, before, excludeId);
+    if (!p) return null;
+    const t = sets[j].type; let k = 0;
+    for (let x = 0; x < j; x++) if (sets[x].type === t) k++;
+    return p.sets.filter(s => s.type === t)[k] || null;
+  }
+  function placeholder(ex, j, before, excludeId) {
+    const p = prevFor(ex.exId, ex.sets, j, before, excludeId);
+    if (p) return { kg: p.kg, reps: p.reps };
+    for (let x = j - 1; x >= 0; x--) {
+      const s = ex.sets[x]; const ph = placeholder(ex, x, before, excludeId) || {};
+      return { kg: s.kg !== "" && s.kg !== null ? s.kg : ph.kg, reps: s.reps !== "" && s.reps !== null ? s.reps : ph.reps };
+    }
+    return null;
+  }
+  function parseKg(s) { s = String(s).trim().replace(",", "."); if (s === "") return null; const n = Number(s); return isFinite(n) && n >= 0 && n <= 999.75 && Math.abs(n * 4 - Math.round(n * 4)) < 1e-9 ? n : null; }
+  function parseReps(s) { s = String(s).trim(); if (!/^\d+$/.test(s)) return null; const n = Number(s); return n >= 1 && n <= 999 ? n : null; }
+
+  /* ---------- Views ---------- */
+  const root = document.getElementById("root");
+  const NAV = [["home", "Home", I.home], ["history", "History", I.hist], ["workout", "Workout", I.lift], ["exercises", "Exercises", I.list], ["profile", "Profile", I.user]];
+
+  function listView() {
+    const prs = prMap();
+    const fc = S.routines.length;
+    const list = filtered();
+    const groups = [];
+    list.forEach(w => {
+      const m = mondayOf(w.start).getTime();
+      let g = groups.find(x => x.m === m);
+      if (!g) { g = { m, items: [] }; groups.push(g); }
+      g.items.push(w);
+    });
+    const card = w => cardHtml(w, prs);
+    const chips = S.routines.map(r => [r, r === "free" ? "Freeform" : ROUT[r].name]);
+    const body = !alive().length
+      ? '<div class="card empty"><p>No workouts yet</p><button type="button" class="btn btn-primary btn-block" data-act="toast" data-msg="Starts an empty workout.">Start empty workout</button></div>'
+      : !groups.length ? '<div class="card empty"><p>No workouts found</p></div>'
+      : groups.map(g => '<div class="week"><span class="lbl">' + weekLabel(new Date(g.m)) + ' · ' + g.items.length + (g.items.length === 1 ? ' workout' : ' workouts') + '</span>' + g.items.map(card).join("") + '</div>').join("");
+    return '<div class="top" style="padding:6px 20px 0"><h1 class="title">History</h1><span style="display:flex;margin-right:-8px">' +
+        '<button type="button" class="ib" data-act="calendar" aria-label="Calendar">' + I.cal + '</button>' +
+        '<button type="button" class="ib" data-act="log-new" aria-label="Log past workout">' + I.plus + '</button></span></div>' +
+      '<div class="sticky"><div class="searchrow"><div class="search">' + I.search + '<input class="field" id="q" type="search" placeholder="Search exercise" autocomplete="off" value="' + esc(S.q) + '" aria-label="Search workouts by exercise"></div>' +
+      '<button type="button" class="ib filter-btn' + (fc ? " active" : "") + '" data-act="filters" aria-label="Filter' + (fc ? ", " + fc + " active" : "") + '">' + I.sliders + (fc ? '<span class="badge">' + fc + '</span>' : '') + '</button></div>' +
+      (chips.length ? '<div class="chiprow">' + chips.map(([k, l]) => '<button type="button" class="fchip" data-act="unchip" data-v="' + k + '" aria-label="Remove filter ' + l + '">' + l + I.x + '</button>').join("") + '</div>' : '') +
+      '</div><div class="screen" id="list-body" style="padding-top:6px;gap:28px">' + body + '</div>';
+  }
+
+  function calendarView() {
+    const prs = prMap();
+    const y = S.calMonth.getFullYear(), mo = S.calMonth.getMonth();
+    const first = new Date(y, mo, 1), days = new Date(y, mo + 1, 0).getDate();
+    const lead = (first.getDay() + 6) % 7;
+    const byDay = {};
+    alive().forEach(w => { if (w.start.getFullYear() === y && w.start.getMonth() === mo) (byDay[w.start.getDate()] = byDay[w.start.getDate()] || []).push(w); });
+    const count = Object.values(byDay).reduce((a, l) => a + l.length, 0);
+    const isToday = d => y === TODAY.getFullYear() && mo === TODAY.getMonth() && d === TODAY.getDate();
+    const future = d => new Date(y, mo, d) > TODAY;
+    let cells = "";
+    for (let i = 0; i < lead; i++) cells += '<span></span>';
+    for (let d = 1; d <= days; d++) {
+      const has = !!byDay[d], sel = S.calDay === d;
+      cells += '<button type="button" class="cday' + (has ? " has" : "") + (sel ? " sel" : "") + (isToday(d) ? " today" : "") + '" data-act="cal-day" data-d="' + d + '"' + (future(d) ? " disabled" : "") +
+        ' aria-label="' + d + ' ' + MON[mo] + (has ? ", " + byDay[d].length + " workout" + (byDay[d].length > 1 ? "s" : "") : "") + '"' + (sel ? ' aria-pressed="true"' : '') + '><span class="cnum">' + d + '</span><span class="cdot"></span></button>';
+    }
+    const nextDisabled = y > TODAY.getFullYear() || (y === TODAY.getFullYear() && mo >= TODAY.getMonth());
+    const selDate = S.calDay ? new Date(y, mo, S.calDay) : null;
+    const dayList = selDate
+      ? '<div class="week"><span class="lbl">' + longDate(selDate) + '</span>' + (byDay[S.calDay] ? byDay[S.calDay].slice().sort((a, b) => a.start - b.start).map(w => cardHtml(w, prs)).join("") : '<div class="card empty"><p>No workout on this day</p></div>') + '</div>'
+      : '';
+    return '<div class="top" style="padding:6px 12px 0"><button type="button" class="ib" data-act="cal-close" aria-label="Back to history">' + I.back + '</button><span style="font-size:17px;font-weight:600">Calendar</span><span style="width:40px"></span></div>' +
+      '<div class="screen" style="padding-top:6px">' +
+        '<div class="card cal"><div class="cal-head"><button type="button" class="ib" data-act="cal-prev" aria-label="Previous month">' + I.back + '</button>' +
+          '<span class="cal-title"><b>' + MON[mo] + (y !== TODAY.getFullYear() ? " " + y : "") + '</b><span class="li-meta">' + count + (count === 1 ? " workout" : " workouts") + '</span></span>' +
+          '<button type="button" class="ib" data-act="cal-next" aria-label="Next month"' + (nextDisabled ? " disabled" : "") + '>' + I.chevR + '</button></div>' +
+          '<div class="cgrid">' + ["M", "T", "W", "T", "F", "S", "S"].map(l => '<span class="cwd">' + l + '</span>').join("") + cells + '</div></div>' +
+        dayList + '</div>';
+  }
+
+  function cardHtml(w, prs) {
+    const hasPr = w.exercises.some((_, i) => prs.has(w.id + ":" + i));
+    const head = '<span class="wc-head"><span class="wc-name"><span>' + esc(w.name) + '</span>' + (hasPr ? '<span class="medal" aria-label="PR">' + I.medal + '</span>' : '') + '</span>' +
+      '<span class="wc-date">' + longDate(w.start) + ' · ' + durText(w.dur) + '</span></span>';
+    const open = '<div class="card wcard" role="button" tabindex="0" data-act="open" data-id="' + w.id + '">';
+    const prLines = () => w.exercises.map((ex, i) => prs.has(w.id + ":" + i) ? '<span class="prline"><span class="n"><span class="medal sm">' + I.medal + '</span>' + EX[ex.exId].n + '</span><span class="v">' + kg(maxKg(ex)) + '</span></span>' : '').join("");
+    const nameText = w.exercises.map(ex => '<span class="' + (exMatch(ex.exId) ? "hit" : "") + '">' + EX[ex.exId].n + '</span>').join('<span class="dotsep"> · </span>');
+    const line = (ex, i) => {
+      const e = EX[ex.exId];
+      const best = e.r ? "best " + maxReps(ex) + " reps" : "best " + fmtNum(maxKg(ex)) + " kg";
+      return '<span class="exline' + (exMatch(ex.exId) ? " hit" : "") + '"><span class="n">' + e.n + (prs.has(w.id + ":" + i) ? '<span class="medal sm" aria-label="PR">' + I.medal + '</span>' : '') + '</span><span class="m">' + ex.sets.length + ' sets · ' + best + '</span></span>';
+    };
+    if (cardStyle === "names") {
+      const p = prLines();
+      return open + head + '<span class="names">' + nameText + '</span>' + (p ? '<span class="prlines">' + p + '</span>' : '') + '</div>';
+    }
+    if (cardStyle === "top3") {
+      const order = w.exercises.map((ex, i) => ({ ex, i, pr: prs.has(w.id + ":" + i) })).sort((a, b) => (b.pr - a.pr) || (a.i - b.i)).slice(0, 3).sort((a, b) => a.i - b.i);
+      const rest = w.exercises.length - order.length;
+      return open + head + '<span class="exlines">' + order.map(o => line(o.ex, o.i)).join("") + (rest > 0 ? '<span class="more">+' + rest + (rest === 1 ? ' more exercise' : ' more exercises') + '</span>' : '') + '</span></div>';
+    }
+    if (cardStyle === "expand") {
+      const openState = S.expanded.includes(w.id);
+      return open + head + (openState ? '<span class="exlines">' + w.exercises.map(line).join("") + '</span>' : '<span class="names">' + nameText + '</span>') +
+        '<button type="button" class="expand" data-act="expand" data-id="' + w.id + '" aria-expanded="' + openState + '">' + (openState ? "Show less" : "Show sets and best") + '</button></div>';
+    }
+    return open + head + '<span class="exlines">' + w.exercises.slice(0, 5).map(line).join("") + (w.exercises.length > 5 ? '<span class="more">+' + (w.exercises.length - 5) + ' more</span>' : '') + '</span></div>';
+  }
+
+  function detailView() {
+    const w = DATA.find(x => x.id === S.detail);
+    const prs = prMap();
+    const prCount = w.exercises.filter((_, i) => prs.has(w.id + ":" + i)).length;
+    const end = new Date(w.start.getTime() + w.dur * 60000);
+    const sets = w.exercises.reduce((a, e) => a + e.sets.length, 0);
+    const cards = w.exercises.map((ex, i) => {
+      const e = EX[ex.exId];
+      const isPr = prs.has(w.id + ":" + i);
+      const m = e.r ? null : maxKg(ex);
+      let n = 0, marked = false;
+      const rows = ex.sets.map(s => {
+        const warm = s.type === "w"; if (!warm) n++;
+        const pr = isPr && !warm && !marked && s.kg === m; if (pr) marked = true;
+        return '<div class="set"><span class="set-n' + (warm ? " w" : "") + '">' + (warm ? "W" : n) + '</span><span class="set-v nw">' + (e.r ? s.reps + '<span class="u">reps</span>' : fmtNum(s.kg) + '<span class="u">kg</span><span class="x">×</span>' + s.reps) + '</span>' + (pr ? '<span class="medal" aria-label="PR">' + I.medal + '</span>' : '<span></span>') + '</div>';
+      }).join("");
+      let foot = "";
+      if (!e.r) {
+        const e1 = Math.max(...ex.sets.filter(s => s.type === "n" && s.reps <= 12).map(s => s.kg * (1 + s.reps / 30)));
+        foot = '<div class="ex-foot"><span>Best ' + kg(m) + '</span>' + (isFinite(e1) ? '<span>e1RM ' + kg(Math.round(e1)) + '</span>' : '') + '</div>';
+      } else foot = '<div class="ex-foot"><span>Best ' + maxReps(ex) + ' reps</span></div>';
+      return '<section class="card ex"><div class="ex-head"><button type="button" class="ex-name-btn" data-act="toast" data-msg="Opens the exercise detail (see the Exercises prototype)."><h2 class="ex-name">' + e.n + '<span class="ex-eq">' + e.eq + '</span></h2></button></div>' +
+        (ex.note ? '<p class="ex-note">' + esc(ex.note) + '</p>' : '') + '<div class="sets">' + rows + '</div>' + foot + '</section>';
+    }).join("");
+    return '<div class="top" style="padding:6px 12px 0"><button type="button" class="ib" data-act="back" aria-label="Back">' + I.back + '</button><button type="button" class="ib" data-act="wmenu" aria-label="Workout options">' + I.more + '</button></div>' +
+      '<div class="screen" style="padding-top:2px"><div><h1 class="title">' + esc(w.name) + '</h1><p class="sub">' + longDate(w.start) + ' · ' + hhmm(w.start) + '–' + hhmm(end) + '</p>' +
+        (w.routine ? '<p class="sub" style="font-size:14px;margin-top:2px">From ' + ROUT[w.routine].name + ' routine</p>' : '') + '</div>' +
+      '<div class="card stats"><div class="stat"><span class="stat-v">' + durText(w.dur) + '</span><span class="lbl">Duration</span></div><div class="stat"><span class="stat-v">' + sets + '</span><span class="lbl">Sets</span></div><div class="stat"><span class="stat-v">' + prCount + '</span><span class="lbl">PRs</span></div></div>' +
+      '<div class="exs">' + cards + '</div></div>';
+  }
+
+  function editView() {
+    const E = S.edit, d = E.draft;
+    const before = d.start;
+    const cards = d.exercises.map((ex, i) => {
+      const e = EX[ex.exId];
+      const rows = ex.sets.map((s, j) => {
+        let n = 0; for (let x = 0; x <= j; x++) if (ex.sets[x].type === "n") n++;
+        const lab = s.type === "w" ? "W" : n;
+        const p = prevFor(ex.exId, ex.sets, j, before, E.origId);
+        const ph = placeholder(ex, j, before, E.origId) || {};
+        const prevT = p ? (e.r ? p.reps + " reps" : fmtNum(p.kg) + " × " + p.reps) : "–";
+        return '<div class="tr' + (e.r ? " r" : "") + '"><button type="button" class="setn' + (s.type === "w" ? " w" : "") + '" data-act="setmenu" data-ex="' + i + '" data-set="' + j + '" aria-label="Set ' + lab + ' options">' + lab + '</button><span class="prev">' + prevT + '</span>' +
+          (e.r ? '' : '<input class="inp" data-f="kg" data-ex="' + i + '" data-set="' + j + '" inputmode="decimal" autocomplete="off" placeholder="' + (ph.kg !== undefined && ph.kg !== null && ph.kg !== "" ? fmtNum(ph.kg) : "") + '" value="' + (s.kg === null || s.kg === "" ? "" : esc(s.kg)) + '" aria-label="Weight">') +
+          '<input class="inp" data-f="reps" data-ex="' + i + '" data-set="' + j + '" inputmode="numeric" autocomplete="off" placeholder="' + (ph.reps || "") + '" value="' + (s.reps === null || s.reps === "" ? "" : esc(s.reps)) + '" aria-label="Reps"></div>';
+      }).join("");
+      return '<section class="card live"><div class="ex-head"><div><h2 class="ex-name">' + e.n + '<span class="ex-eq">' + e.eq + '</span></h2>' + (ex.note ? '<p class="ex-note">' + esc(ex.note) + '</p>' : '') + '</div>' +
+        '<button type="button" class="ib" data-act="exmenu" data-ex="' + i + '" aria-label="' + e.n + ' options" style="margin:-6px -8px 0 0">' + I.more + '</button></div>' +
+        '<div><div class="tr th' + (e.r ? " r" : "") + '"><span class="lbl">Set</span><span class="lbl">Previous</span>' + (e.r ? '' : '<span class="lbl c">kg</span>') + '<span class="lbl c">Reps</span></div>' + rows + '</div>' +
+        '<button type="button" class="ghost" data-act="add-set" data-ex="' + i + '" style="justify-self:start">+ Add set</button></section>';
+    }).join("");
+    const h = Math.floor(d.dur / 60), m = d.dur % 60;
+    return '<div class="ehead"><button type="button" class="tbtn" data-act="edit-cancel">Cancel</button><h1>' + (E.isNew ? "Log past workout" : "Edit workout") + '</h1><button type="button" class="tbtn save" data-act="edit-save">Save</button></div>' +
+      '<div class="screen" style="padding-top:8px">' +
+      (E.isNew ? '<div class="grp"><span class="lbl">Start from</span><div class="from">' + [["", "Empty"]].concat(Object.entries(ROUT).map(([k, r]) => [k, r.name])).map(([k, l]) => '<button type="button" class="chip" data-act="from" data-r="' + k + '" aria-pressed="' + ((E.from || "") === k) + '">' + l + '</button>').join("") + '</div></div>' : '') +
+      '<div class="card details">' +
+        '<div class="drow"><label class="lbl" for="e-name">Name</label><input class="field" id="e-name" data-d="name" maxlength="40" value="' + esc(d.name) + '"></div>' +
+        '<div class="dgrid"><div class="drow"><label class="lbl" for="e-date">Date</label><input class="field" id="e-date" data-d="date" type="date" max="' + iso(TODAY) + '" value="' + iso(d.start) + '"></div>' +
+        '<div class="drow"><label class="lbl" for="e-time">Start time</label><input class="field" id="e-time" data-d="time" type="time" value="' + hhmm(d.start) + '"></div></div>' +
+        '<div class="drow"><span class="lbl" id="l-dur">Duration</span><div class="dur" role="group" aria-labelledby="l-dur"><input class="field" id="e-h" data-d="h" inputmode="numeric" value="' + h + '" aria-label="Hours" style="width:64px"><span>h</span><input class="field" id="e-m" data-d="m" inputmode="numeric" value="' + m + '" aria-label="Minutes" style="width:64px"><span>min</span></div></div>' +
+      '</div>' +
+      (d.exercises.length ? '<div class="exs">' + cards + '</div>' : '') +
+      '<button type="button" class="btn btn-block" data-act="picker">Add exercise</button></div>';
+  }
+
+  function sheetView() {
+    const sh = S.sheet;
+    const wrap = inner => '<div class="scrim" data-act="sheet-close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>' + inner + '</div>';
+    const mi = (act, label, cls = "", extra = "") => '<button type="button" class="mi ' + cls + '" data-act="' + act + '"' + extra + '>' + label + '</button>';
+    switch (sh.kind) {
+      case "filters": {
+        const opts = Object.entries(ROUT).map(([k, r]) => [k, r.name]).concat([["free", "Freeform"]]);
+        return wrap('<h3>Filter</h3><div class="grp"><span class="lbl">Routine</span><div class="chips">' + opts.map(([k, l]) => '<button type="button" class="chip" data-act="f-r" data-v="' + k + '" aria-pressed="' + S.routines.includes(k) + '">' + l + '</button>').join("") + '</div></div>' +
+          '<div class="acts two"><button type="button" class="btn" data-act="f-reset">Reset</button><button type="button" class="btn btn-primary" data-act="sheet-close">Show ' + filtered().length + ' workouts</button></div>');
+      }
+      case "wmenu": {
+        return wrap('<h3>' + esc(DATA.find(x => x.id === S.detail).name) + '</h3><div class="menu">' + mi("edit", "Edit workout") + mi("repeat", "Repeat workout") + mi("save-routine", "Save as routine") + mi("del-open", "Delete workout", "danger") + '</div>');
+      }
+      case "save-routine": {
+        const w = DATA.find(x => x.id === S.detail);
+        return wrap('<h3>Save as routine</h3><p>' + w.exercises.length + ' exercises with their set counts.</p><input class="field" id="r-name" maxlength="40" value="' + esc(w.name) + '" aria-label="Routine name">' +
+          '<div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="routine-save">Save routine</button></div>');
+      }
+      case "delete": {
+        const w = DATA.find(x => x.id === S.detail);
+        const hadPr = w.exercises.some((_, i) => prMap().has(w.id + ":" + i));
+        return wrap('<h3>Delete this workout?</h3><p>' + esc(w.name) + ', ' + longDate(w.start) + '.' + (hadPr ? ' Its PRs will be removed.' : '') + '</p>' +
+          '<div class="acts"><button type="button" class="btn btn-block" style="color:var(--danger)" data-act="del-confirm">Delete workout</button><button type="button" class="btn btn-block" data-act="sheet-close">Cancel</button></div>');
+      }
+      case "discard":
+        return wrap('<h3>Discard changes?</h3><p>Your edits will be lost.</p><div class="acts"><button type="button" class="btn btn-block" style="color:var(--danger)" data-act="discard-confirm">Discard</button><button type="button" class="btn btn-block" data-act="sheet-close">Keep editing</button></div>');
+      case "setmenu": {
+        const s = S.edit.draft.exercises[sh.ex].sets[sh.set];
+        return wrap('<h3>Set</h3><div class="menu">' + mi("set-type", "<span>Warm-up</span>" + (s.type === "w" ? '<span class="on">' + I.check + '</span>' : ''), "", ' data-t="w"') + mi("set-type", "<span>Normal</span>" + (s.type === "n" ? '<span class="on">' + I.check + '</span>' : ''), "", ' data-t="n"') + mi("set-del", "Delete set", "danger") + '</div>');
+      }
+      case "exmenu":
+        return wrap('<h3>' + EX[S.edit.draft.exercises[sh.ex].exId].n + '</h3><div class="menu">' + mi("toast", "Replace exercise", "", ' data-msg="Works like in the Active workout prototype."') + mi("note-open", "Note") + mi("toast", "Reorder exercises", "", ' data-msg="Works like in the Active workout prototype."') + mi("ex-remove", "Remove exercise", "danger") + '</div>');
+      case "note":
+        return wrap('<h3>Note</h3><input class="field" id="n-inp" maxlength="120" value="' + esc(S.edit.draft.exercises[sh.ex].note) + '" placeholder="e.g. Seat position 4" aria-label="Note"><div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="note-save">Save</button></div>');
+      case "picker":
+        return wrap('<h3>Add exercises</h3><div>' + Object.entries(EX).map(([id, e]) => '<button type="button" class="pk-row" data-act="pk" data-id="' + id + '" aria-pressed="' + S.pickSel.includes(id) + '"><span class="grow"><span style="display:block;font-weight:500">' + e.n + '</span><span class="muted" style="font-size:13px">' + e.eq + '</span></span><span class="tick">' + I.check + '</span></button>').join("") + '</div>' +
+          '<div class="acts"><button type="button" class="btn btn-primary btn-block" data-act="pk-add" id="pk-add"' + (S.pickSel.length ? '' : ' disabled') + '>' + (S.pickSel.length ? 'Add ' + S.pickSel.length : 'Select exercises') + '</button></div>');
+    }
+    return "";
+  }
+
+  function render(keep = true) {
+    const sc = root.querySelector(".scroll");
+    const top = sc ? sc.scrollTop : 0;
+    const body = S.edit ? editView() : S.view === "detail" ? detailView() : S.view === "calendar" ? calendarView() : listView();
+    root.innerHTML = '<div class="app" data-mode="' + mode + '"><div class="status"><span>19:12</span><span>86%</span></div>' +
+      '<div class="scroll">' + body + '</div>' +
+      (S.edit ? '' : '<nav class="nav" aria-label="Main">' + NAV.map(([k, l, svg]) => '<button type="button" class="' + (k === "history" ? "on" : "") + '" data-act="nav" data-to="' + k + '"' + (k === "history" ? ' aria-current="page"' : '') + '>' + svg + '<span>' + l + '</span></button>').join("") + '</nav>') +
+      (S.sheet ? sheetView() : '') +
+      (S.toast ? '<div class="toast" role="status"><span>' + S.toast + '</span>' + (S.undo ? '<button type="button" data-act="undo">Undo</button>' : '') + '</div>' : '') + '</div>';
+    const nsc = root.querySelector(".scroll");
+    if (nsc) nsc.scrollTop = keep ? top : 0;
+  }
+  function toast(msg, undo) { S.toast = msg; S.undo = undo || null; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; S.undo = null; render(); }, 5000); }
+  const focusSoon = sel => setTimeout(() => { const el = root.querySelector(sel); if (el) { el.focus(); if (el.select) el.select(); } }, 30);
+
+  function newDraft() {
+    const now = new Date();
+    let t = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate(), now.getHours(), now.getMinutes());
+    t = new Date(t.getTime() - 60 * 60000);
+    t.setMinutes(Math.floor(t.getMinutes() / 5) * 5);
+    const h = t.getHours();
+    return { id: null, name: h < 12 ? "Morning workout" : h < 17 ? "Afternoon workout" : "Evening workout", routine: null, start: t, dur: 60, exercises: [] };
+  }
+  function lastTrainedDay(month) {
+    const ws = alive().filter(w => w.start.getFullYear() === month.getFullYear() && w.start.getMonth() === month.getMonth());
+    return ws.length ? Math.max(...ws.map(w => w.start.getDate())) : null;
+  }
+  const blankSets = n => Array.from({ length: n }, () => ({ id: uid++, type: "n", kg: "", reps: "" }));
+
+  root.addEventListener("click", ev => {
+    const t = ev.target.closest("[data-act]");
+    if (!t) return;
+    let keep = true;
+    const E = S.edit;
+    switch (t.dataset.act) {
+      case "open": S.backTo = S.view === "calendar" ? "calendar" : "list"; S.view = "detail"; S.detail = t.dataset.id; keep = false; break;
+      case "back": S.view = S.backTo || "list"; S.detail = null; keep = false; break;
+      case "calendar": S.view = "calendar"; S.calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); S.calDay = lastTrainedDay(S.calMonth); keep = false; break;
+      case "cal-close": S.view = "list"; keep = false; break;
+      case "cal-prev": case "cal-next": {
+        const dir = t.dataset.act === "cal-prev" ? -1 : 1;
+        S.calMonth = new Date(S.calMonth.getFullYear(), S.calMonth.getMonth() + dir, 1);
+        S.calDay = lastTrainedDay(S.calMonth);
+        break;
+      }
+      case "cal-day": S.calDay = +t.dataset.d; break;
+      case "expand": { const id = t.dataset.id; S.expanded = S.expanded.includes(id) ? S.expanded.filter(x => x !== id) : S.expanded.concat(id); break; }
+      case "filters": S.sheet = { kind: "filters" }; break;
+      case "sheet-close": S.sheet = null; break;
+      case "f-r": { const v = t.dataset.v; S.routines = S.routines.includes(v) ? S.routines.filter(x => x !== v) : S.routines.concat(v); break; }
+      case "f-reset": S.routines = []; break;
+      case "unchip": S.routines = S.routines.filter(x => x !== t.dataset.v); break;
+      case "wmenu": S.sheet = { kind: "wmenu" }; break;
+      case "edit": { const w = DATA.find(x => x.id === S.detail); S.edit = { draft: clone(w), origId: w.id, isNew: false, dirty: false }; S.sheet = null; keep = false; break; }
+      case "repeat": S.sheet = null; toast("New workout started with the same exercises. In the app this opens the workout screen."); break;
+      case "save-routine": S.sheet = { kind: "save-routine" }; render(); focusSoon("#r-name"); return;
+      case "routine-save": { const n = root.querySelector("#r-name").value.trim() || "New routine"; S.sheet = null; toast('Routine "' + esc(n) + '" saved'); break; }
+      case "del-open": S.sheet = { kind: "delete" }; break;
+      case "del-confirm": { const w = DATA.find(x => x.id === S.detail); w.deleted = true; S.sheet = null; S.view = "list"; S.detail = null; keep = false; toast("Workout deleted", w.id); break; }
+      case "undo": { const w = DATA.find(x => x.id === S.undo); if (w) w.deleted = false; S.toast = null; S.undo = null; clearTimeout(toastTimer); break; }
+      case "log-new": S.edit = { draft: newDraft(), origId: null, isNew: true, dirty: false, from: "" }; keep = false; break;
+      case "from": {
+        const r = t.dataset.r; E.from = r; E.dirty = true;
+        if (!r) { E.draft.exercises = []; E.draft.routine = null; const nd = newDraft(); E.draft.name = nd.name; }
+        else { E.draft.routine = r; E.draft.name = ROUT[r].name; E.draft.exercises = ROUT[r].ex.map(([id, n]) => ({ exId: id, note: "", sets: blankSets(n).map((s, i) => (i === 0 && EX[id].warm ? Object.assign(s, { type: "w" }) : s)) })); }
+        break;
+      }
+      case "edit-cancel": if (E.dirty) { S.sheet = { kind: "discard" }; break; } S.edit = null; keep = false; break;
+      case "discard-confirm": S.edit = null; S.sheet = null; keep = false; break;
+      case "edit-save": {
+        const d = E.draft;
+        const bad = [];
+        if (d.start > new Date(TODAY.getTime() + DAY - 1)) bad.push("#e-date");
+        if (!(d.dur >= 1 && d.dur <= 720)) bad.push("#e-h", "#e-m");
+        d.exercises.forEach((ex, i) => ex.sets.forEach((s, j) => {
+          const ph = placeholder(ex, j, d.start, E.origId) || {};
+          if (!EX[ex.exId].r) { if (String(s.kg ?? "").trim() === "" && ph.kg !== undefined && ph.kg !== null && ph.kg !== "") s.kg = ph.kg; if (parseKg(s.kg ?? "") === null) bad.push('[data-f="kg"][data-ex="' + i + '"][data-set="' + j + '"]'); else s.kg = parseKg(s.kg); }
+          if (String(s.reps ?? "").trim() === "" && ph.reps) s.reps = ph.reps;
+          if (parseReps(s.reps ?? "") === null) bad.push('[data-f="reps"][data-ex="' + i + '"][data-set="' + j + '"]'); else s.reps = parseReps(s.reps);
+        }));
+        if (bad.length) {
+          render();
+          bad.forEach(sel => { const el = root.querySelector(sel); if (el) { el.classList.add("need"); setTimeout(() => el.classList.remove("need"), 1500); } });
+          const first = root.querySelector(bad[0]); if (first) first.focus();
+          toast("Check the highlighted fields");
+          return;
+        }
+        d.exercises = d.exercises.filter(ex => ex.sets.length);
+        if (E.isNew) { d.id = "w" + uid++; d.deleted = false; DATA.push(d); DATA.sort((a, b) => b.start - a.start); S.view = "detail"; S.detail = d.id; }
+        else { const i = DATA.findIndex(x => x.id === E.origId); DATA[i] = Object.assign(d, { id: E.origId, deleted: false }); DATA.sort((a, b) => b.start - a.start); }
+        S.edit = null; keep = false; toast("Saved");
+        break;
+      }
+      case "setmenu": S.sheet = { kind: "setmenu", ex: +t.dataset.ex, set: +t.dataset.set }; break;
+      case "set-type": E.draft.exercises[S.sheet.ex].sets[S.sheet.set].type = t.dataset.t; E.dirty = true; S.sheet = null; break;
+      case "set-del": E.draft.exercises[S.sheet.ex].sets.splice(S.sheet.set, 1); E.dirty = true; S.sheet = null; break;
+      case "add-set": E.draft.exercises[+t.dataset.ex].sets.push({ id: uid++, type: "n", kg: "", reps: "" }); E.dirty = true; break;
+      case "exmenu": S.sheet = { kind: "exmenu", ex: +t.dataset.ex }; break;
+      case "note-open": S.sheet = { kind: "note", ex: S.sheet.ex }; render(); focusSoon("#n-inp"); return;
+      case "note-save": E.draft.exercises[S.sheet.ex].note = root.querySelector("#n-inp").value.trim(); E.dirty = true; S.sheet = null; break;
+      case "ex-remove": E.draft.exercises.splice(S.sheet.ex, 1); E.dirty = true; S.sheet = null; break;
+      case "picker": S.pickSel = []; S.sheet = { kind: "picker" }; break;
+      case "pk": {
+        const id = t.dataset.id; S.pickSel = S.pickSel.includes(id) ? S.pickSel.filter(x => x !== id) : S.pickSel.concat(id);
+        t.setAttribute("aria-pressed", String(S.pickSel.includes(id)));
+        const b = root.querySelector("#pk-add"); b.disabled = !S.pickSel.length; b.textContent = S.pickSel.length ? "Add " + S.pickSel.length : "Select exercises";
+        return;
+      }
+      case "pk-add": S.pickSel.forEach(id => E.draft.exercises.push({ exId: id, note: "", sets: blankSets(3) })); E.dirty = true; S.sheet = null; break;
+      case "nav": if (t.dataset.to !== "history") toast("Other tabs have their own prototypes."); break;
+      case "toast": S.sheet = null; toast(t.dataset.msg); break;
+      default: return;
+    }
+    render(keep);
+  });
+
+  root.addEventListener("input", ev => {
+    const el = ev.target;
+    if (el.id === "q") {
+      S.q = el.value;
+      const tmp = document.createElement("div"); tmp.innerHTML = listView();
+      root.querySelector("#list-body").innerHTML = tmp.querySelector("#list-body").innerHTML;
+      return;
+    }
+    if (!S.edit) return;
+    const d = S.edit.draft;
+    if (el.classList.contains("inp")) { d.exercises[+el.dataset.ex].sets[+el.dataset.set][el.dataset.f] = el.value; S.edit.dirty = true; return; }
+    const k = el.dataset.d; if (!k) return;
+    S.edit.dirty = true;
+    if (k === "name") d.name = el.value;
+    if (k === "date" && el.value) { const [y, m, dd] = el.value.split("-").map(Number); d.start = new Date(y, m - 1, dd, d.start.getHours(), d.start.getMinutes()); }
+    if (k === "time" && el.value) { const [hh, mm] = el.value.split(":").map(Number); d.start = new Date(d.start.getFullYear(), d.start.getMonth(), d.start.getDate(), hh, mm); }
+    if (k === "h" || k === "m") { const h = parseInt(root.querySelector("#e-h").value, 10) || 0, m = parseInt(root.querySelector("#e-m").value, 10) || 0; d.dur = h * 60 + m; }
+  });
+  root.addEventListener("change", ev => { if (S.edit && (ev.target.id === "e-date" || ev.target.id === "e-time")) render(); });
+  root.addEventListener("keydown", ev => {
+    if (ev.key === "Escape" && S.sheet) { S.sheet = null; render(); return; }
+    if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('.wcard[role="button"]')) { ev.preventDefault(); ev.target.click(); }
+  });
+  document.querySelectorAll("[data-cs]").forEach(b => b.addEventListener("click", () => {
+    cardStyle = b.dataset.cs;
+    document.querySelectorAll("[data-cs]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    render(false);
+  }));
+
+  const tD = document.getElementById("th-dark"), tL = document.getElementById("th-light");
+  tD.addEventListener("click", () => { mode = "dark"; tD.setAttribute("aria-pressed", "true"); tL.setAttribute("aria-pressed", "false"); render(); });
+  tL.addEventListener("click", () => { mode = "light"; tL.setAttribute("aria-pressed", "true"); tD.setAttribute("aria-pressed", "false"); render(); });
+  document.getElementById("reset").addEventListener("click", () => { reset(); render(false); });
+
+  render(false);
+})();
+</script>

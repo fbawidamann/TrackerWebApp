@@ -22,7 +22,7 @@ Clickable prototype: [Home screen prototype](https://claude.ai/artifact/FahzKjEe
 │ │ Pull Day …                        │ │
 │ └──────────────────────────────────┘ │
 │ RECENT                      History  │
-│ ┌ card: 3 workouts ────────────────┐ │  tap → workout detail
+│ ┌ card: 3 workouts (no volume) ────┐ │  tap → workout detail
 │ └──────────────────────────────────┘ │
 │ LATEST PRS                           │
 │ ┌ card: 3 records ─────────────────┐ │  tap → exercise detail
@@ -68,7 +68,7 @@ There is no "This week" card and no greeting or filler text.
 
 ## Recent
 - Label `RECENT`, with a **History** link on the right.
-- Shows the **3 latest completed workouts**. Each row has the name, and a meta line with the relative date, duration and volume, e.g. `Today · 58 min · 9 840 kg`.
+- Shows the **3 latest completed workouts**. Each row has the name, and a meta line with the relative date and duration, e.g. `Today · 58 min`. There is no volume (decided 2026-09-30).
   - A medal icon appears when the workout set a PR.
   - Relative dates: `Today`, `Yesterday`, the weekday within the last 7 days, otherwise `22 Sep`.
 - Tapping a row opens the **workout detail** (History).

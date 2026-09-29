@@ -88,8 +88,8 @@ Font: **IBM Plex Sans** (400/500/600), with `font-variant-numeric: tabular-nums`
 `card-bg` fill, 1 px `card-border`, 14 px radius, no shadow. One card per exercise in workout detail and active workout. Home lists (routines, recent) and the week summary also use cards.
 
 ### Workout summary (detail screen)
-- Three stat tiles in one card: **Duration · Volume · PRs**, with value on top and label below, separated by `card-divider` lines.
-- Tile widths follow their content (for example `grid-template-columns: auto 1fr auto`, or reduced side padding) so that large values like `12 900 kg` fit **without shrinking or wrapping**.
+- Three stat tiles in one card: **Duration · Sets · PRs**, with value on top and label below, separated by `card-divider` lines. **No volume anywhere in the UI** (decided 2026-09-30); volume may appear only in future stats pages.
+- Tile widths follow their content, so values never shrink or wrap.
 
 ### Exercise block (detail)
 - Header: the exercise name, with the equipment on a second line (13 px, muted); "4 sets" on the right.

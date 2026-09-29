@@ -98,7 +98,7 @@ While the active workout screen is open, the app requests a screen **wake lock**
 3. The workout is saved: `status = completed`, `endedAt = now`, and sync is triggered.
 4. A **summary screen** shows:
    - The title, date and duration.
-   - Volume and number of sets.
+   - Tiles **Duration · Sets · PRs** (no volume, decided 2026-09-30).
    - **New PRs** with the medal icon: "Bench Press · 82.5 kg (was 80 kg)".
    - The exercises list, compact.
    - If the workout came from a routine and differs from it (exercises added/removed/reordered, or a different number of sets): "**Update Push Day with these changes?**" → *Update routine* / *Keep routine*.

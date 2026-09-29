@@ -29,6 +29,15 @@ Status: agreed on 2026-09-29.
 - A Start button, or a Resume card while a workout is running.
 - Routines (tap → preview → Start), the 3 most recent workouts, and the 3 latest PRs.
 
+### History (details in [design/screens/history.md](design/screens/history.md))
+- Workouts grouped by week (`THIS WEEK · 2 workouts`). Each card shows the name, date, duration and a PR medal, then the exercise names as one calm line (max 2 lines). Numbers appear only for PRs (`Bench Press  82.5 kg`).
+- **No volume shown anywhere** in the workout UI (list, detail, Home, finish summary).
+- Search by exercise name, and filter by routine (including Freeform).
+- A calendar (icon in the History header) marks training days with a small blue dot. Tapping a day shows that day's workouts.
+- Workout detail actions: Edit, Repeat, Save as routine, Delete (with Undo).
+- Edit mode uses the logging layout without ✓ and can change the name, date, start time, duration and notes.
+- Workouts can be logged afterwards ("Log past workout").
+
 ### Routines
 - Create and edit routines: an ordered list of exercises with planned sets (optional target reps/weight).
 - A finished workout can be saved as a new routine.
