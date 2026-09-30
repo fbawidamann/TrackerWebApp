@@ -30,7 +30,7 @@ Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation change
 ## Phase 1b: Backend and sync
 - [ ] **M7: Backend**: Postgres (Docker), Drizzle schema + migrations, Hono API, Better Auth (email + password), login/register screens
 - [ ] **M8: Sync**: push/pull endpoints, sync engine, re-own local data at first login
-- [ ] **M9: Deploy**: Docker Compose on the VPS behind the existing Traefik: `app` container (Hono + frontend), `db` container (Postgres), nightly backups, deploy from GitHub Actions ([ADR 0004](adr/0004-deployment.md)). The `app` container can go live before M7 as frontend-only
+- [ ] **M9: Deploy**: Docker Compose on the VPS behind the existing Traefik ([ADR 0004](adr/0004-deployment.md)). **Done 2026-10-01:** the `app` container is live at https://tracker.fbawidamannserver.cloud (deployed by the VPS agent Hermes, built on the VPS). Still open: the `db` container (with M7), nightly backups, automatic deploys
 
 ## Phase 2: Running and swimming
 - [ ] Plan in detail (manual entry; GPX import?); follow the `add-activity-type` skill

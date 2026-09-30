@@ -1,6 +1,8 @@
 # Runs behind the existing Traefik on the VPS (docs/adr/0004-deployment.md).
+# Traefik on this VPS runs with network_mode: host, so there is no Traefik Docker network:
+# the app publishes its port on 127.0.0.1 only, and Traefik forwards to that loopback address.
 # Settings come from .env (copy .env.example → .env and fill in).
-# M7 will add a "db" service (postgres:17) on a private network here.
+# M7 will add a "db" service (postgres:17) on the default Compose network, reachable as "db", with no published port.
 
 services:
   app:
@@ -8,18 +10,13 @@ services:
     image: fitness-tracker-app:latest
     container_name: fitness-app
     restart: unless-stopped
-    networks:
-      - proxy
+    ports:
+      - "127.0.0.1:${APP_HOST_PORT}:3000"   # loopback only, not reachable from outside
     labels:
       - traefik.enable=true
-      - traefik.docker.network=${TRAEFIK_NETWORK}
       - traefik.http.routers.fitness.rule=Host(`${APP_DOMAIN}`)
-      - traefik.http.routers.fitness.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.fitness.entrypoints=${TRAEFIK_ENTRYPOINTS}
       - traefik.http.routers.fitness.tls=true
       - traefik.http.routers.fitness.tls.certresolver=${TRAEFIK_CERTRESOLVER}
-      - traefik.http.services.fitness.loadbalancer.server.port=3000
-
-networks:
-  proxy:
-    external: true
-    name: ${TRAEFIK_NETWORK}
+      - traefik.http.routers.fitness.middlewares=secure-headers@file
+      - traefik.http.services.fitness.loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}

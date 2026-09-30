@@ -43,6 +43,8 @@ git clone git@github-fitness:fbawidamann/TrackerWebApp.git /opt/fitness-tracker
 ```
 Never ask for or store Florian's GitHub password or personal tokens.
 
+> **Status (2026-10-01): deployed and live.** Hermes' findings are now in the repo: Traefik on this VPS runs with `network_mode: host`, so the app publishes on `127.0.0.1:${APP_HOST_PORT}` and Traefik forwards to `loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}`. The entrypoints are `web,websecure`, and the middleware is `secure-headers@file`. `docker-compose.yml` and `.env.example` in the repo match the running setup. Steps 2–4 below were for the first deployment. For updates, see "Updating later".
+
 ### 2. Read the existing Traefik setup (read-only)
 Find these values, but do **not** change the Traefik configuration:
 - **Network:** the Docker network Traefik uses to reach containers (`docker inspect <traefik-container>` → Networks, or look at another service it routes to).
@@ -82,14 +84,16 @@ Also check that `http://` redirects to `https://` the same way it does for the o
 ## Updating later
 ```bash
 cd /opt/fitness-tracker
-git pull                      # or Florian copies the new folder
+git checkout -- docker-compose.yml   # only the first time: your local edit is now committed in the repo
+git pull
 docker compose up -d --build
-docker image prune -f         # removes dangling old images only
+docker image prune -f                # removes dangling old images only
 ```
+`.env` stays as it is (it's git-ignored). If `.env.example` gains new variables, add them to `.env`.
 
 ## Please don't
 - Change Traefik's own configuration, or touch other containers or their networks.
-- Publish port 3000 (or any port) on the host. Only Traefik may reach the container.
+- Publish any port on a public interface. The app port is bound to `127.0.0.1` only, and only Traefik (host network) reaches it.
 - Commit `.env` anywhere, or put secrets into the repo.
 - Run `docker system prune -a --volumes`, or delete any volumes. Later the database volume will hold Florian's data.
 

@@ -33,7 +33,12 @@ The trade-off is that the frontend and API are always deployed together. That's 
 ## Order
 The **app** container can go live **before the backend exists** (M9 before M7): it then serves only the static frontend, which gives HTTPS and real offline use on the iPhone right away. The **db** container and the `/api` routes are added with M7.
 
+## Actual VPS setup (found by Hermes at first deploy, 2026-10-01)
+- Traefik runs with **`network_mode: host`**, so there is no Traefik Docker network. The `app` container publishes its port on **`127.0.0.1:${APP_HOST_PORT}`** only (e.g. 63255), and the router uses `loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}`.
+- Entrypoints: `web,websecure` (HTTP → HTTPS redirect with 301). Middleware: `secure-headers@file` (HSTS, X-Frame-Options, nosniff), the same as the other sites on the VPS. Let's Encrypt uses the HTTP-01 challenge on port 80.
+- **For M7:** the `db` service stays on the default Compose network with **no published port**. `app` reaches it as `db:5432`, because `app` itself is not in host network mode. Protect the database volume from any cleanup commands.
+
 ## Consequences
 - There is no Caddy in the stack.
-- The Compose file needs the Traefik network name and certresolver name used on the user's VPS. They're filled in when M9 is built.
+- Compose settings live in `.env` on the VPS (template: `.env.example`).
 - The exercise images (~100 MB) are baked into the app image at build time (`npm run catalog:images` in the Dockerfile), not committed to Git.
