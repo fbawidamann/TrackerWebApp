@@ -1,0 +1,25 @@
+# Runs behind the existing Traefik on the VPS (docs/adr/0004-deployment.md).
+# Settings come from .env (copy .env.example → .env and fill in).
+# M7 will add a "db" service (postgres:17) on a private network here.
+
+services:
+  app:
+    build: .
+    image: fitness-tracker-app:latest
+    container_name: fitness-app
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK}
+      - traefik.http.routers.fitness.rule=Host(`${APP_DOMAIN}`)
+      - traefik.http.routers.fitness.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.fitness.tls=true
+      - traefik.http.routers.fitness.tls.certresolver=${TRAEFIK_CERTRESOLVER}
+      - traefik.http.services.fitness.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    external: true
+    name: ${TRAEFIK_NETWORK}

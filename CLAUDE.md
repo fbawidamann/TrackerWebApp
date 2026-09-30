@@ -20,7 +20,8 @@ TypeScript everywhere, npm workspaces, Node 24:
 ```
 apps/web         React 19 + Vite 8, TanStack Router (code-based, src/app/router.tsx), plain CSS with design tokens
                  (src/styles/app.css), custom SVG chart, Dexie + dexie-react-hooks, vite-plugin-pwa
-apps/api         Hono (Node), Drizzle ORM, Better Auth (email + password)   (milestone M7, not started)
+apps/api         Hono (Node): today serves the built frontend + /api/health (Docker app container);
+                 M7 adds Drizzle ORM, Better Auth (email + password), sync endpoints
 packages/shared  Zod 4 schemas + types, IDs (uuid v7/v5), formatting (settings-aware), metrics (PRs, e1RM),
                  exercise catalog JSON (data/) + import script (scripts/)
 docs/            requirements, architecture, ADRs, design specs, prototypes, roadmap
@@ -40,6 +41,10 @@ npx vitest run -t "detects heaviest-weight"   # single test by name
 npm run catalog:import               # regenerate packages/shared/data/exercises.json from free-exercise-db
 npm run icons -w @fitness/web        # regenerate PWA icons
 ```
+
+## Deployment
+
+`Dockerfile` + `docker-compose.yml` (root) build one `app` container behind the VPS's existing Traefik; settings in `.env` (template `.env.example`). The VPS agent "Hermes" deploys it following `ForHermesInstruction.md`. Keep that file in sync when the deployment changes.
 
 ## Code map (apps/web/src)
 

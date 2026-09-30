@@ -31,5 +31,8 @@ Note: the offline mode (service worker) only works over HTTPS or on `localhost`.
 | `npm run catalog:import` | Regenerate the exercise catalog from free-exercise-db |
 | `npm run catalog:images` | Download the exercise images into `apps/web/public/exercise-images` |
 
+## Deploy
+The app runs as one Docker container behind Traefik on the VPS: see [`ForHermesInstruction.md`](ForHermesInstruction.md), `Dockerfile` and `docker-compose.yml`. Test the container server locally with `npm run build -w @fitness/web && npm run build -w @fitness/api`, then `STATIC_ROOT=../web/dist npm start -w @fitness/api` (port 3000).
+
 ## Docs
 Planning, design specs and decisions live in [`docs/`](docs/README.md). Clickable design prototypes: [`docs/design/prototypes/`](docs/design/prototypes/README.md).
