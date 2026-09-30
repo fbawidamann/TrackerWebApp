@@ -14,7 +14,7 @@ The order is deliberate: the app is fully usable offline on one device after **M
   - [x] Routines (list, editor, starter routines)
   - [x] Profile / Settings (personalization, backup)
   - [ ] Stats (desktop) (deferred: charts already live in the exercise detail)
-  - [ ] Login / Register (planned together with the backend, M7)
+  - [x] Login (no registration; the admin creates accounts) + admin Users screen (M7, [login.md](design/screens/login.md), [admin-users.md](design/screens/admin-users.md))
 
 ## Phase 1: Gym (frontend, local-only)
 - [x] **M0: Scaffold**: npm workspaces monorepo, TypeScript, ESLint, Vitest, Vite + design-token CSS, TanStack Router, app shell (bottom nav / desktop sidebar, theme), CI workflow file
@@ -28,9 +28,9 @@ The order is deliberate: the app is fully usable offline on one device after **M
 Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation changes). Not done yet: the desktop master–detail layouts (low priority), and pushing the CI workflow to GitHub (repo: github.com/fbawidamann/TrackerWebApp).
 
 ## Phase 1b: Backend and sync
-- [ ] **M7: Backend**: Postgres (Docker), Drizzle schema + migrations, Hono API, Better Auth (email + password), login/register screens
-- [ ] **M8: Sync**: push/pull endpoints, sync engine, re-own local data at first login
-- [ ] **M9: Deploy**: Docker Compose on the VPS behind the existing Traefik ([ADR 0004](adr/0004-deployment.md)). **Done 2026-10-01:** the `app` container is live at https://tracker.fbawidamannserver.cloud (deployed by the VPS agent Hermes, built on the VPS). Still open: the `db` container (with M7), nightly backups, automatic deploys
+- [x] **M7: Backend** (built 2026-09-30): Postgres 17 (PGlite locally), Drizzle schema + migrations, Hono API, custom session auth with username + password, admin user management, CLI ([ADR 0005](adr/0005-backend-auth-and-sync.md))
+- [x] **M8: Sync** (built 2026-09-30): push/pull endpoints (generic `records` table), sync engine with outbox, re-own local data at first login, logout wipe
+- [ ] **M9: Deploy**: Docker Compose on the VPS behind the existing Traefik ([ADR 0004](adr/0004-deployment.md)). **Done 2026-10-01:** the `app` container is live at https://tracker.fbawidamannserver.cloud (deployed by the VPS agent Hermes, built on the VPS). M7 update (db container, admin, nightly backups): instructions in `ForHermesInstruction.md`. Still open: automatic deploys
 
 ## Phase 2: Running and swimming
 - [ ] Plan in detail (manual entry; GPX import?); follow the `add-activity-type` skill

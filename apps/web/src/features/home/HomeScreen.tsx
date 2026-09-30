@@ -2,7 +2,7 @@ import { formatClock, formatDuration, MONTHS, WEEKDAYS } from "@fitness/shared";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { updateSettings } from "@/db/actions";
-import { lastDoneByRoutine, useActiveWorkout, useCatalog, useRoutines, useSettings, useTraining, type RoutineView } from "@/data/hooks";
+import { lastDoneByRoutine, useAccount, useActiveWorkout, useCatalog, useRoutines, useSettings, useTraining, type RoutineView } from "@/data/hooks";
 import { RoutinePreview } from "@/features/routines/RoutinePreview";
 import { StarterRoutines } from "@/features/routines/StarterRoutines";
 import { useStarter } from "@/features/workout/useStarter";
@@ -14,6 +14,7 @@ import { RadioSheet } from "@/ui/Sheet";
 
 export function HomeScreen() {
   const settings = useSettings();
+  const account = useAccount();
   const training = useTraining();
   const routines = useRoutines();
   const active = useActiveWorkout();
@@ -39,7 +40,7 @@ export function HomeScreen() {
       <div style={{ display: "grid", gap: 14 }}>
         <div>
           {/* Username at the very top (docs/design/screens/home.md). Until accounts exist (M7) this is the Profile name. */}
-          {settings.displayName && <p className="home-user">{settings.displayName}</p>}
+          {(account?.username ?? settings.displayName) && <p className="home-user">{account?.username ?? settings.displayName}</p>}
           <h1 className="title">{WEEKDAYS[today.getDay()]}</h1>
           <p className="sub" style={{ marginTop: 2 }}>{today.getDate()} {MONTHS[today.getMonth()]}</p>
         </div>

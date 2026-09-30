@@ -8,13 +8,14 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @fitness/web",
-    "build": "npm run build -w @fitness/web",
+    "build": "npm run build -w @fitness/web && npm run build -w @fitness/api",
     "preview": "npm run preview -w @fitness/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint .",
     "catalog:import": "npm run catalog:import -w @fitness/shared",
-    "catalog:images": "npm run catalog:images -w @fitness/shared"
+    "catalog:images": "npm run catalog:images -w @fitness/shared",
+    "dev:api": "npm run dev -w @fitness/api"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

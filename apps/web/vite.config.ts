@@ -9,6 +9,9 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
+  // Local development: the API runs on :3000 (npm run dev:api), the app on :5173.
+  server: { proxy: { "/api": "http://localhost:3000" } },
+  preview: { proxy: { "/api": "http://localhost:3000" } },
   plugins: [
     react(),
     VitePWA({

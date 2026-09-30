@@ -413,3 +413,60 @@ html[data-nav="active"] .nav a:not(.on) span { visibility: hidden; }
 .plain { max-width: 640px; margin: 0 auto; padding-bottom: calc(var(--nav-h) + var(--safe-b) + 110px); }
 .plain-head { padding: calc(var(--safe-t) + 12px) 20px 0; }
 .home-user { margin: 0 0 6px; font-size: calc(15px + var(--d)); font-weight: 600; color: var(--acc-text); }
+
+/* ---------- Login (docs/design/screens/login.md) ---------- */
+.login { position: relative; min-height: 100dvh; max-width: 440px; margin: 0 auto; display: grid; align-content: start; gap: 26px; padding: calc(var(--safe-t) + 64px) 24px calc(var(--safe-b) + 32px); isolation: isolate; }
+.login::before { content: ""; position: absolute; z-index: -1; left: 50%; top: calc(var(--safe-t) - 40px); width: 460px; height: 380px; transform: translateX(-50%); background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 26%, transparent), transparent); pointer-events: none; }
+html[data-mode="light"] .login::before { background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 18%, transparent), transparent); }
+.brand-block { display: grid; justify-items: center; gap: 14px; margin-bottom: 10px; }
+.appicon { width: 88px; height: 88px; border-radius: 20px; overflow: hidden; box-shadow: 0 22px 44px -16px color-mix(in oklab, var(--acc) 55%, transparent), 0 10px 24px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06); animation: pop .6s cubic-bezier(.2,.8,.2,1) both; }
+.appicon svg { width: 100%; height: 100%; display: block; }
+.icon-arc { stroke-dasharray: 152 189; }
+.icon-arc.draw { animation: draw 1.1s .15s cubic-bezier(.3,.7,.2,1) both; }
+.brand-block h1 { margin: 0; font-size: calc(26px + var(--d)); font-weight: 600; letter-spacing: -.01em; }
+.brand-block p { margin: -8px 0 0; font-size: calc(14px + var(--d)); color: var(--muted); }
+.login form { animation: rise .5s .15s ease both; }
+.field-wrap { position: relative; }
+.field.pw { padding-right: 52px; }
+.eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+.err { margin: 0; font-size: calc(14px + var(--d)); color: var(--danger); }
+.pw-rules { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 2px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.pw-rules li { display: inline-flex; align-items: center; gap: 5px; }
+.pw-rules li svg { width: 14px; height: 14px; opacity: .35; }
+.pw-rules li.ok { color: var(--acc-text); }
+.pw-rules li.ok svg { opacity: 1; }
+.gen { font-size: 14px; font-weight: 600; color: var(--acc-text); padding: 4px 0; justify-self: start; }
+
+/* ---------- Busy overlay (ring from the app icon) ---------- */
+.busy { position: fixed; inset: 0; z-index: 90; background: var(--bg); display: grid; place-items: center; align-content: center; gap: 10px; text-align: center; padding: 24px; isolation: isolate; animation: fade .2s ease both; }
+.busy::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: 380px; height: 380px; transform: translate(-50%, -62%); background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 20%, transparent), transparent); }
+.ring { width: 96px; height: 96px; margin-bottom: 10px; overflow: visible; }
+.ring .track { stroke: var(--raised); }
+.ring .arc { stroke: var(--acc); filter: drop-shadow(0 0 5px color-mix(in oklab, var(--acc) 70%, transparent)); transform-origin: 50px 50px; }
+.ring.spin .arc { stroke-dasharray: 70 251; animation: spin 1.1s linear infinite; }
+.ring.fill .arc { stroke-dasharray: 251 251; transform: rotate(-90deg); animation: fillring 1.4s cubic-bezier(.4,0,.2,1) both; }
+.ring .db { fill: var(--text); }
+.busy b { font-size: calc(18px + var(--d)); font-weight: 600; }
+
+/* ---------- Account section ---------- */
+.acct { display: grid; gap: 2px; padding: 16px 0 14px; }
+.acct .name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: calc(17px + var(--d)); font-weight: 600; }
+.status-line { font-size: calc(14px + var(--d)); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+.sdot.ok { background: var(--acc); }
+.sdot.warn { background: var(--danger); }
+.retry { color: var(--acc-text); font-weight: 600; font-size: 14px; }
+.row.danger { color: var(--danger); }
+.acct + .row { border-top: 1px solid var(--card-div); }
+.tag.acc { color: var(--acc-text); border-color: color-mix(in oklab, var(--acc) 50%, transparent); }
+.li.disabled .li-name > span:first-child { color: var(--muted); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes draw { from { stroke-dashoffset: 152; } to { stroke-dashoffset: 0; } }
+@keyframes fillring { from { stroke-dashoffset: 251; } to { stroke-dashoffset: 0; } }
+@keyframes pop { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .appicon, .icon-arc.draw, .login form, .busy, .ring.fill .arc { animation: none; }
+  .ring.spin .arc { animation-duration: 3s; }
+}

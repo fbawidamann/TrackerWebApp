@@ -1,6 +1,6 @@
 # Screen: Users (admin)
 
-Status: **draft for prototype review** (2026-10-01). Only visible to accounts with role `admin` (`LegendFLOO`). It's reached from Profile → Account → **Users**.
+Status: **approved and built** (M7). Only visible to accounts with role `admin` (`LegendFLOO`). It's reached from Profile → Account → **Users**.
 Prototype: [10-login-admin.html](../prototypes/10-login-admin.html) ([online](https://claude.ai/artifact/VdRJ6tfNa4bLbjCRhpw2zX)).
 
 ## List

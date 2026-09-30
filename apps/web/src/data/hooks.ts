@@ -108,3 +108,24 @@ export function lastDoneByRoutine(training: Training): Map<string, Date> {
   }
   return out;
 }
+
+/* ---------- Account and sync (M7/M8) ---------- */
+
+/** The logged-in account on this device: undefined while loading, null when logged out. */
+export function useAccount(): import("@fitness/shared").Account | null | undefined {
+  return useLiveQuery(async () => ((await db.meta.get("account"))?.value as import("@fitness/shared").Account | undefined) ?? null, []);
+}
+
+export function useSessionExpired(): boolean {
+  return useLiveQuery(async () => !!(await db.meta.get("sessionExpired"))?.value, []) ?? false;
+}
+
+export interface SyncView { state: "idle" | "syncing"; lastSyncAt: string | null; error: "offline" | "failed" | null; pending: number }
+
+export function useSyncStatus(): SyncView {
+  return useLiveQuery(async () => {
+    const s = ((await db.meta.get("sync"))?.value as Omit<SyncView, "pending"> | undefined) ?? { state: "idle" as const, lastSyncAt: null, error: null };
+    const entries = await db.outbox.toArray();
+    return { ...s, pending: new Set(entries.map((e) => e.table + "|" + e.rowId)).size };
+  }, []) ?? { state: "idle", lastSyncAt: null, error: null, pending: 0 };
+}

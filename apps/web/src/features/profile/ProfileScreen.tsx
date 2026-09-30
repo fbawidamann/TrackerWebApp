@@ -2,9 +2,10 @@ import { ACCENTS as ACCENT_KEYS, formatClock, MONTHS, WEIGHT_STEPS_KG, weightSte
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { ACCENTS } from "@/app/theme";
 import { exportBackup, importBackup, parseBackup, updateDeviceSettings, updateSettings, type ParsedBackup } from "@/db/actions";
-import { useDeviceSettings, useSettings, useTraining } from "@/data/hooks";
+import { useAccount, useDeviceSettings, useSettings, useTraining } from "@/data/hooks";
 import { useFormat } from "@/lib/useFormat";
-import { IconCheck, IconChevron, IconExternal, IconPhone } from "@/ui/icons";
+import { IconCheck, IconChevron, IconExternal } from "@/ui/icons";
+import { AccountSection } from "./AccountSection";
 import { RadioSheet, Sheet, TextSheet } from "@/ui/Sheet";
 import { useToast } from "@/ui/Toast";
 
@@ -12,6 +13,7 @@ type Picker = "goal" | "weekStart" | "defaultSets" | "step" | "rest" | "theme" |
 
 export function ProfileScreen() {
   const s = useSettings();
+  const account = useAccount();
   const device = useDeviceSettings();
   const training = useTraining();
   const fmt = useFormat();
@@ -86,9 +88,11 @@ export function ProfileScreen() {
   return (
     <div className="page">
       <div>
-        <button type="button" onClick={() => setRename(true)} aria-label="Change name" style={{ display: "block", textAlign: "left" }}>
-          <h1 className="title" style={s.displayName ? undefined : { color: "var(--muted)" }}>{s.displayName || "Your name"}</h1>
-        </button>
+        {account ? <h1 className="title">{account.username}</h1> : (
+          <button type="button" onClick={() => setRename(true)} aria-label="Change name" style={{ display: "block", textAlign: "left" }}>
+            <h1 className="title" style={s.displayName ? undefined : { color: "var(--muted)" }}>{s.displayName || "Your name"}</h1>
+          </button>
+        )}
         {stats.first && <p className="sub">Training since {MONTHS[stats.first.getMonth()]} {stats.first.getFullYear()}</p>}
       </div>
       <div className="card stats eq">
@@ -97,10 +101,7 @@ export function ProfileScreen() {
         <div className="stat"><span className="stat-v">{stats.streak}<span className="u">{stats.streak === 1 ? "week" : "weeks"}</span></span><span className="lbl">Streak</span></div>
       </div>
 
-      <div className="sec">
-        <span className="lbl">Account</span>
-        <div className="card info"><IconPhone /><span><span style={{ display: "block", fontWeight: 500 }}>Saved on this device</span><span className="row-sub">Back up with Export backup</span></span></div>
-      </div>
+      <AccountSection />
 
       {section("Training", <>
         {pick("Weekly goal", s.weeklyGoal, "goal")}

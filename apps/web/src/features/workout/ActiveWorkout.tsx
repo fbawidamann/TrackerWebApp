@@ -7,6 +7,7 @@ import {
 } from "@/db/actions";
 import { useCatalog, useDeviceSettings, useRest, useSettings, useTraining, type ActiveWorkout as AW } from "@/data/hooks";
 import { ExercisePicker } from "@/features/exercises/ExercisePicker";
+import { syncNow } from "@/sync/engine";
 import { EQUIPMENT_LABEL } from "@/lib/labels";
 import { useNow, useWakeLock, vibrate } from "@/lib/time";
 import { useFormat } from "@/lib/useFormat";
@@ -56,6 +57,7 @@ export function ActiveWorkout({ workout }: { workout: AW }) {
   };
   const doFinish = async () => {
     await finishWorkout(activity.id);
+    void syncNow();
     void navigate({ to: "/workout/done/$activityId", params: { activityId: activity.id } });
   };
 

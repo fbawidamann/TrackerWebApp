@@ -28,3 +28,5 @@ export const IconHistory = make([<circle key="a" cx="12" cy="12" r="9" />, <path
 export const IconLift = make(<path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11" />);
 export const IconList = make(<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />);
 export const IconUser = make([<circle key="a" cx="12" cy="8" r="4" />, <path key="b" d="M4 21a8 8 0 0 1 16 0" />]);
+export const IconEye = make([<path key="a" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />, <circle key="b" cx="12" cy="12" r="3" />]);
+export const IconEyeOff = make(<path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A16.8 16.8 0 0 0 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6" />);

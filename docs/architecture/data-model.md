@@ -1,6 +1,16 @@
 # Data model
 
-The same model exists twice: in the browser (Dexie/IndexedDB) and on the server (PostgreSQL via Drizzle). The Zod schemas in `packages/shared` define it once for both.
+The model is defined once by the Zod schemas in `packages/shared`. The **browser** (Dexie/IndexedDB) stores it table by table. The **server** (PostgreSQL via Drizzle) does not repeat each table: it stores every synced row as JSONB in one generic `records` table, validated with the same schemas ([ADR 0005](../adr/0005-backend-auth-and-sync.md)).
+
+## Server tables (apps/api/src/db/schema.ts)
+
+| Table | Columns |
+|---|---|
+| `users` | `id` uuid, `username` (display form), `username_lower` unique, `password_hash` (scrypt), `role` `admin \| user`, `disabled_at`, `created_at`, `last_login_at`, `last_sync_at` |
+| `sessions` | `id` = SHA-256 of the cookie token, `user_id` → users (cascade), `created_at`, `expires_at`, `last_used_at`, `user_agent` |
+| `records` | `user_id` → users (cascade), `table_name`, `id`, `updated_at`, `deleted_at`, `server_version` (sequence `sync_version`), `data` jsonb. PK `(user_id, table_name, id)`, index `(user_id, server_version)` |
+
+The browser entities below are what `records.data` holds.
 
 ## Conventions
 
@@ -14,7 +24,7 @@ The same model exists twice: in the browser (Dexie/IndexedDB) and on the server 
   - `deleted_at`: soft delete, `null` = alive
 - **Server-only column**: `server_version bigint`, taken from a global sequence on every write and used as the sync cursor. See [sync.md](sync.md).
 - **Units**: kg, meters, seconds. Conversion happens only when displaying.
-- **Naming**: `snake_case` in Postgres, `camelCase` in TypeScript/Dexie (Drizzle maps them).
+- **Naming**: `camelCase` in the rows (also inside `records.data`); `snake_case` for the server's own columns.
 
 ## Entities
 

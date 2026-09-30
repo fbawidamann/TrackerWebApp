@@ -15,3 +15,6 @@ test-results/
 # Downloaded catalog images (npm run catalog:images)
 apps/web/public/exercise-images/
 dev-dist/
+
+# Local dev database (PGlite)
+apps/api/.data/

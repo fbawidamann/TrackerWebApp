@@ -11,7 +11,7 @@ Status: agreed on 2026-09-29.
 | Language | English UI only |
 | Devices | Phone in the gym (mobile-first, installable as a PWA); desktop mainly for stats and history |
 | Offline | Offline-first: logging must work fully without reception, and data syncs when online |
-| Login | Email + password (more methods possible later) |
+| Login | Username + password, no registration: the admin (LegendFLOO) creates accounts ([ADR 0005](adr/0005-backend-auth-and-sync.md)) |
 | Hosting | Own VPS with Docker Compose |
 | Code hosting / CI | GitHub + GitHub Actions |
 
@@ -84,7 +84,7 @@ Status: agreed on 2026-09-29.
   - **Units and formats:** kg/lb, decimal comma, date format.
   - **Home:** start screen, and which Home sections to show.
 - Data: export backup (JSON) and import backup (replace). No CSV, no delete-all.
-- Account: "Saved on this device" until the backend exists.
+- Account: username, sync status, Sync now, Change password, Log out; admins also see Users ([login.md](design/screens/login.md)).
 
 ## Design
 Dark by default + light theme. Plain and calm, not "AI style". Readability first. Details in [design/ui-guidelines.md](design/ui-guidelines.md).

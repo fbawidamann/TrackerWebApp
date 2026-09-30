@@ -1,4 +1,5 @@
-# Fitness Tracker: one "app" container (Hono serving /api + the built frontend). See docs/adr/0004-deployment.md
+# Fitness Tracker "app" container: Hono serving /api + the built frontend; data in the "db" (Postgres) container.
+# See docs/adr/0004-deployment.md and docs/adr/0005-backend-auth-and-sync.md
 
 # ---------- build ----------
 FROM node:24-alpine AS build
@@ -33,6 +34,8 @@ ENV NODE_ENV=production PORT=3000 STATIC_ROOT=/app/public
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=build /repo/apps/api/dist ./dist
 COPY --from=build /repo/apps/web/dist ./public
+# SQL migrations, applied automatically at start (found as ../drizzle next to dist)
+COPY --from=build /repo/apps/api/drizzle ./drizzle
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1

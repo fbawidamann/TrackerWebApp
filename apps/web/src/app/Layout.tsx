@@ -2,7 +2,8 @@ import { formatClock } from "@fitness/shared";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { discardWorkout, finishWorkout } from "@/db/actions";
-import { useActiveWorkout, useDeviceSettings, useRest, useSettings } from "@/data/hooks";
+import { useAccount, useActiveWorkout, useDeviceSettings, useRest, useSessionExpired, useSettings } from "@/data/hooks";
+import { LoginScreen } from "@/features/auth/LoginScreen";
 import { restLabel } from "@/features/workout/RestPill";
 import { useNow } from "@/lib/time";
 import { IconChevron, IconHistory, IconHome, IconLift, IconList, IconUser } from "@/ui/icons";
@@ -28,9 +29,16 @@ export function Layout() {
   const device = useDeviceSettings();
   useApplyTheme(settings, device);
   const { pathname } = useLocation();
-  const hideNav = noNav(pathname);
+  const account = useAccount();
+  const expired = useSessionExpired();
+  const gated = account === null || expired;
+  const hideNav = noNav(pathname) || gated;
   useEffect(() => { document.body.classList.toggle("no-nav", hideNav); }, [hideNav]);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+
+  // Locked until the first login on this device (docs/design/screens/login.md). Offline starts work once logged in.
+  if (account === undefined) return null;
+  if (gated) return <ToastProvider><div className="safe-cover" /><LoginScreen expired={expired && account !== null} /></ToastProvider>;
 
   return (
     <ToastProvider>

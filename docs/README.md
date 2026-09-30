@@ -23,3 +23,4 @@ An ADR records one important decision: the context, the choice, the alternatives
 | [0002](adr/0002-offline-sync.md) | Offline-first sync approach | Accepted |
 | [0003](adr/0003-exercise-catalog.md) | Exercise catalog source | Accepted |
 | [0004](adr/0004-deployment.md) | Deployment: existing Traefik, 2 containers (app + db) | Accepted |
+| [0005](adr/0005-backend-auth-and-sync.md) | Backend auth (username + password, admin-created) and sync store (generic `records` table) | Accepted |

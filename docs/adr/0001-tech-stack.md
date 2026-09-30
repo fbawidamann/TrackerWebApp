@@ -29,7 +29,7 @@ TypeScript everywhere, in an npm-workspaces monorepo (`apps/web`, `apps/api`, `p
 | Backend | **Hono** on Node | Small, fast, TypeScript-first. Runs as one Docker container. |
 | Database | **PostgreSQL 17** | Relational integrity, strong aggregation queries for progress, JSONB if flexible fields are ever needed. Runs well in Docker. |
 | ORM | **Drizzle** + drizzle-kit | Queries are close to SQL and type-safe; migrations are readable SQL files. |
-| Auth | **Better Auth** (email + password) | Self-hosted library inside the API; users/sessions live in our Postgres; httpOnly cookie sessions. Can add OAuth/passkeys later. |
+| Auth | ~~Better Auth~~ → **small custom session auth** (username + password, superseded by [ADR 0005](0005-backend-auth-and-sync.md)) | No sign-up, admin-created users; scrypt + httpOnly cookie sessions in our Postgres. |
 | Tests | **Vitest**, Testing Library, **Playwright**, fake-indexeddb | Vite-native unit tests; E2E for the logging flow. |
 | CI | **GitHub Actions** | lint → typecheck → test → build on every push/PR. |
 | Deploy | **Docker Compose on the VPS** (superseded by ADR 0004: existing Traefik, 2 containers) | Nightly `pg_dump` backups. |

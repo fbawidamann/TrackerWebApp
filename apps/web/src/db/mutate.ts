@@ -1,6 +1,7 @@
 import { newId } from "@fitness/shared";
 import type { Table } from "dexie";
-import { db, LOCAL_USER, SYNCED_TABLES, type SyncedTable } from "./db";
+import { db, SYNCED_TABLES, type SyncedTable } from "./db";
+import { getOwner } from "./owner";
 
 /**
  * The single write path. Every change to user data goes through these helpers:
@@ -24,7 +25,7 @@ export function write<T>(fn: () => Promise<T>): Promise<T> {
 /** Insert or replace a row (must include all fields). Returns the stored row. */
 export async function upsert<T extends Row>(name: SyncedTable, row: T): Promise<T> {
   const at = nowIso();
-  const stored = { ...row, userId: row.userId === null ? null : LOCAL_USER, createdAt: row.createdAt ?? at, updatedAt: at, deletedAt: row.deletedAt ?? null } as T;
+  const stored = { ...row, userId: row.userId === null ? null : getOwner(), createdAt: row.createdAt ?? at, updatedAt: at, deletedAt: row.deletedAt ?? null } as T;
   await write(async () => {
     await table(name).put(stored);
     await db.outbox.add({ table: name, rowId: stored.id, at });
@@ -68,7 +69,7 @@ export async function restore(name: SyncedTable, ids: string[]): Promise<void> {
 /** Fields every new synced row starts with. */
 export function baseRow(): { id: string; userId: string; createdAt: string; updatedAt: string; deletedAt: null } {
   const at = nowIso();
-  return { id: newId(), userId: LOCAL_USER, createdAt: at, updatedAt: at, deletedAt: null };
+  return { id: newId(), userId: getOwner(), createdAt: at, updatedAt: at, deletedAt: null };
 }
 
 export const alive = <T extends { deletedAt: string | null }>(r: T): boolean => r.deletedAt === null;

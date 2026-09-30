@@ -1,8 +1,8 @@
 # Runs behind the existing Traefik on the VPS (docs/adr/0004-deployment.md).
 # Traefik on this VPS runs with network_mode: host, so there is no Traefik Docker network:
 # the app publishes its port on 127.0.0.1 only, and Traefik forwards to that loopback address.
+# The database has no published port at all; only the app reaches it as "db" on the default Compose network.
 # Settings come from .env (copy .env.example → .env and fill in).
-# M7 will add a "db" service (postgres:17) on the default Compose network, reachable as "db", with no published port.
 
 services:
   app:
@@ -10,6 +10,13 @@ services:
     image: fitness-tracker-app:latest
     container_name: fitness-app
     restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      APP_DOMAIN: ${APP_DOMAIN}
+      DATABASE_URL: postgres://fitness:${DB_PASSWORD:?set DB_PASSWORD in .env}@db:5432/fitness
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${APP_HOST_PORT}:3000"   # loopback only, not reachable from outside
     labels:
@@ -20,3 +27,24 @@ services:
       - traefik.http.routers.fitness.tls.certresolver=${TRAEFIK_CERTRESOLVER}
       - traefik.http.routers.fitness.middlewares=secure-headers@file
       - traefik.http.services.fitness.loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}
+
+  db:
+    image: postgres:17-alpine
+    container_name: fitness-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fitness
+      POSTGRES_DB: fitness
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - fitness_pgdata:/var/lib/postgresql/data   # Florian's data: never delete this volume
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitness -d fitness"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # no "ports:" on purpose
+
+volumes:
+  fitness_pgdata:
+    name: fitness_pgdata

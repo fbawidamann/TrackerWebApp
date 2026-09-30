@@ -1,6 +1,6 @@
 # Screen: Login + Account (Profile)
 
-Status: **draft for prototype review** (2026-10-01). Backend decisions: [ADR 0005](../../adr/0005-backend-auth-and-sync.md) (to be written), plan M7/M8 in [roadmap](../../roadmap.md).
+Status: **approved and built** (M7). Backend decisions: [ADR 0005](../../adr/0005-backend-auth-and-sync.md), plan M7/M8 in [roadmap](../../roadmap.md).
 Prototype: [10-login-admin.html](../prototypes/10-login-admin.html) ([online](https://claude.ai/artifact/VdRJ6tfNa4bLbjCRhpw2zX)).
 
 ## Rules (decided)

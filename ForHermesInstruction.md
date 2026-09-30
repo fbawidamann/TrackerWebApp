@@ -6,12 +6,99 @@ Hermes, this is Florian's fitness tracker app. Please deploy it on this VPS behi
 
 You know how Traefik runs on this server better than anyone, so adapt the Traefik-specific values (network, entrypoint, resolver, any middlewares) to match the setup here. Everything else is ready in the repo.
 
+> **Status (2026-09-30):** the app container is live (thanks!). **Your current task is the "M7 update" right below:** it adds the database, accounts and sync. The rest of this file is the original first-time setup, kept for reference.
+
+## M7 update: database, accounts, sync
+
+What changes: a second container **`fitness-db`** (`postgres:17-alpine`, named volume **`fitness_pgdata`**, **no published port**) joins `fitness-app` in the same `docker-compose.yml`. The app now needs a login. There is no registration: the admin **`LegendFLOO`** creates all accounts. The Traefik labels are unchanged.
+
+### 1. Pull and add the database password
+```bash
+cd /opt/fitness-tracker
+git pull
+grep -q '^DB_PASSWORD=.' .env || echo "DB_PASSWORD=$(openssl rand -hex 32)" >> .env   # hex = URL-safe; generate once, never change
+chmod 600 .env
+```
+Keep `.env` as the only place the DB password lives. Changing it later needs a manual `ALTER USER` in Postgres, so don't rotate it casually.
+
+### 2. Build and start
+```bash
+docker compose up -d --build
+docker compose ps                         # fitness-db healthy, fitness-app healthy
+docker logs fitness-app --tail 20         # "Fitness app listening on :3000 (… db: postgres)"
+```
+The tables are created automatically at app start (migrations in `/app/drizzle`).
+
+### 3. Create the admin account `LegendFLOO` (once)
+The password must have at least 8 characters, with a digit and a special character. It is **not stored anywhere** except as a hash in the database.
+
+- **Preferred:** Florian runs it himself in an SSH session and types the password (hidden input):
+  ```bash
+  docker compose exec app node dist/cli.js create-admin LegendFLOO
+  ```
+- **If you do it:** generate a one-time password, pass it on stdin, tell it to Florian **once** in your report, and don't write it to any file or log. He then changes it in the app (Profile → Change password).
+  ```bash
+  PW="$(openssl rand -base64 12)!7"
+  printf '%s' "$PW" | docker compose exec -T app node dist/cli.js create-admin LegendFLOO --password-stdin
+  ```
+
+Other commands (all via `docker compose exec app node dist/cli.js …`): `list-users`, `create-user <name>`, `reset-password <name>` (a forgotten password; also signs the user out everywhere), `enable-user <name>`.
+
+### 4. Nightly backup (14 days)
+```bash
+mkdir -p /var/backups/fitness && chmod 700 /var/backups/fitness
+cat > /usr/local/bin/fitness-backup <<'SH'
+#!/bin/sh
+set -eu
+f=/var/backups/fitness/fitness-$(date +%F).dump
+docker exec fitness-db pg_dump -U fitness -d fitness -Fc > "$f.tmp" && mv "$f.tmp" "$f"
+find /var/backups/fitness -name 'fitness-*.dump' -mtime +13 -delete
+SH
+chmod 700 /usr/local/bin/fitness-backup
+echo '30 3 * * * root /usr/local/bin/fitness-backup' > /etc/cron.d/fitness-backup
+/usr/local/bin/fitness-backup && ls -la /var/backups/fitness      # run once now
+```
+If the VPS already has an off-site backup job, please include `/var/backups/fitness` in it.
+
+### 5. Restore test (into a scratch database, not the real one)
+```bash
+f=$(ls -t /var/backups/fitness/fitness-*.dump | head -1)
+docker exec fitness-db createdb -U fitness restore_test
+docker exec -i fitness-db pg_restore -U fitness -d restore_test --no-owner < "$f"
+docker exec fitness-db psql -U fitness -d restore_test -c 'select username, role from users;'
+docker exec fitness-db dropdb -U fitness restore_test
+```
+
+### 6. Verify
+```bash
+curl -s https://tracker.fbawidamannserver.cloud/api/health          # {"ok":true}
+docker port fitness-db                                              # must print nothing (no published port)
+curl -s -o /dev/null -w "%{http_code}\n" https://tracker.fbawidamannserver.cloud/api/auth/me   # 401 (not logged in)
+```
+After the admin exists, a login over HTTPS must set the cookie `fitness_session` with `HttpOnly; Secure; SameSite=Lax`:
+```bash
+curl -si -X POST https://tracker.fbawidamannserver.cloud/api/auth/login \
+  -H 'content-type: application/json' -H 'origin: https://tracker.fbawidamannserver.cloud' \
+  -d '{"username":"LegendFLOO","password":"<password>"}' | grep -i set-cookie
+```
+(Skip this one if Florian set the password himself; he'll just log in on his iPhone.)
+
+### M7: please don't
+- **Never** run `docker compose down -v`, `docker volume rm fitness_pgdata` or `docker system prune --volumes`. The volume holds Florian's training data. `docker compose down` (without `-v`) and `up -d --build` are safe.
+- Publish a port for `fitness-db`.
+
+### M7: please report back
+1. `docker compose ps` output and the app log line from step 2.
+2. That the admin exists (`list-users`), plus the one-time password if you created it.
+3. The backup file from step 4 and the result of the restore test.
+4. The verification output from step 6.
+
 ## What you are deploying
 
 - **One container, `fitness-app`**, built from the `Dockerfile` in the repo root. It's a Node 24 server (Hono) on port **3000** that serves:
   - the web app (static files, a PWA that works offline),
   - `/api/health` → `{"ok":true}`, the health check.
-- There is **no database yet.** A Postgres container will be added later (milestone M7), in the same `docker-compose.yml`, on a private network. Nothing to do for that now.
+- Since M7 also **`fitness-db`** (Postgres 17, volume `fitness_pgdata`, no published port), see "M7 update" above.
 - The app must be served over **HTTPS**, because the offline mode (service worker) only works there.
 
 Files in the repo root that matter to you:

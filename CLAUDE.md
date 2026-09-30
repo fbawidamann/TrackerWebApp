@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project status
 
 Personal fitness tracker web app. Gym tracking comes first, running and swimming later, food tracking after that.
-**Phase 1 frontend (gym, local-only) is built** in `apps/web` + `packages/shared`; backend/sync (M7–M9) is not started. All decisions are recorded in [docs/](docs/README.md). Read the relevant doc before proposing changes, and record new decisions there (new ADR in `docs/adr/` for major ones).
+**Phase 1 (gym) is built**: frontend in `apps/web`, backend (accounts, sync) in `apps/api`, shared code in `packages/shared` (M0–M8 done, see [roadmap](docs/roadmap.md)). All decisions are recorded in [docs/](docs/README.md). Read the relevant doc before proposing changes, and record new decisions there (new ADR in `docs/adr/` for major ones).
 
 ## Working mode (important)
 
@@ -20,8 +20,8 @@ TypeScript everywhere, npm workspaces, Node 24:
 ```
 apps/web         React 19 + Vite 8, TanStack Router (code-based, src/app/router.tsx), plain CSS with design tokens
                  (src/styles/app.css), custom SVG chart, Dexie + dexie-react-hooks, vite-plugin-pwa
-apps/api         Hono (Node): today serves the built frontend + /api/health (Docker app container);
-                 M7 adds Drizzle ORM, Better Auth (email + password), sync endpoints
+apps/api         Hono (Node) serving /api + the built frontend; Drizzle ORM (postgres.js in prod, PGlite locally),
+                 custom session auth (username + password, admin-created users), sync endpoints, CLI; esbuild bundle
 packages/shared  Zod 4 schemas + types, IDs (uuid v7/v5), formatting (settings-aware), metrics (PRs, e1RM),
                  exercise catalog JSON (data/) + import script (scripts/)
 docs/            requirements, architecture, ADRs, design specs, prototypes, roadmap
@@ -34,7 +34,10 @@ Database: PostgreSQL 17. Deployment: Docker Compose on the user's own VPS behind
 ```
 npm install
 npm run catalog:images               # once: exercise pictures into apps/web/public/exercise-images (gitignored)
-npm run dev                          # Vite dev server (--host, so the iPhone can open it on the LAN)
+npm run dev                          # Vite dev server (--host, so the iPhone can open it on the LAN); proxies /api → :3000
+npm run dev:api                      # API on :3000 with PGlite in apps/api/.data (no Docker needed)
+node apps/api/dist/cli.js create-admin <name>   # after "npm run build"; also create-user, reset-password, enable-user, list-users
+                                     # (PGlite = one process: stop dev:api first)
 npm run lint | typecheck | test | build
 npx vitest run src/db/actions.test.ts         # single test file (run inside apps/web or packages/shared)
 npx vitest run -t "detects heaviest-weight"   # single test by name
@@ -44,14 +47,22 @@ npm run icons -w @fitness/web        # regenerate PWA icons
 
 ## Deployment
 
-`Dockerfile` + `docker-compose.yml` (root) build one `app` container behind the VPS's existing Traefik; settings in `.env` (template `.env.example`). The VPS agent "Hermes" deploys it following `ForHermesInstruction.md`. Keep that file in sync when the deployment changes.
+`Dockerfile` + `docker-compose.yml` (root) build the `app` container (+ `db` = postgres:17, volume `fitness_pgdata`, no port) behind the VPS's existing Traefik; settings in `.env` (template `.env.example`). The VPS agent "Hermes" deploys it following `ForHermesInstruction.md`. Keep that file in sync when the deployment changes.
+
+## Code map (apps/api/src)
+
+- `app.ts` Hono app (middleware: session, CSRF, no-store; static files) · `index.ts` server entry · `cli.ts` admin commands.
+- `db/schema.ts` users, sessions, records (generic JSONB sync store) · `db/client.ts` postgres.js or PGlite + migrations (`apps/api/drizzle/`, `npm run db:generate -w @fitness/api`).
+- `auth/` password (scrypt), session (cookie, sliding 1 year), rateLimit · `routes/` auth, admin, sync · `users.ts` user management.
+- Tests: `app.test.ts` (API), `sync.integration.test.ts` (the real web sync engine against the real API, two devices).
 
 ## Code map (apps/web/src)
 
 - `db/db.ts` Dexie schema · `db/mutate.ts` the single write path · `db/actions.ts` every domain action (workouts, routines, exercises, settings, backup) · `db/seed.ts` catalog + settings seeding.
 - `data/hooks.ts` live queries (`useSettings`, `useCatalog`, `useTraining`, `useActiveWorkout`, `useRoutines`, `useRest`). `lib/training.ts` derives history, per-exercise sessions and PRs from raw rows (pure, tested).
 - `features/<screen>/` one folder per screen spec; `features/workout/SetTable.tsx` is the set table shared by live logging and history edit mode; `features/exercises/ExerciseBrowser.tsx` is shared by the Exercises tab and the picker.
-- `ui/` Sheet/MenuSheet/ConfirmSheet/RadioSheet/TextSheet, Toast (with Undo), Overlay, ReorderList, LineChart, icons. `app/` router, Layout (nav, mini bar), theme (accent/text size/theme on `<html>`).
+- `ui/` Sheet/MenuSheet/ConfirmSheet/RadioSheet/TextSheet, Toast (with Undo), Overlay, ReorderList, LineChart, icons. `app/` router, Layout (login gate, nav, mini bar), theme (accent/text size/theme on `<html>`).
+- `sync/engine.ts` push/pull + triggers · `sync/account.ts` login (re-own local data), logout (wipe) · `api/client.ts` fetch wrapper · `db/owner.ts` current userId for writes. `features/auth/` Login, `features/admin/` Users (admin only), `features/profile/AccountSection.tsx`.
 
 ## Architecture rules
 
