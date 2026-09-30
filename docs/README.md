@@ -22,3 +22,4 @@ An ADR records one important decision: the context, the choice, the alternatives
 | [0001](adr/0001-tech-stack.md) | Tech stack | Accepted |
 | [0002](adr/0002-offline-sync.md) | Offline-first sync approach | Accepted |
 | [0003](adr/0003-exercise-catalog.md) | Exercise catalog source | Accepted |
+| [0004](adr/0004-deployment.md) | Deployment: existing Traefik, 2 containers (app + db) | Accepted |

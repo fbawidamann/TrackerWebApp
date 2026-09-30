@@ -26,7 +26,7 @@ packages/shared  Zod 4 schemas + types, IDs (uuid v7/v5), formatting (settings-a
 docs/            requirements, architecture, ADRs, design specs, prototypes, roadmap
 ```
 
-Database: PostgreSQL 17. Deployment: Docker Compose on the user's own VPS (Caddy + api + postgres). CI: GitHub Actions.
+Database: PostgreSQL 17. Deployment: Docker Compose on the user's own VPS behind their existing **Traefik** (2 containers: `app` = Hono serving API + built frontend, `db` = Postgres). See ADR 0004. CI: GitHub Actions.
 
 ## Commands (run from repo root)
 

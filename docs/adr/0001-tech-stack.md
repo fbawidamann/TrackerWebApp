@@ -18,7 +18,7 @@ TypeScript everywhere, in an npm-workspaces monorepo (`apps/web`, `apps/api`, `p
 
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | **React + Vite** | A logged-in, offline app needs no server rendering. Vite builds static files that Caddy serves. React has the largest ecosystem for charts, drag-and-drop and similar. |
+| Frontend | **React + Vite** | A logged-in, offline app needs no server rendering. Vite builds static files that the app container serves (see ADR 0004). React has the largest ecosystem for charts, drag-and-drop and similar. |
 | Routing | **TanStack Router** (file-based) | Routes and URL parameters are type-checked. |
 | UI | **Tailwind v4 + shadcn/ui**, lucide icons | Fast mobile-first styling. shadcn copies accessible components into our code, so we own and can restyle them (important for the non-generic look). |
 | Forms | **React Hook Form + Zod** | Validation uses the same schemas as the DB and API. |
@@ -32,7 +32,7 @@ TypeScript everywhere, in an npm-workspaces monorepo (`apps/web`, `apps/api`, `p
 | Auth | **Better Auth** (email + password) | Self-hosted library inside the API; users/sessions live in our Postgres; httpOnly cookie sessions. Can add OAuth/passkeys later. |
 | Tests | **Vitest**, Testing Library, **Playwright**, fake-indexeddb | Vite-native unit tests; E2E for the logging flow. |
 | CI | **GitHub Actions** | lint → typecheck → test → build on every push/PR. |
-| Deploy | **Docker Compose on the VPS**: Caddy + api + postgres | Caddy provides automatic HTTPS, serves the static frontend and proxies `/api`. Nightly `pg_dump` backups. Costs about €5/month. |
+| Deploy | **Docker Compose on the VPS** (superseded by ADR 0004: existing Traefik, 2 containers) | Nightly `pg_dump` backups. |
 
 ## Alternatives considered
 
