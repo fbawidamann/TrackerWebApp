@@ -38,6 +38,8 @@ export function HomeScreen() {
     <div className="page">
       <div style={{ display: "grid", gap: 14 }}>
         <div>
+          {/* Username at the very top (docs/design/screens/home.md). Until accounts exist (M7) this is the Profile name. */}
+          {settings.displayName && <p className="home-user">{settings.displayName}</p>}
           <h1 className="title">{WEEKDAYS[today.getDay()]}</h1>
           <p className="sub" style={{ marginTop: 2 }}>{today.getDate()} {MONTHS[today.getMonth()]}</p>
         </div>

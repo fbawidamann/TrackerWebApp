@@ -244,7 +244,7 @@ input[type="date"].field, input[type="time"].field { min-height: 48px; }
 .fchip svg { width: 14px; height: 14px; }
 .tick { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--line); display: grid; place-items: center; color: transparent; flex: none; }
 .tick svg { width: 15px; height: 15px; }
-[aria-pressed="true"] > .tick { background: var(--acc-fill); border-color: transparent; color: var(--on-acc); }
+[aria-pressed="true"] .tick { background: var(--acc-fill); border-color: transparent; color: var(--on-acc); }
 
 /* Segmented controls */
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 3px; border-radius: 12px; background: var(--raised); }
@@ -412,3 +412,4 @@ html[data-nav="active"] .nav a:not(.on) span { visibility: hidden; }
 .safe-cover { position: fixed; top: 0; left: 0; right: 0; height: var(--safe-t); background: var(--bg); z-index: 50; pointer-events: none; }
 .plain { max-width: 640px; margin: 0 auto; padding-bottom: calc(var(--nav-h) + var(--safe-b) + 110px); }
 .plain-head { padding: calc(var(--safe-t) + 12px) 20px 0; }
+.home-user { margin: 0 0 6px; font-size: calc(15px + var(--d)); font-weight: 600; color: var(--acc-text); }
