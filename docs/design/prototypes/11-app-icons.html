@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Fitness App Icons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root { --pg-bg:#f3f4f6; --pg-surface:#ffffff; --pg-text:#15191e; --pg-muted:#5c6470; --pg-border:#dce0e5; --pg-accent:#3a6fd8; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  }
+  :root[data-theme="dark"] { color-scheme: dark; --pg-bg:#0d0f12; --pg-surface:#15181c; --pg-text:#e5e8ec; --pg-muted:#939ba6; --pg-border:#272c33; --pg-accent:#82a7f1; }
+  body { background: var(--pg-bg); color: var(--pg-text); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 72px; display: grid; gap: 32px; }
+  header { display: grid; gap: 8px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 600; }
+  header p { margin: 0; color: var(--pg-muted); max-width: 72ch; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 8px; cursor: pointer; border: 1px solid var(--pg-border); background: transparent; color: var(--pg-text); }
+  .seg button[aria-pressed="true"] { border-color: var(--pg-accent); color: var(--pg-accent); font-weight: 600; }
+  .seg button:focus-visible { outline: 2px solid var(--pg-accent); outline-offset: 2px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+  .opt { display: grid; gap: 18px; padding: 24px; border: 1px solid var(--pg-border); border-radius: 18px; background: var(--pg-surface); align-content: start; }
+  .opt-head { display: flex; align-items: baseline; gap: 10px; }
+  .opt-head b { font-size: 13px; font-weight: 600; color: var(--pg-accent); letter-spacing: .06em; }
+  .opt-head h2 { margin: 0; font-size: 18px; font-weight: 600; }
+  .opt p { margin: 0; color: var(--pg-muted); font-size: 14px; }
+  .big { width: 190px; height: 190px; border-radius: 42px; overflow: hidden; justify-self: center; box-shadow: 0 24px 50px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04); }
+  .big svg, .sm svg, .ph svg, .fav svg { width: 100%; height: 100%; display: block; }
+  .sizes { display: flex; align-items: flex-end; justify-content: center; gap: 18px; }
+  .size { display: grid; justify-items: center; gap: 6px; font-size: 12px; color: var(--pg-muted); }
+  .sm { overflow: hidden; }
+  .s60 { width: 60px; height: 60px; border-radius: 13px; }
+  .s40 { width: 40px; height: 40px; border-radius: 9px; }
+  .s32 { width: 32px; height: 32px; border-radius: 7px; }
+  .s16 { width: 16px; height: 16px; border-radius: 3.5px; }
+
+  .previews { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 18px; }
+  .panel { padding: 22px; border: 1px solid var(--pg-border); border-radius: 18px; background: var(--pg-surface); display: grid; gap: 16px; align-content: start; }
+  .panel h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--pg-muted); font-weight: 600; }
+  .phone { justify-self: center; width: 310px; max-width: 100%; border-radius: 36px; padding: 36px 22px 28px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 10px; }
+  .phone.wall-dark { background: radial-gradient(120% 90% at 20% 10%, #2a3350, #0b0e16 60%); }
+  .phone.wall-light { background: radial-gradient(120% 90% at 20% 10%, #f3dcc2, #9fb3d6 75%); }
+  .app-ic { display: grid; justify-items: center; gap: 5px; font: 11px -apple-system, "IBM Plex Sans", sans-serif; }
+  .phone.wall-dark .app-ic { color: #fff; }
+  .phone.wall-light .app-ic { color: #1b1b1b; }
+  .ph { width: 58px; height: 58px; border-radius: 13.5px; overflow: hidden; box-shadow: 0 4px 10px -4px rgba(0,0,0,.5); }
+  .ph.dummy { background: rgba(255,255,255,.16); box-shadow: none; }
+  .phone.wall-light .ph.dummy { background: rgba(255,255,255,.5); }
+  .tabbar { border: 1px solid var(--pg-border); border-radius: 12px; overflow: hidden; }
+  .tabs { display: flex; gap: 4px; padding: 8px 8px 0; background: color-mix(in oklab, var(--pg-text) 8%, var(--pg-surface)); }
+  .tab { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px 8px 0 0; font-size: 13px; white-space: nowrap; }
+  .tab.active { background: var(--pg-surface); }
+  .fav { width: 16px; height: 16px; border-radius: 3.5px; overflow: hidden; flex: none; }
+  .tab.dummy .fav { background: color-mix(in oklab, var(--pg-muted) 45%, transparent); }
+  .url { padding: 10px 14px; font-size: 13px; color: var(--pg-muted); border-top: 1px solid var(--pg-border); }
+  footer { color: var(--pg-muted); font-size: 14px; border-top: 1px solid var(--pg-border); padding-top: 18px; }
+  @media (max-width: 420px) { .wrap { padding-inline: 16px; } .big { width: 160px; height: 160px; border-radius: 36px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Fitness app icons, round 2</h1>
+    <p>Five new icons on premium level: depth through light and shadow, metallic plates, glowing cobalt, and small details like embossed weight numbers. Each is shown large, at real sizes down to the 16 px favicon, on an iPhone home screen and in a browser tab.</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="previews">
+    <section class="panel" aria-labelledby="h-home">
+      <h2 id="h-home">On the iPhone home screen</h2>
+      <div class="seg" role="group" aria-label="Icon shown" id="pick"></div>
+      <div class="seg" role="group" aria-label="Wallpaper">
+        <button type="button" data-wall="dark" aria-pressed="true">Dark wallpaper</button>
+        <button type="button" data-wall="light" aria-pressed="false">Light wallpaper</button>
+      </div>
+      <div class="phone wall-dark" id="phone"></div>
+    </section>
+    <section class="panel" aria-labelledby="h-tab">
+      <h2 id="h-tab">As favicon in the browser</h2>
+      <div class="tabbar" id="tabbar"></div>
+      <p style="margin:0;color:var(--pg-muted);font-size:14px">At 16 px only strong shapes stay recognisable. That's the hardest test.</p>
+    </section>
+  </div>
+
+  <footer>Tell me the letter of your favourite, or what you like from several, e.g. "B, but in the style of A".</footer>
+</div>
+
+<script>
+(() => {
+  let n = 0; // unique ids per rendered instance (gradients/filters)
+  const BG = (u) => `
+    <defs>
+      <linearGradient id="bg${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1D2536"/><stop offset="1" stop-color="#06080C"/></linearGradient>
+      <radialGradient id="sheen${u}" cx=".22" cy=".08" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".11"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <radialGradient id="halo${u}" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="#4F86F7" stop-opacity=".28"/><stop offset="1" stop-color="#4F86F7" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="100" height="100" fill="url(#bg${u})"/>
+    <rect width="100" height="100" fill="url(#halo${u})"/>
+    <rect width="100" height="100" fill="url(#sheen${u})"/>`;
+
+  const ICONS = [
+    {
+      key: "A", name: "Cobalt Plate",
+      text: "A metallic weight plate with embossed \"20 KG\", a recessed ring and a chrome hub. It has real depth, like a physical object lying in the light.",
+      svg: (u) => BG(u) + `
+        <defs>
+          <radialGradient id="pl${u}" cx=".36" cy=".28" r=".8"><stop offset="0" stop-color="#A9C4FF"/><stop offset=".42" stop-color="#4F86F7"/><stop offset="1" stop-color="#15307F"/></radialGradient>
+          <radialGradient id="rec${u}" cx=".62" cy=".72" r=".85"><stop offset="0" stop-color="#3E6CE0"/><stop offset="1" stop-color="#132B73"/></radialGradient>
+          <radialGradient id="hub${u}" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#F4F7FC"/><stop offset=".5" stop-color="#AEB8C8"/><stop offset="1" stop-color="#5F6A7C"/></radialGradient>
+          <linearGradient id="rim${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2EBFF" stop-opacity=".95"/><stop offset=".55" stop-color="#E2EBFF" stop-opacity="0"/></linearGradient>
+          <linearGradient id="rimIn${u}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#CFDDFF" stop-opacity=".7"/><stop offset=".6" stop-color="#CFDDFF" stop-opacity="0"/></linearGradient>
+          <filter id="sh${u}" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.2" flood-color="#000" flood-opacity=".6"/></filter>
+        </defs>
+        <circle cx="50" cy="50" r="35" fill="url(#pl${u})" filter="url(#sh${u})"/>
+        <circle cx="50" cy="50" r="34.4" fill="none" stroke="url(#rim${u})" stroke-width="1.3"/>
+        <circle cx="50" cy="50" r="25.5" fill="url(#rec${u})"/>
+        <circle cx="50" cy="50" r="25" fill="none" stroke="url(#rimIn${u})" stroke-width="1.1"/>
+        <circle cx="50" cy="50" r="14" fill="url(#hub${u})"/>
+        <circle cx="50" cy="50" r="6.2" fill="#05070A"/>
+        <circle cx="50" cy="50" r="6.2" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width=".9"/>
+        <text x="50" y="23.6" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="7" letter-spacing=".6" fill="#0B1C55" fill-opacity=".55">20</text>
+        <text x="50" y="81.2" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="5.2" letter-spacing="1" fill="#0B1C55" fill-opacity=".5">KG</text>`,
+    },
+    {
+      key: "B", name: "Goal Ring",
+      text: "A glowing progress ring (like your weekly goal) around a clean silver dumbbell. Elegant, recognisable at every size, and it says \"you're almost there\".",
+      svg: (u) => BG(u) + `
+        <defs>
+          <linearGradient id="arc${u}" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2450D4"/><stop offset=".6" stop-color="#4F86F7"/><stop offset="1" stop-color="#A9C4FF"/></linearGradient>
+          <linearGradient id="db${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#A9B4C6"/></linearGradient>
+          <filter id="glow${u}" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="dsh${u}" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter>
+        </defs>
+        <circle cx="50" cy="50" r="30" fill="none" stroke="#1A2233" stroke-width="9.5"/>
+        <circle cx="50" cy="50" r="30" fill="none" stroke="url(#arc${u})" stroke-width="9.5" stroke-linecap="round" stroke-dasharray="152 189" transform="rotate(-90 50 50)" filter="url(#glow${u})"/>
+        <g filter="url(#dsh${u})" fill="url(#db${u})">
+          <rect x="37.5" y="48.3" width="25" height="3.4" rx="1.7"/>
+          <rect x="33.5" y="40" width="5.6" height="20" rx="2.2"/>
+          <rect x="60.9" y="40" width="5.6" height="20" rx="2.2"/>
+          <rect x="29.6" y="43.5" width="4.2" height="13" rx="1.8"/>
+          <rect x="66.2" y="43.5" width="4.2" height="13" rx="1.8"/>
+        </g>`,
+    },
+    {
+      key: "C", name: "PR Spark",
+      text: "The rising progress line glows neon cobalt over a soft light field and ends in a bright orb with a spark: the moment of a new record.",
+      svg: (u) => BG(u) + `
+        <defs>
+          <linearGradient id="area${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4F86F7" stop-opacity=".5"/><stop offset="1" stop-color="#4F86F7" stop-opacity="0"/></linearGradient>
+          <linearGradient id="ln${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2B57D8"/><stop offset="1" stop-color="#B5CCFF"/></linearGradient>
+          <radialGradient id="orb${u}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".35" stop-color="#C9D9FF"/><stop offset=".7" stop-color="#4F86F7" stop-opacity=".55"/><stop offset="1" stop-color="#4F86F7" stop-opacity="0"/></radialGradient>
+          <filter id="blur${u}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.8"/></filter>
+        </defs>
+        <g stroke="#fff" stroke-opacity=".06" stroke-width=".8"><line x1="14" x2="86" y1="34" y2="34"/><line x1="14" x2="86" y1="52" y2="52"/><line x1="14" x2="86" y1="70" y2="70"/></g>
+        <path d="M15 73 L34 58 L48 63 L72 37 L72 86 L15 86 Z" fill="url(#area${u})"/>
+        <polyline points="15,73 34,58 48,63 72,37" fill="none" stroke="#4F86F7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur${u})" opacity=".9"/>
+        <polyline points="15,73 34,58 48,63 72,37" fill="none" stroke="url(#ln${u})" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="72" cy="37" r="13" fill="url(#orb${u})"/>
+        <circle cx="72" cy="37" r="3.6" fill="#FFFFFF"/>
+        <path d="M84 16 L85.4 21.6 L91 23 L85.4 24.4 L84 30 L82.6 24.4 L77 23 L82.6 21.6 Z" fill="#E4ECFF" opacity=".95"/>`,
+    },
+    {
+      key: "D", name: "Loaded Bar",
+      text: "A loaded barbell seen from the side: chrome bar, cobalt plates with light edges, collars and a soft shadow on the floor. It feels powerful and classic, but premium.",
+      svg: (u) => BG(u) + `
+        <defs>
+          <linearGradient id="chr${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAFCFF"/><stop offset=".45" stop-color="#A3AEC0"/><stop offset=".6" stop-color="#6D7789"/><stop offset="1" stop-color="#D7DDE7"/></linearGradient>
+          <linearGradient id="big${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8FB0FF"/><stop offset=".35" stop-color="#4F86F7"/><stop offset="1" stop-color="#1A3790"/></linearGradient>
+          <linearGradient id="sml${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#A9C4FF"/><stop offset=".4" stop-color="#6B9AFA"/><stop offset="1" stop-color="#2A52C4"/></linearGradient>
+          <radialGradient id="flr${u}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".65"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+        </defs>
+        <ellipse cx="50" cy="80" rx="38" ry="5" fill="url(#flr${u})"/>
+        <rect x="9" y="47.6" width="82" height="4.8" rx="2.4" fill="url(#chr${u})"/>
+        <rect x="21" y="23" width="9.5" height="54" rx="3.2" fill="url(#big${u})"/>
+        <rect x="69.5" y="23" width="9.5" height="54" rx="3.2" fill="url(#big${u})"/>
+        <rect x="31.5" y="30" width="6.5" height="40" rx="2.6" fill="url(#sml${u})"/>
+        <rect x="62" y="30" width="6.5" height="40" rx="2.6" fill="url(#sml${u})"/>
+        <rect x="21.6" y="24.5" width="1.3" height="51" rx=".65" fill="#fff" opacity=".45"/>
+        <rect x="70.1" y="24.5" width="1.3" height="51" rx=".65" fill="#fff" opacity=".45"/>
+        <rect x="32" y="31.5" width="1" height="37" rx=".5" fill="#fff" opacity=".45"/>
+        <rect x="62.5" y="31.5" width="1" height="37" rx=".5" fill="#fff" opacity=".45"/>
+        <rect x="38.6" y="43.5" width="3.4" height="13" rx="1.3" fill="url(#chr${u})"/>
+        <rect x="58" y="43.5" width="3.4" height="13" rx="1.3" fill="url(#chr${u})"/>
+        <g stroke="#3B4454" stroke-width=".6" opacity=".55"><line x1="46" x2="46" y1="48" y2="52"/><line x1="48" x2="48" y1="48" y2="52"/><line x1="50" x2="50" y1="48" y2="52"/><line x1="52" x2="52" y1="48" y2="52"/><line x1="54" x2="54" y1="48" y2="52"/></g>`,
+    },
+    {
+      key: "E", name: "Cobalt Kettlebell",
+      text: "A polished metal kettlebell with the embossed weight \"16\", a gleaming highlight and a shadow. It stands out in any app collection.",
+      svg: (u) => BG(u) + `
+        <defs>
+          <radialGradient id="kb${u}" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#B2CBFF"/><stop offset=".4" stop-color="#4F86F7"/><stop offset="1" stop-color="#132B73"/></radialGradient>
+          <linearGradient id="hd${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A9C4FF"/><stop offset=".5" stop-color="#4F86F7"/><stop offset="1" stop-color="#1D3B99"/></linearGradient>
+          <clipPath id="base${u}"><rect x="0" y="0" width="100" height="83"/></clipPath>
+          <filter id="ksh${u}" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="3.5" stdDeviation="3" flood-color="#000" flood-opacity=".65"/></filter>
+          <filter id="soft${u}"><feGaussianBlur stdDeviation="1.4"/></filter>
+          <radialGradient id="kfl${u}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+        </defs>
+        <ellipse cx="50" cy="85" rx="26" ry="4" fill="url(#kfl${u})"/>
+        <path d="M33 55 C29 35 35 16 50 16 C65 16 71 35 67 55" fill="none" stroke="url(#hd${u})" stroke-width="8.5" stroke-linecap="round" filter="url(#ksh${u})"/>
+        <path d="M34.6 46 C33 33 38 20 50 19.6" fill="none" stroke="#E4ECFF" stroke-opacity=".45" stroke-width="1.4" stroke-linecap="round"/>
+        <g clip-path="url(#base${u})" filter="url(#ksh${u})"><circle cx="50" cy="63" r="23" fill="url(#kb${u})"/></g>
+        <rect x="36" y="80.5" width="28" height="3.6" rx="1.8" fill="#132B73"/>
+        <ellipse cx="41" cy="54" rx="7" ry="4.2" fill="#fff" opacity=".4" transform="rotate(-28 41 54)" filter="url(#soft${u})"/>
+        <text x="50" y="72" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="10" fill="#0B1C55" fill-opacity=".5">16</text>`,
+    },
+  ];
+
+  let wall = "dark", chosen = "A";
+  const svg = (ic) => { const u = "i" + (++n); return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Icon ${ic.key}: ${ic.name}">${ic.svg(u)}</svg>`; };
+
+  function render() {
+    document.getElementById("grid").innerHTML = ICONS.map((ic) => `
+      <article class="opt">
+        <div class="opt-head"><b>${ic.key}</b><h2>${ic.name}</h2></div>
+        <div class="big">${svg(ic)}</div>
+        <div class="sizes">
+          <span class="size"><span class="sm s60">${svg(ic)}</span>60</span>
+          <span class="size"><span class="sm s40">${svg(ic)}</span>40</span>
+          <span class="size"><span class="sm s32">${svg(ic)}</span>32</span>
+          <span class="size"><span class="sm s16">${svg(ic)}</span>16</span>
+        </div>
+        <p>${ic.text}</p>
+      </article>`).join("");
+
+    document.getElementById("pick").innerHTML = ICONS.map((ic) => `<button type="button" data-pick="${ic.key}" aria-pressed="${ic.key === chosen}">${ic.key} · ${ic.name}</button>`).join("");
+    const ic = ICONS.find((x) => x.key === chosen);
+    const dummies = ["Photos", "Mail", "Maps", "Notes", "Music", "Weather", "Clock"];
+    const cells = [];
+    for (let i = 0; i < 12; i++) cells.push(i === 5
+      ? `<span class="app-ic"><span class="ph">${svg(ic)}</span>Fitness</span>`
+      : `<span class="app-ic"><span class="ph dummy"></span>${dummies[i % dummies.length]}</span>`);
+    const phone = document.getElementById("phone");
+    phone.className = "phone wall-" + wall;
+    phone.innerHTML = cells.join("");
+    document.getElementById("tabbar").innerHTML =
+      `<div class="tabs"><span class="tab dummy"><span class="fav"></span>Inbox</span><span class="tab active"><span class="fav">${svg(ic)}</span>Fitness</span><span class="tab dummy"><span class="fav"></span>News</span></div>
+       <div class="url">tracker.fbawidamannserver.cloud</div>`;
+  }
+
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.wall) { wall = b.dataset.wall; document.querySelectorAll("[data-wall]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); }
+    else if (b.dataset.pick) chosen = b.dataset.pick;
+    else return;
+    render();
+  });
+  render();
+})();
+</script>

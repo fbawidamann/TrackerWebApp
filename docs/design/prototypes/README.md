@@ -16,6 +16,7 @@ These files are **design references, not app code**. The real app is built with 
 | [08-routines.html](08-routines.html) | Workout tab (idle), routines list, ⋯ menu, reordering, preview, editor with steppers, starter routines | Approved; spec in [screens/routines.md](../screens/routines.md) | [link](https://claude.ai/artifact/BH5EUAkSuhrs2UHtafCSrj) |
 | [09-profile.html](09-profile.html) | Profile header, all settings (theme/accent/text size applied live), backup export/import | Approved; spec in [screens/profile.md](../screens/profile.md) | [link](https://claude.ai/artifact/EWqYPHDNhFYZh9FZD6mKQu) |
 | [10-login-admin.html](10-login-admin.html) | Login screen, Account section (sync status, change password, log out), admin Users screen | In review; specs in [screens/login.md](../screens/login.md), [screens/admin-users.md](../screens/admin-users.md) | [link](https://claude.ai/artifact/VdRJ6tfNa4bLbjCRhpw2zX) |
+| [11-app-icons.html](11-app-icons.html) | Five premium app icon directions at real sizes, on the iPhone home screen and as favicon | **B · Goal Ring** chosen; source `apps/web/assets/app-icon.svg` | [link](https://claude.ai/artifact/5nBXzEzwagy5wCocPXra5W) |
 
 Note: prototypes 04 and 05 still show volume in a few places. Volume was removed from the UI on 2026-09-30, and the specs are the source of truth.
 

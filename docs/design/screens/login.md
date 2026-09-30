@@ -13,7 +13,7 @@ Prototype: [10-login-admin.html](../prototypes/10-login-admin.html) ([online](ht
 A full screen with no bottom nav, centred in the upper third:
 
 ```
-        [dumbbell mark]
+        [app icon]
         Fitness
 
   USERNAME

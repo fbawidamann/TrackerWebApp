@@ -133,6 +133,13 @@ A **floating pill above the bottom nav**: `REST` label · progress bar · `0:56`
 ### Bottom navigation
 Home · History · Workout · Exercises · Profile, with icons and **always-visible labels**. The active tab gets `accent-text` and a pill background. It sits on `surface` with a `line` top border.
 
+## App icon (chosen 2026-10-01)
+
+**Goal Ring**: a glowing cobalt progress ring (about 80 % closed, like the weekly goal) around a silver dumbbell, on the deep Graphite background with a soft cobalt halo. It was chosen from two rounds of options (see [prototypes/11-app-icons.html](prototypes/11-app-icons.html)); the first, flat round was rejected as too plain.
+- Source: `apps/web/assets/app-icon.svg`. `npm run icons -w @fitness/web` renders `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png` (also maskable; the artwork stays inside the safe zone), `favicon-32.png` and `favicon.svg`.
+- App icons may use gradients and glow. The in-app UI stays flat (no gradients), as in the principles above.
+- The login screen uses this icon as its brand mark.
+
 ## Screens (next planning step)
 
 1. Home
