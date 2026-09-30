@@ -13,8 +13,9 @@ Prototype: [10-login-admin.html](../prototypes/10-login-admin.html) ([online](ht
 A full screen with no bottom nav, centred in the upper third:
 
 ```
-        [app icon]
+        [app icon]              ← Goal Ring icon, 88 px, soft cobalt glow behind
         Fitness
+        Welcome back            ← muted, 14 px
 
   USERNAME
   [ LegendFLOO              ]
@@ -25,6 +26,7 @@ A full screen with no bottom nav, centred in the upper third:
 
   Accounts are created by the admin.     ← muted, 14 px
 ```
+- **Look (refined 2026-10-01):** the app icon (Goal Ring) is the brand mark, with a soft cobalt light behind it and a coloured shadow. On opening, the icon pops in and its ring draws itself once (about 1 s), and the form fades up. With reduced motion, nothing animates. It stays subtle: no gradients on the form, and the buttons are the standard ones.
 - Autofill-friendly: `autocomplete="username"` / `"current-password"`, so the iPhone keychain can fill both.
 - The **eye** button shows or hides the password.
 - **Log in** is disabled until both fields are filled. While waiting it shows `Logging in…`.
@@ -32,6 +34,7 @@ A full screen with no bottom nav, centred in the upper third:
   - wrong credentials or disabled account → `Username or password is wrong` (deliberately the same message),
   - rate-limited → `Too many attempts. Try again in 15 min.`,
   - offline → `No connection. Connect to the internet to log in.`
+- **Loading overlay:** full screen on `bg` with the same soft cobalt light. It shows the icon's ring (96 px) around the dumbbell, the title (18 px, 600) and a sub-line (e.g. `142 workouts`). For data upload/download the ring **fills up**, and for short waits (logging in or out) it **spins**.
 - **After success:**
   - with local data → a short full-screen state `Uploading your data…` (e.g. `142 workouts`), then Home;
   - otherwise → `Loading your data…` (pull), then Home.

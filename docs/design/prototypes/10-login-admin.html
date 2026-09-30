@@ -93,11 +93,17 @@
   .gen { font-size: 14px; font-weight: 600; color: var(--acc-text); padding: 4px 0; justify-self: start; }
 
   /* Login */
-  .login { min-height: 100%; display: grid; align-content: start; gap: 26px; padding: 64px 24px 32px; }
-  .brand { display: grid; justify-items: center; gap: 12px; margin-bottom: 8px; }
-  .mark { width: 64px; height: 64px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); display: grid; place-items: center; color: var(--acc); }
-  .mark svg { width: 34px; height: 34px; }
-  .brand h1 { margin: 0; font-size: 24px; font-weight: 600; }
+  .login { position: relative; min-height: 100%; display: grid; align-content: start; gap: 26px; padding: 60px 24px 32px; isolation: isolate; }
+  /* soft cobalt light behind the icon */
+  .login::before { content: ""; position: absolute; z-index: -1; left: 50%; top: -60px; width: 440px; height: 360px; transform: translateX(-50%); background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 26%, transparent), transparent); pointer-events: none; }
+  .app[data-mode="light"] .login::before { background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 18%, transparent), transparent); }
+  .brand { display: grid; justify-items: center; gap: 14px; margin-bottom: 10px; }
+  .appicon { width: 88px; height: 88px; border-radius: 20px; overflow: hidden; box-shadow: 0 22px 44px -16px color-mix(in oklab, var(--acc) 55%, transparent), 0 10px 24px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06); animation: pop .6s cubic-bezier(.2,.8,.2,1) both; }
+  .appicon svg { width: 100%; height: 100%; display: block; }
+  .appicon .arc { stroke-dasharray: 152 189; animation: draw 1.1s .15s cubic-bezier(.3,.7,.2,1) both; }
+  .brand h1 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+  .brand p { margin: -8px 0 0; font-size: 14px; color: var(--muted); }
+  .login form { animation: rise .5s .15s ease both; }
   .login .foot { text-align: center; }
 
   /* Rows */
@@ -136,9 +142,15 @@
   .mi { display: flex; justify-content: space-between; align-items: center; padding: 15px 4px; font-size: 17px; width: 100%; }
   .mi + .mi { border-top: 1px solid var(--card-div); }
   .mi.danger { color: var(--danger); }
-  .busy { position: absolute; inset: 0; z-index: 20; background: var(--bg); display: grid; place-items: center; align-content: center; gap: 14px; text-align: center; padding: 24px; }
-  .spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--raised); border-top-color: var(--acc); animation: spin .9s linear infinite; }
-  .busy b { font-size: 17px; font-weight: 600; }
+  .busy { position: absolute; inset: 0; z-index: 20; background: var(--bg); display: grid; place-items: center; align-content: center; gap: 10px; text-align: center; padding: 24px; isolation: isolate; animation: fadein .2s ease both; }
+  .busy::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: 380px; height: 380px; transform: translate(-50%, -62%); background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 20%, transparent), transparent); }
+  .ring { width: 96px; height: 96px; margin-bottom: 10px; overflow: visible; }
+  .ring .track { stroke: var(--raised); }
+  .ring .arc { stroke: var(--acc); filter: drop-shadow(0 0 5px color-mix(in oklab, var(--acc) 70%, transparent)); transform-origin: 50px 50px; }
+  .ring.spin .arc { stroke-dasharray: 70 251; animation: spin 1.1s linear infinite; }
+  .ring.fill .arc { stroke-dasharray: 251 251; transform: rotate(-90deg); animation: fillring 1.4s cubic-bezier(.4,0,.2,1) both; }
+  .ring .db { fill: var(--text); }
+  .busy b { font-size: 18px; font-weight: 600; }
   .toast { position: absolute; left: 16px; right: 16px; bottom: 86px; z-index: 12; padding: 12px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 15px; }
   .nav { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px 14px; border-top: 1px solid var(--line); background: var(--surf); }
   .nav button { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); }
@@ -148,7 +160,12 @@
   @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .sheet, .scrim { animation: none; } .spinner { animation-duration: 3s; } }
+  @keyframes draw { from { stroke-dashoffset: 152; } to { stroke-dashoffset: 0; } }
+  @keyframes fillring { from { stroke-dashoffset: 251; } to { stroke-dashoffset: 0; } }
+  @keyframes pop { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .sheet, .scrim, .appicon, .appicon .arc, .login form, .busy, .ring.fill .arc { animation: none; } .ring.spin .arc { animation-duration: 3s; } }
 </style>
 
 <div class="wrap">
@@ -251,10 +268,30 @@
   };
   const pwField = (id, label, value, show, auto) => '<div class="grp"><label class="lbl" for="' + id + '">' + label + '</label><div class="field-wrap"><input class="field pw' + (show ? " plain" : "") + '" id="' + id + '" type="' + (show ? "text" : "password") + '" autocomplete="' + auto + '" value="' + esc(value) + '"><button type="button" class="ib eye" data-act="eye" data-for="' + id + '" aria-label="' + (show ? "Hide" : "Show") + ' password">' + (show ? I.eyeOff : I.eye) + '</button></div></div>';
 
+  /** The app icon ("Goal Ring"), same artwork as apps/web/assets/app-icon.svg. */
+  const APP_ICON = '<svg viewBox="0 0 100 100" role="img" aria-label="Fitness app icon"><defs>' +
+    '<linearGradient id="ai-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1D2536"/><stop offset="1" stop-color="#06080C"/></linearGradient>' +
+    '<radialGradient id="ai-sheen" cx=".22" cy=".08" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".11"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="ai-halo" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="#4F86F7" stop-opacity=".28"/><stop offset="1" stop-color="#4F86F7" stop-opacity="0"/></radialGradient>' +
+    '<linearGradient id="ai-arc" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2450D4"/><stop offset=".6" stop-color="#4F86F7"/><stop offset="1" stop-color="#A9C4FF"/></linearGradient>' +
+    '<linearGradient id="ai-db" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#A9B4C6"/></linearGradient>' +
+    '<filter id="ai-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+    '<filter id="ai-dsh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#000" flood-opacity=".6"/></filter></defs>' +
+    '<rect width="100" height="100" fill="url(#ai-bg)"/><rect width="100" height="100" fill="url(#ai-halo)"/><rect width="100" height="100" fill="url(#ai-sheen)"/>' +
+    '<circle cx="50" cy="50" r="30" fill="none" stroke="#1A2233" stroke-width="9.5"/>' +
+    '<circle class="arc" cx="50" cy="50" r="30" fill="none" stroke="url(#ai-arc)" stroke-width="9.5" stroke-linecap="round" transform="rotate(-90 50 50)" filter="url(#ai-glow)"/>' +
+    '<g filter="url(#ai-dsh)" fill="url(#ai-db)"><rect x="37.5" y="48.3" width="25" height="3.4" rx="1.7"/><rect x="33.5" y="40" width="5.6" height="20" rx="2.2"/><rect x="60.9" y="40" width="5.6" height="20" rx="2.2"/><rect x="29.6" y="43.5" width="4.2" height="13" rx="1.8"/><rect x="66.2" y="43.5" width="4.2" height="13" rx="1.8"/></g></svg>';
+
+  /** Loading ring for the busy overlay: the icon's ring, filling (data upload/download) or spinning (short waits). */
+  const busyRing = (kind) => '<svg class="ring ' + kind + '" viewBox="0 0 100 100" aria-hidden="true">' +
+    '<circle class="track" cx="50" cy="50" r="40" fill="none" stroke-width="7"/>' +
+    '<circle class="arc" cx="50" cy="50" r="40" fill="none" stroke-width="7" stroke-linecap="round"/>' +
+    '<g class="db"><rect x="37.5" y="48.4" width="25" height="3.2" rx="1.6"/><rect x="33.8" y="41" width="5" height="18" rx="2"/><rect x="61.2" y="41" width="5" height="18" rx="2"/><rect x="30.3" y="44.2" width="3.8" height="11.6" rx="1.6"/><rect x="65.9" y="44.2" width="3.8" height="11.6" rx="1.6"/></g></svg>';
+
   function loginView() {
     const d = S.draft;
     return '<div class="login">' +
-      '<div class="brand"><div class="mark">' + I.lift + '</div><h1>Fitness</h1></div>' +
+      '<div class="brand"><div class="appicon">' + APP_ICON + '</div><h1>Fitness</h1><p>Welcome back</p></div>' +
       '<form class="grp" style="gap:18px" id="login-form" autocomplete="on">' +
         '<div class="grp"><label class="lbl" for="lg-user">Username</label><input class="field" id="lg-user" autocomplete="username" autocapitalize="none" spellcheck="false" value="' + esc(d.user) + '"></div>' +
         pwField("lg-pw", "Password", d.pw, d.show, "current-password") +
@@ -341,7 +378,7 @@
       '<div class="scroll">' + body + '</div>' +
       (S.view === "login" ? '' : '<nav class="nav" aria-label="Main">' + NAV.map(([l, svg]) => '<button type="button" class="' + (l === "Profile" ? "on" : "") + '" data-act="nav">' + svg + '<span>' + l + '</span></button>').join("") + '</nav>') +
       (S.sheet ? sheetView() : '') +
-      (S.busy ? '<div class="busy" role="status"><div class="spinner"></div><b>' + S.busy.title + '</b><span class="hint">' + S.busy.sub + '</span></div>' : '') +
+      (S.busy ? '<div class="busy" role="status">' + busyRing(S.busy.kind || "spin") + '<b>' + S.busy.title + '</b><span class="hint">' + S.busy.sub + '</span></div>' : '') +
       (S.toast ? '<div class="toast" role="status">' + S.toast + '</div>' : '') + '</div>';
     const nsc = root.querySelector(".scroll"); if (nsc && keep) nsc.scrollTop = top;
   }
@@ -363,7 +400,7 @@
     S.busy = { title: "Logging in…", sub: "" };
     render();
     setTimeout(() => {
-      S.busy = localData ? { title: "Uploading your data…", sub: "142 workouts" } : { title: "Loading your data…", sub: "" };
+      S.busy = localData ? { title: "Uploading your data…", sub: "142 workouts", kind: "fill" } : { title: "Loading your data…", sub: "", kind: "fill" };
       render();
       setTimeout(() => {
         S.account = { name: u.name, role: u.role };
