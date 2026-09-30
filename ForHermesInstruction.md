@@ -25,7 +25,23 @@ Files in the repo root that matter to you:
 ## Steps
 
 ### 1. Get the code onto the server
-Florian gives you the code either as a **git URL** (then `git clone <url> /opt/fitness-tracker`) or as a **copied folder** at `/opt/fitness-tracker`. If neither is there yet, stop and ask him. Don't invent a source.
+The code is on GitHub: **https://github.com/fbawidamann/TrackerWebApp** (branch `main`).
+
+```bash
+git clone https://github.com/fbawidamann/TrackerWebApp.git /opt/fitness-tracker
+```
+
+If the repository is **private**, the clone needs read access. Preferred: create an SSH key on this server just for this repo, and ask Florian to add the **public** key as a read-only *Deploy key* (GitHub → repo → Settings → Deploy keys). Then clone via `git@github.com:fbawidamann/TrackerWebApp.git`.
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/fitness_deploy -N "" -C "fitness-tracker deploy"
+cat ~/.ssh/fitness_deploy.pub          # send this line to Florian
+# ~/.ssh/config:
+#   Host github-fitness
+#     HostName github.com
+#     IdentityFile ~/.ssh/fitness_deploy
+git clone git@github-fitness:fbawidamann/TrackerWebApp.git /opt/fitness-tracker
+```
+Never ask for or store Florian's GitHub password or personal tokens.
 
 ### 2. Read the existing Traefik setup (read-only)
 Find these values, but do **not** change the Traefik configuration:

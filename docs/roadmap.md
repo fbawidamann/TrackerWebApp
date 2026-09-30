@@ -25,7 +25,7 @@ The order is deliberate: the app is fully usable offline on one device after **M
 - [x] **M5: Progress**: exercise chart (heaviest weight / best set reps, 3M–All), heaviest-weight PRs, PR history, finish summary (the Stats page is deferred)
 - [x] **M6: PWA and polish**: installable PWA, offline app shell, runtime image caching, JSON backup export/import, all Profile settings
 
-Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation changes). Not done yet: the desktop master–detail layouts (low priority), and pushing the CI workflow to GitHub (the repo has no remote yet).
+Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation changes). Not done yet: the desktop master–detail layouts (low priority), and pushing the CI workflow to GitHub (repo: github.com/fbawidamann/TrackerWebApp).
 
 ## Phase 1b: Backend and sync
 - [ ] **M7: Backend**: Postgres (Docker), Drizzle schema + migrations, Hono API, Better Auth (email + password), login/register screens
