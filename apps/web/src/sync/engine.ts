@@ -27,6 +27,23 @@ export async function pendingCount(): Promise<number> {
   return new Set(entries.map((e) => key(e.table, e.rowId))).size;
 }
 
+/** Rough upper bound for one push request: GPS tracks are tens of kB each, so many of them are split up. */
+const PUSH_MAX_BYTES = 1_000_000;
+
+/** Splits changes into requests of at most SYNC_PUSH_MAX rows and about PUSH_MAX_BYTES. */
+export function batches<T>(changes: T[]): T[][] {
+  const out: T[][] = [];
+  let cur: T[] = [], bytes = 0;
+  for (const c of changes) {
+    const size = JSON.stringify(c).length;
+    if (cur.length && (cur.length >= SYNC_PUSH_MAX || bytes + size > PUSH_MAX_BYTES)) { out.push(cur); cur = []; bytes = 0; }
+    cur.push(c);
+    bytes += size;
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
 async function push(): Promise<void> {
   const entries = await db.outbox.toArray();
   if (!entries.length) return;
@@ -43,8 +60,8 @@ async function push(): Promise<void> {
     changes.push({ table, row });
   }
 
-  for (let i = 0; i < changes.length; i += SYNC_PUSH_MAX) {
-    const res = await api<PushResponse>("POST", "/api/sync/push", { changes: changes.slice(i, i + SYNC_PUSH_MAX) });
+  for (const batch of batches(changes)) {
+    const res = await api<PushResponse>("POST", "/api/sync/push", { changes: batch });
     for (const a of res.accepted) done.add(key(a.table, a.id));
     if (res.rejected.length) {
       // Keep rejected rows aside so they don't block the queue forever.

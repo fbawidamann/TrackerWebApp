@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { getRoutineItems, saveRoutine, type RoutineItemInput } from "@/db/actions";
 import { useCatalog, useRoutines, useTraining } from "@/data/hooks";
 import { ExercisePicker } from "@/features/exercises/ExercisePicker";
-import { columnsFor, EQUIPMENT_LABEL } from "@/lib/labels";
+import { useT } from "@/i18n";
+import { columnsFor } from "@/lib/labels";
 import { useFormat } from "@/lib/useFormat";
 import { IconMore } from "@/ui/icons";
 import { ReorderList } from "@/ui/ReorderList";
@@ -23,6 +24,8 @@ export function RoutineEditor() {
   const training = useTraining();
   const routines = useRoutines();
   const fmt = useFormat();
+  const t = useT();
+  const r9 = t.routines;
   const [name, setName] = useState("");
   const [items, setItems] = useState<Item[] | null>(isNew ? [] : null);
   const [dirty, setDirty] = useState(false);
@@ -44,7 +47,7 @@ export function RoutineEditor() {
   const save = async () => {
     if (!valid) return;
     await saveRoutine(params.routineId ?? null, name, items.map(({ key: _k, ...rest }) => rest));
-    toast("Routine saved");
+    toast(r9.saved);
     router.history.back();
   };
   const lastText = (exerciseId: string) => {
@@ -57,7 +60,7 @@ export function RoutineEditor() {
       const top = work.find((x) => x.weightKg === s.heaviest);
       return `${fmt.weight(s.heaviest)} × ${top?.reps ?? 0}`;
     }
-    return s.bestReps !== null ? `${s.bestReps} reps` : null;
+    return s.bestReps !== null ? t.common.reps(s.bestReps) : null;
   };
   const menuItem = sheet && sheet.kind !== "discard" ? items.find((i) => i.key === sheet.key) : undefined;
 
@@ -65,10 +68,10 @@ export function RoutineEditor() {
     return (
       <div className="page tight no-nav">
         <div className="ehead" style={{ padding: 0, margin: "-6px -8px -10px" }}>
-          <span style={{ width: 60 }} /><h1>Change order</h1>
-          <button type="button" className="tbtn save" onClick={() => setReordering(false)}>Done</button>
+          <span style={{ width: 60 }} /><h1>{r9.changeOrder}</h1>
+          <button type="button" className="tbtn save" onClick={() => setReordering(false)}>{t.common.done}</button>
         </div>
-        <ReorderList items={items.map((i) => ({ id: i.key, label: catalog.byId.get(i.exerciseId)?.name ?? "Exercise" }))}
+        <ReorderList items={items.map((i) => ({ id: i.key, label: catalog.byId.get(i.exerciseId)?.name ?? t.common.exercise }))}
           onChange={(keys) => change((l) => keys.map((k) => l.find((i) => i.key === k)!))} />
       </div>
     );
@@ -77,13 +80,13 @@ export function RoutineEditor() {
   return (
     <div className="page tight no-nav">
       <div className="ehead" style={{ padding: 0, margin: "-6px -8px -6px" }}>
-        <button type="button" className="tbtn" onClick={() => (dirty ? setSheet({ kind: "discard" }) : router.history.back())}>Cancel</button>
-        <h1>{isNew ? "New routine" : "Edit routine"}</h1>
-        <button type="button" className="tbtn save" disabled={!valid} onClick={() => void save()}>Save</button>
+        <button type="button" className="tbtn" onClick={() => (dirty ? setSheet({ kind: "discard" }) : router.history.back())}>{t.common.cancel}</button>
+        <h1>{isNew ? r9.newRoutine : r9.editRoutine}</h1>
+        <button type="button" className="tbtn save" disabled={!valid} onClick={() => void save()}>{t.common.save}</button>
       </div>
       <div className="grp" style={{ gap: 8 }}>
-        <label className="lbl" htmlFor="r-name">Name</label>
-        <input id="r-name" className="field" maxLength={40} autoComplete="off" placeholder="e.g. Push Day" value={name} autoFocus={isNew}
+        <label className="lbl" htmlFor="r-name">{t.common.name}</label>
+        <input id="r-name" className="field" maxLength={40} autoComplete="off" placeholder={r9.namePlaceholder} value={name} autoFocus={isNew}
           onChange={(e) => { setName(e.target.value); setDirty(true); }} />
       </div>
       {items.length > 0 && (
@@ -96,26 +99,26 @@ export function RoutineEditor() {
             return (
               <section key={i.key} className="card ex" style={{ padding: "16px 16px 12px", gap: 4 }}>
                 <div className="ex-head">
-                  <h2 className="ex-name">{ex?.name ?? "Exercise"}<span className="ex-eq">{ex ? EQUIPMENT_LABEL[ex.equipment] : ""}</span></h2>
-                  <button type="button" className="ib" onClick={() => setSheet({ kind: "menu", key: i.key })} aria-label={`${ex?.name ?? "Exercise"} options`}><IconMore /></button>
+                  <h2 className="ex-name">{ex?.name ?? t.common.exercise}<span className="ex-eq">{ex ? t.equipment[ex.equipment] : ""}</span></h2>
+                  <button type="button" className="ib" onClick={() => setSheet({ kind: "menu", key: i.key })} aria-label={r9.options(ex?.name ?? t.common.exercise)}><IconMore /></button>
                 </div>
-                {last && <p className="hint" style={{ marginTop: 4 }}>Last: {last}</p>}
+                {last && <p className="hint" style={{ marginTop: 4 }}>{r9.lastSession(last)}</p>}
                 {i.note && <p className="ex-note" style={{ marginTop: 2 }}>{i.note}</p>}
                 <div className="steps">
                   <div className="step">
-                    <span className="lbl">Warm-up</span>
+                    <span className="lbl">{r9.warmup}</span>
                     <span className="stepper">
-                      <button type="button" disabled={i.warmupSets <= 0} onClick={() => step("warmupSets", -1)} aria-label="Fewer warm-up sets">−</button>
+                      <button type="button" disabled={i.warmupSets <= 0} onClick={() => step("warmupSets", -1)} aria-label={r9.fewerWarmups}>−</button>
                       <b>{i.warmupSets}</b>
-                      <button type="button" disabled={i.warmupSets >= 5} onClick={() => step("warmupSets", 1)} aria-label="More warm-up sets">+</button>
+                      <button type="button" disabled={i.warmupSets >= 5} onClick={() => step("warmupSets", 1)} aria-label={r9.moreWarmups}>+</button>
                     </span>
                   </div>
                   <div className="step">
-                    <span className="lbl">Sets</span>
+                    <span className="lbl">{r9.sets}</span>
                     <span className="stepper">
-                      <button type="button" disabled={i.workingSets <= 1} onClick={() => step("workingSets", -1)} aria-label="Fewer sets">−</button>
+                      <button type="button" disabled={i.workingSets <= 1} onClick={() => step("workingSets", -1)} aria-label={r9.fewerSets}>−</button>
                       <b>{i.workingSets}</b>
-                      <button type="button" disabled={i.workingSets >= 10} onClick={() => step("workingSets", 1)} aria-label="More sets">+</button>
+                      <button type="button" disabled={i.workingSets >= 10} onClick={() => step("workingSets", 1)} aria-label={r9.moreSets}>+</button>
                     </span>
                   </div>
                 </div>
@@ -124,7 +127,7 @@ export function RoutineEditor() {
           })}
         </div>
       )}
-      <button type="button" className="btn btn-block" onClick={() => setPicker({ mode: "multi" })}>Add exercise</button>
+      <button type="button" className="btn btn-block" onClick={() => setPicker({ mode: "multi" })}>{r9.addExercise}</button>
 
       {picker && (
         <ExercisePicker mode={picker.mode} onClose={() => setPicker(null)} onDone={(ids) => {
@@ -134,18 +137,18 @@ export function RoutineEditor() {
         }} />
       )}
       {sheet?.kind === "discard" && (
-        <ConfirmSheet title="Discard changes?" text="Your edits will be lost." confirm="Discard" cancel="Keep editing" danger onConfirm={() => router.history.back()} onClose={() => setSheet(null)} />
+        <ConfirmSheet title={t.common.discardChanges} text={r9.editsLost} confirm={t.common.discard} cancel={t.common.keepEditing} danger onConfirm={() => router.history.back()} onClose={() => setSheet(null)} />
       )}
       {sheet?.kind === "menu" && menuItem && (
-        <MenuSheet title={catalog.byId.get(menuItem.exerciseId)?.name ?? "Exercise"} onClose={() => setSheet(null)} items={[
-          { label: "Note", onSelect: () => setSheet({ kind: "note", key: menuItem.key }) },
-          { label: "Replace exercise", onSelect: () => setPicker({ mode: "single", key: menuItem.key }) },
-          { label: "Reorder exercises", onSelect: () => setReordering(true) },
-          { label: "Remove exercise", danger: true, onSelect: () => change((l) => l.filter((x) => x.key !== menuItem.key)) },
+        <MenuSheet title={catalog.byId.get(menuItem.exerciseId)?.name ?? t.common.exercise} onClose={() => setSheet(null)} items={[
+          { label: r9.note, onSelect: () => setSheet({ kind: "note", key: menuItem.key }) },
+          { label: r9.replaceExercise, onSelect: () => setPicker({ mode: "single", key: menuItem.key }) },
+          { label: r9.reorderExercises, onSelect: () => setReordering(true) },
+          { label: r9.removeExercise, danger: true, onSelect: () => change((l) => l.filter((x) => x.key !== menuItem.key)) },
         ]} />
       )}
       {sheet?.kind === "note" && menuItem && (
-        <TextSheet title="Note" initial={menuItem.note} maxLength={120} placeholder="e.g. Seat 4, grip wide" onClose={() => setSheet(null)}
+        <TextSheet title={r9.note} initial={menuItem.note} maxLength={120} placeholder={r9.notePlaceholder} onClose={() => setSheet(null)}
           onSave={(v) => change((l) => l.map((x) => (x.key === menuItem.key ? { ...x, note: v } : x)))} />
       )}
     </div>

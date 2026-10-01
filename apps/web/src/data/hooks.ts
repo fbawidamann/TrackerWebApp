@@ -1,21 +1,24 @@
 import {
   DEFAULT_DEVICE_SETTINGS, DEFAULT_USER_SETTINGS, MUSCLE_TO_GROUP,
   type Activity, type ActivityExercise, type DeviceSettings, type Exercise, type MuscleGroup, type Routine,
-  type RoutineExercise, type UserSettings, type WorkoutSet,
+  type RoutineExercise, type RunTrack, type UserSettings, type WorkoutSet,
 } from "@fitness/shared";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import type { RestState } from "@/db/actions";
 import { db, LOCAL_USER } from "@/db/db";
+import { initialLanguage } from "@/i18n/device";
+import { buildRuns, type RunView } from "@/lib/runStats";
 import { buildTraining, type Training } from "@/lib/training";
 
 const alive = <T extends { deletedAt: string | null }>(r: T) => r.deletedAt === null;
 const byPosition = <T extends { position: number }>(a: T, b: T) => a.position - b.position;
 
-const FALLBACK_SETTINGS: UserSettings = { ...DEFAULT_USER_SETTINGS, userId: LOCAL_USER, updatedAt: "" };
+const FALLBACK_SETTINGS: UserSettings = { ...DEFAULT_USER_SETTINGS, language: initialLanguage(), userId: LOCAL_USER, updatedAt: "" };
 
 export function useSettings(): UserSettings {
   const row = useLiveQuery(() => db.settings.get("user"), []);
+  // Rows saved before a setting existed (e.g. `language`) lack it: the fallback fills the gap.
   return useMemo(() => ({ ...FALLBACK_SETTINGS, ...(row ?? {}) }), [row]);
 }
 
@@ -68,7 +71,7 @@ export interface ActiveWorkout {
 /** The workout currently in progress (at most one), or null. `undefined` while loading. */
 export function useActiveWorkout(): ActiveWorkout | null | undefined {
   return useLiveQuery(async () => {
-    const acts = (await db.activities.where("status").equals("in_progress").toArray()).filter(alive);
+    const acts = (await db.activities.where("status").equals("in_progress").toArray()).filter((a) => alive(a) && a.type === "gym");
     const activity = acts.sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
     if (!activity) return null;
     const aes = (await db.activityExercises.where("activityId").equals(activity.id).toArray()).filter(alive).sort(byPosition);
@@ -107,6 +110,22 @@ export function lastDoneByRoutine(training: Training): Map<string, Date> {
     if (id && !out.has(id)) out.set(id, w.start);
   }
   return out;
+}
+
+/* ---------- Running ---------- */
+
+/** All completed runs, newest first. `undefined` while loading. */
+export function useRuns(): RunView[] | undefined {
+  const data = useLiveQuery(async () => {
+    const [activities, runs] = await Promise.all([db.activities.toArray(), db.runs.toArray()]);
+    return { activities, runs };
+  }, []);
+  return useMemo(() => (data ? buildRuns(data.activities, data.runs) : undefined), [data]);
+}
+
+/** The GPS track of one run, null when it has none. `undefined` while loading. */
+export function useRunTrack(activityId: string): RunTrack | null | undefined {
+  return useLiveQuery(async () => (await db.runTracks.where("activityId").equals(activityId).toArray()).find(alive) ?? null, [activityId]);
 }
 
 /* ---------- Account and sync (M7/M8) ---------- */

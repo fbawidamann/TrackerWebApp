@@ -42,6 +42,7 @@ npm run lint | typecheck | test | build
 npx vitest run src/db/actions.test.ts         # single test file (run inside apps/web or packages/shared)
 npx vitest run -t "detects heaviest-weight"   # single test by name
 npm run catalog:import               # regenerate packages/shared/data/exercises.json from free-exercise-db
+npm run catalog:version              # after editing data/exercises.de.json (devices re-seed; a test checks it)
 npm run icons -w @fitness/web        # regenerate PWA icons
 ```
 
@@ -62,6 +63,7 @@ npm run icons -w @fitness/web        # regenerate PWA icons
 - `data/hooks.ts` live queries (`useSettings`, `useCatalog`, `useTraining`, `useActiveWorkout`, `useRoutines`, `useRest`). `lib/training.ts` derives history, per-exercise sessions and PRs from raw rows (pure, tested).
 - `features/<screen>/` one folder per screen spec; `features/workout/SetTable.tsx` is the set table shared by live logging and history edit mode; `features/exercises/ExerciseBrowser.tsx` is shared by the Exercises tab and the picker.
 - `ui/` Sheet/MenuSheet/ConfirmSheet/RadioSheet/TextSheet, Toast (with Undo), Overlay, ReorderList, LineChart, icons. `app/` router, Layout (login gate, nav, mini bar), theme (accent/text size/theme on `<html>`).
+- `i18n/` en.ts (source dictionary) + de.ts (typed `Dict`), `useT()` in components, `tr()`/`currentLanguage()` elsewhere. Every UI string goes into both files. German catalog: `packages/shared/data/exercises.de.json` by slug, seeded in the chosen language ([ADR 0007](docs/adr/0007-german-language.md)).
 - `sync/engine.ts` push/pull + triggers · `sync/account.ts` login (re-own local data), logout (wipe) · `api/client.ts` fetch wrapper · `db/owner.ts` current userId for writes. `features/auth/` Login, `features/admin/` Users (admin only), `features/profile/AccountSection.tsx`.
 
 ## Architecture rules

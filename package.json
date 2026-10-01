@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "catalog:import": "npm run catalog:import -w @fitness/shared",
     "catalog:images": "npm run catalog:images -w @fitness/shared",
+    "catalog:version": "npm run catalog:version -w @fitness/shared",
     "dev:api": "npm run dev -w @fitness/api"
   },
   "devDependencies": {

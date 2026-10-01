@@ -30,7 +30,10 @@ export const MUSCLE_TO_GROUP: Record<Muscle, MuscleGroup> = {
 export const LEVELS = ["beginner", "intermediate", "expert"] as const;
 export const SET_TYPES = ["normal", "warmup", "drop", "failure"] as const;
 export type SetType = (typeof SET_TYPES)[number];
-export const ACTIVITY_TYPES = ["gym"] as const;
+export const ACTIVITY_TYPES = ["gym", "run"] as const;
+export type ActivityType = (typeof ACTIVITY_TYPES)[number];
+export const RUN_SOURCES = ["manual", "gpx", "fit"] as const;
+export type RunSource = (typeof RUN_SOURCES)[number];
 export const ACTIVITY_STATUS = ["in_progress", "completed"] as const;
 
 /* ---------- Common columns ---------- */
@@ -118,17 +121,63 @@ export const workoutSetSchema = syncedBase.extend({
 });
 export type WorkoutSet = z.infer<typeof workoutSetSchema>;
 
+/* ---------- Running (docs/design/screens/running.md) ---------- */
+
+const hr = z.number().int().min(20).max(255);
+
+/** One per run activity: the totals. Manual runs have only these; imported runs also have a track. */
+export const runSchema = syncedBase.extend({
+  activityId: z.string().min(1),
+  distanceM: z.number().min(0).max(1_000_000),
+  /** Moving time (pauses removed). Elapsed time is activity.endedAt − startedAt. */
+  movingTimeS: z.number().int().min(0).max(7 * 86_400),
+  elevationGainM: z.number().min(0).max(20_000).nullable(),
+  avgHr: hr.nullable(),
+  maxHr: hr.nullable(),
+  source: z.enum(RUN_SOURCES),
+  /**
+   * Fastest time (s) per standard distance within this run, keyed by metres ("1000", "5000" …).
+   * Computed once at import: tracks are never edited, so it can't go stale (docs/architecture/data-model.md).
+   */
+  efforts: z.record(z.string(), z.number().min(0)),
+  hasTrack: z.boolean(),
+});
+export type Run = z.infer<typeof runSchema>;
+
+const MAX_TRACK_POINTS = 12_000;
+
+/**
+ * The GPS route of an imported run, downsampled to about one point per 5 s.
+ * `polyline` = lat/lon in the Google polyline encoding (1e-5°), the arrays are parallel to it.
+ */
+export const runTrackSchema = syncedBase.extend({
+  activityId: z.string().min(1),
+  polyline: z.string().max(MAX_TRACK_POINTS * 12),
+  /** Seconds since the start. */
+  t: z.array(z.number().int().min(0)).max(MAX_TRACK_POINTS),
+  /** Metres above sea level, rounded to 0.1 m. */
+  ele: z.array(z.number()).max(MAX_TRACK_POINTS).nullable(),
+  /** Heart rate in bpm, 0 = no reading. */
+  hr: z.array(z.number().int().min(0).max(255)).max(MAX_TRACK_POINTS).nullable(),
+});
+export type RunTrack = z.infer<typeof runTrackSchema>;
+
 /* ---------- Settings ---------- */
 
 export const ACCENTS = ["cobalt", "teal", "amber", "rose", "violet"] as const;
 export type Accent = (typeof ACCENTS)[number];
 export const WEIGHT_STEPS_KG = [2.5, 1.25, 1, 0.5] as const;
+/** UI languages (docs/adr/0007-german-language.md). */
+export const LANGUAGES = ["en", "de"] as const;
+export type Language = (typeof LANGUAGES)[number];
 
 export const userSettingsSchema = z.object({
   id: z.literal("user"),
   userId: z.string().min(1),
   updatedAt: isoDate,
   displayName: z.string().max(30),
+  // Added with German (2026-10-01); rows saved before have no value and count as English.
+  language: z.enum(LANGUAGES).default("en"),
   weeklyGoal: z.number().int().min(1).max(7),
   weekStart: z.enum(["monday", "sunday"]),
   defaultSets: z.number().int().min(1).max(5),
@@ -155,6 +204,7 @@ export type UserSettings = z.infer<typeof userSettingsSchema>;
 export const DEFAULT_USER_SETTINGS: Omit<UserSettings, "userId" | "updatedAt"> = {
   id: "user",
   displayName: "",
+  language: "en",
   weeklyGoal: 3,
   weekStart: "monday",
   defaultSets: 3,
@@ -201,6 +251,9 @@ export const backupSchema = z.object({
     activityExercises: z.array(activityExerciseSchema),
     sets: z.array(workoutSetSchema),
     settings: z.array(userSettingsSchema),
+    // Added with running; optional so older backups still import.
+    runs: z.array(runSchema).default([]),
+    runTracks: z.array(runTrackSchema).default([]),
   }),
 });
 export type Backup = z.infer<typeof backupSchema>;

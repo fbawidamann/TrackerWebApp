@@ -4,13 +4,14 @@
  */
 import { builtinExerciseId } from "@fitness/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { deleteWorkout, finishWorkout, saveRoutine, startWorkout, updateSet, updateSettings } from "@/db/actions";
+import { deleteWorkout, finishWorkout, importRun, saveRoutine, saveRun, startWorkout, updateSet, updateSettings } from "@/db/actions";
 import { db, FitnessDb, setDb } from "@/db/db";
 import { setOwner } from "@/db/owner";
 import { ensureSettings } from "@/db/seed";
+import { buildRuns } from "@/lib/runStats";
 import { buildTraining } from "@/lib/training";
 import { getAccount, login, logout } from "@/sync/account";
-import { pendingCount, syncNow } from "@/sync/engine";
+import { batches, pendingCount, syncNow } from "@/sync/engine";
 import { createApp } from "./app";
 import { LoginLimiter } from "./auth/rateLimit";
 import { openDatabase, type Database } from "./db/client";
@@ -122,6 +123,33 @@ describe("sync between devices", () => {
     await use(phone);
     await syncNow();
     expect((await workouts()).map((w) => w.activity.id)).not.toContain(firstId);
+  });
+
+  it("runs with their GPS track reach the other device", async () => {
+    await use(pc);
+    // 10 km at 5:00 /km, one point per second: the track is downsampled, but still the biggest row we sync.
+    const points = Array.from({ length: 3001 }, (_, t) => ({ lat: 48.1 + (t / 3000) * 10_000 / 111_194.9, lon: 11.5, t, ele: 500, hr: 150 }));
+    const { activityId } = await importRun({ source: "gpx", name: "Long run", startedAt: new Date("2026-09-27T07:00:00Z"), points, totals: {} });
+    await saveRun({ activityId: null, name: "", startedAt: new Date("2026-09-29T18:00:00Z"), distanceM: 5000, movingTimeS: 1500, elevationGainM: null, avgHr: null, notes: "" });
+    await syncNow();
+    expect(await pendingCount()).toBe(0);
+    await use(phone);
+    await syncNow();
+    const runs = buildRuns(await db.activities.toArray(), await db.runs.toArray());
+    expect(runs.map((r) => r.activity.name).sort()).toEqual(["Evening run", "Long run"].sort());
+    const track = (await db.runTracks.where("activityId").equals(activityId).toArray())[0]!;
+    expect(track.t.length).toBeGreaterThan(500);
+    expect(runs.find((r) => r.activity.id === activityId)!.run.efforts["10000"]).toBeCloseTo(3000, -1);
+    // Runs never show up as gym workouts.
+    expect((await workouts()).every((w) => w.activity.type === "gym")).toBe(true);
+  });
+
+  it("splits big pushes into small requests", () => {
+    const big = Array.from({ length: 30 }, (_, i) => ({ id: String(i), blob: "x".repeat(100_000) }));
+    const parts = batches(big);
+    expect(parts.length).toBeGreaterThan(2);
+    expect(parts.flat()).toHaveLength(30);
+    expect(batches(Array.from({ length: 1200 }, (_, i) => ({ id: i }))).map((p) => p.length)).toEqual([500, 500, 200]);
   });
 
   it("logout wipes the device, and nothing is lost on the server", async () => {

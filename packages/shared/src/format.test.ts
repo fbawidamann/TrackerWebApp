@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_FORMAT_PREFS as P, formatClock, formatDate, formatDuration, formatNumber, formatRelativeDay,
-  formatWeekLabel, formatWeight, parseRepsInput, parseWeightInput, startOfWeek, toDisplayWeight, workoutNameForTime,
+  formatShortDate, formatWeekLabel, formatWeight, monthAxisLabel, monthName, parseRepsInput, parseWeightInput, runNameForTime,
+  startOfWeek, toDisplayWeight, weekdayName, workoutNameForTime,
 } from "./format";
 
 const NOW = new Date(2026, 8, 30, 12); // Wednesday, 30 September 2026
@@ -78,5 +79,36 @@ describe("dates", () => {
     expect(workoutNameForTime(new Date(2026, 8, 30, 9))).toBe("Morning workout");
     expect(workoutNameForTime(new Date(2026, 8, 30, 14))).toBe("Afternoon workout");
     expect(workoutNameForTime(new Date(2026, 8, 30, 19))).toBe("Evening workout");
+  });
+});
+
+describe("German dates and names", () => {
+  const DE = { ...P, language: "de" as const };
+  it("formats long, short and relative dates", () => {
+    expect(formatDate(new Date(2026, 8, 29), DE, NOW)).toBe("Dienstag, 29. September");
+    expect(formatDate(new Date(2025, 2, 3), DE, NOW)).toBe("Montag, 3. März 2025");
+    expect(formatShortDate(new Date(2026, 8, 20), DE, NOW)).toBe("20. Sept.");
+    expect(formatShortDate(new Date(2026, 4, 2), DE, NOW)).toBe("2. Mai");
+    expect(formatRelativeDay(new Date(2026, 8, 30, 8), DE, NOW)).toBe("Heute");
+    expect(formatRelativeDay(new Date(2026, 8, 29), DE, NOW)).toBe("Gestern");
+    expect(formatRelativeDay(new Date(2026, 8, 26), DE, NOW)).toBe("Sa.");
+  });
+  it("labels weeks", () => {
+    expect(formatWeekLabel(new Date(2026, 8, 28), DE, NOW)).toBe("Diese Woche");
+    expect(formatWeekLabel(new Date(2026, 8, 21), DE, NOW)).toBe("Letzte Woche");
+    expect(formatWeekLabel(new Date(2026, 8, 14), DE, NOW)).toBe("14.–20. September");
+    expect(formatWeekLabel(new Date(2026, 7, 31), DE, NOW)).toBe("31. August – 6. September");
+  });
+  it("names workouts and runs by time of day", () => {
+    expect(workoutNameForTime(new Date(2026, 8, 30, 9), "de")).toBe("Morgentraining");
+    expect(workoutNameForTime(new Date(2026, 8, 30, 19), "de")).toBe("Abendtraining");
+    expect(runNameForTime(new Date(2026, 8, 30, 14), "de")).toBe("Nachmittagslauf");
+    expect(runNameForTime(new Date(2026, 8, 30, 19))).toBe("Evening run");
+  });
+  it("names months and weekdays", () => {
+    expect(monthName(2, DE)).toBe("März");
+    expect(weekdayName(0, DE)).toBe("Sonntag");
+    expect(monthAxisLabel(2, DE)).toBe("Mär");
+    expect(monthAxisLabel(2)).toBe("Mar");
   });
 });

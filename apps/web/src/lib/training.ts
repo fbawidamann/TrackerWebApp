@@ -54,7 +54,7 @@ export function buildTraining(
   sets: WorkoutSet[],
   includeWarmups: boolean,
 ): Training {
-  const completed = activities.filter((a) => a.deletedAt === null && a.status === "completed");
+  const completed = activities.filter((a) => a.deletedAt === null && a.status === "completed" && a.type === "gym");
   const actIds = new Set(completed.map((a) => a.id));
   const setsByAe = new Map<string, WorkoutSet[]>();
   for (const s of sets) {

@@ -8,7 +8,7 @@ Status: agreed on 2026-09-29.
 |---|---|
 | Users | Just me for now, but multi-user ready: accounts exist and every row has a `user_id` |
 | Scope order | 1. Gym → 2. Running + swimming → 3. Food tracking |
-| Language | English UI only |
+| Language | English and **German** (setting in Profile, [ADR 0007](adr/0007-german-language.md)); exercise names and instructions are translated too |
 | Devices | Phone in the gym (mobile-first, installable as a PWA); desktop mainly for stats and history |
 | Offline | Offline-first: logging must work fully without reception, and data syncs when online |
 | Login | Username + password, no registration: the admin (LegendFLOO) creates accounts ([ADR 0005](adr/0005-backend-auth-and-sync.md)) |
@@ -89,7 +89,13 @@ Status: agreed on 2026-09-29.
 ## Design
 Dark by default + light theme. Plain and calm, not "AI style". Readability first. Details in [design/ui-guidelines.md](design/ui-guidelines.md).
 
+## Running (details in [design/screens/running.md](design/screens/running.md), [ADR 0006](adr/0006-running.md))
+- A **Running** tab: period totals (week/month/year/all), weekly distance chart (12 weeks), personal bests (400 m to marathon), all runs.
+- Runs come from the watch: **import GPX or FIT** files (several at once, duplicates skipped), or **log a run by hand** (distance, time, optional elevation and heart rate).
+- Run detail: route drawn without map tiles, pace / elevation / heart-rate charts, per-km splits, best efforts.
+- Runs also show in History and the calendar. No live GPS recording in the app.
+
 ## Later phases (not planned in detail yet)
-- Running and swimming: manual entry first (distance, duration, laps/pool length); GPX import maybe.
+- Swimming: manual entry first (distance, duration, laps/pool length), like running.
 - Food tracking: foods, meals, calories/macros. A separate domain from activities.
 - Body measurements (bodyweight etc.): not in the MVP.

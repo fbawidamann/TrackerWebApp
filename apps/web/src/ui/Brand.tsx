@@ -1,10 +1,12 @@
 import { useId } from "react";
+import { useT } from "@/i18n";
 
 /** The app icon ("Goal Ring"), same artwork as assets/app-icon.svg. The ring draws itself once when `animate` is set. */
 export function AppIcon({ animate = false }: { animate?: boolean }) {
   const u = useId().replace(/:/g, "");
+  const t = useT();
   return (
-    <svg viewBox="0 0 100 100" role="img" aria-label="Fitness app icon">
+    <svg viewBox="0 0 100 100" role="img" aria-label={t.ui.appIcon}>
       <defs>
         <linearGradient id={`bg${u}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1D2536" /><stop offset="1" stopColor="#06080C" /></linearGradient>
         <radialGradient id={`sh${u}`} cx=".22" cy=".08" r=".85"><stop offset="0" stopColor="#fff" stopOpacity=".11" /><stop offset=".6" stopColor="#fff" stopOpacity="0" /></radialGradient>

@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from "dexie";
 import type {
-  Activity, ActivityExercise, Exercise, ExercisePref, Routine, RoutineExercise, UserSettings, WorkoutSet,
+  Activity, ActivityExercise, Exercise, ExercisePref, Routine, RoutineExercise, Run, RunTrack, UserSettings, WorkoutSet,
 } from "@fitness/shared";
 
 /** One pending change for the sync engine (M8). */
@@ -25,6 +25,8 @@ export class FitnessDb extends Dexie {
   activityExercises!: EntityTable<ActivityExercise, "id">;
   sets!: EntityTable<WorkoutSet, "id">;
   settings!: EntityTable<UserSettings, "id">;
+  runs!: EntityTable<Run, "id">;
+  runTracks!: EntityTable<RunTrack, "id">;
   outbox!: EntityTable<OutboxEntry, "seq">;
   meta!: EntityTable<MetaEntry, "key">;
 
@@ -42,11 +44,17 @@ export class FitnessDb extends Dexie {
       outbox: "++seq, table",
       meta: "key",
     });
+    // Running (docs/design/screens/running.md). Existing versions are never edited.
+    this.version(2).stores({
+      runs: "id, activityId",
+      runTracks: "id, activityId",
+    });
   }
 }
 
 export const SYNCED_TABLES = [
   "exercises", "exercisePrefs", "routines", "routineExercises", "activities", "activityExercises", "sets", "settings",
+  "runs", "runTracks",
 ] as const;
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
 

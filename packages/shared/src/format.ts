@@ -1,7 +1,10 @@
-import type { UserSettings } from "./schemas";
+import type { Language, UserSettings } from "./schemas";
 
 /** The settings that influence how numbers and dates are shown. */
-export type FormatPrefs = Pick<UserSettings, "weightUnit" | "decimalSeparator" | "dateFormat" | "weightStepKg" | "weekStart">;
+export type FormatPrefs = Pick<UserSettings, "weightUnit" | "decimalSeparator" | "dateFormat" | "weightStepKg" | "weekStart" | "language">;
+
+/** Date helpers take the language optionally; without it they write English. */
+type Lang = { language?: Language };
 
 export const DEFAULT_FORMAT_PREFS: FormatPrefs = {
   weightUnit: "kg",
@@ -9,6 +12,7 @@ export const DEFAULT_FORMAT_PREFS: FormatPrefs = {
   dateFormat: "long",
   weightStepKg: 2.5,
   weekStart: "monday",
+  language: "en",
 };
 
 export const KG_PER_LB = 0.45359237;
@@ -16,6 +20,36 @@ const NARROW_NBSP = " ";
 
 export const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] as const;
+
+/** Day and month names per language. German abbreviations follow the Duden/CLDR forms ("Sept.", "März", "Di."). */
+const NAMES: Record<Language, { weekdays: readonly string[]; weekdaysShort: readonly string[]; months: readonly string[]; monthsShort: readonly string[]; monthsAxis: readonly string[] }> = {
+  en: {
+    weekdays: WEEKDAYS,
+    weekdaysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    months: MONTHS,
+    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    monthsAxis: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  },
+  de: {
+    weekdays: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+    weekdaysShort: ["So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa."],
+    months: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    monthsShort: ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sept.", "Okt.", "Nov.", "Dez."],
+    monthsAxis: ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+  },
+};
+const names = (p: Lang) => NAMES[p.language ?? "en"];
+
+/** "March" / "März". */
+export const monthName = (month: number, p: Lang = {}): string => names(p).months[month]!;
+/** "Tuesday" / "Dienstag". */
+export const weekdayName = (day: number, p: Lang = {}): string => names(p).weekdays[day]!;
+/** Three-letter month for chart axes: "Mar" / "Mär". */
+export const monthAxisLabel = (month: number, p: Lang = {}): string => names(p).monthsAxis[month]!;
+/** "29 September" / "29. September" (no weekday, no year). */
+export function formatDayMonth(d: Date, p: Lang = {}): string {
+  return `${d.getDate()}${p.language === "de" ? "." : ""} ${monthName(d.getMonth(), p)}`;
+}
 
 /* ---------- Numbers and weights ---------- */
 
@@ -119,31 +153,32 @@ function dayDiff(a: Date, b: Date): number {
   return Math.round((startOfDay(a).getTime() - startOfDay(b).getTime()) / 86_400_000);
 }
 
-/** "Tuesday, 29 September" (year added when not the current year) or "29.09.2026". */
-export function formatDate(d: Date, prefs: Pick<FormatPrefs, "dateFormat">, now = new Date()): string {
+/** "Tuesday, 29 September" / "Dienstag, 29. September" (year added when not the current year) or "29.09.2026". */
+export function formatDate(d: Date, prefs: Pick<FormatPrefs, "dateFormat"> & Lang, now = new Date()): string {
   if (prefs.dateFormat === "numeric") {
     return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`;
   }
   const year = d.getFullYear() !== now.getFullYear() ? ` ${d.getFullYear()}` : "";
-  return `${WEEKDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]}${year}`;
+  return `${weekdayName(d.getDay(), prefs)}, ${formatDayMonth(d, prefs)}${year}`;
 }
 
-/** "22 Sep" or "22.09." — compact date without weekday. */
-export function formatShortDate(d: Date, prefs: Pick<FormatPrefs, "dateFormat">, now = new Date()): string {
+/** "22 Sep" / "22. Sept." or "22.09." — compact date without weekday. */
+export function formatShortDate(d: Date, prefs: Pick<FormatPrefs, "dateFormat"> & Lang, now = new Date()): string {
   if (prefs.dateFormat === "numeric") {
     const y = d.getFullYear() !== now.getFullYear() ? String(d.getFullYear()) : "";
     return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${y}`;
   }
   const y = d.getFullYear() !== now.getFullYear() ? ` ${d.getFullYear()}` : "";
-  return `${d.getDate()} ${MONTHS[d.getMonth()]!.slice(0, 3)}${y}`;
+  return `${d.getDate()}${prefs.language === "de" ? "." : ""} ${names(prefs).monthsShort[d.getMonth()]}${y}`;
 }
 
-/** "Today", "Yesterday", "Tue" (within a week), otherwise the short date. */
-export function formatRelativeDay(d: Date, prefs: Pick<FormatPrefs, "dateFormat">, now = new Date()): string {
+/** "Today" / "Heute", "Yesterday" / "Gestern", "Tue" / "Di." (within a week), otherwise the short date. */
+export function formatRelativeDay(d: Date, prefs: Pick<FormatPrefs, "dateFormat"> & Lang, now = new Date()): string {
   const diff = dayDiff(now, d);
-  if (diff === 0) return "Today";
-  if (diff === 1) return "Yesterday";
-  if (diff > 1 && diff < 7) return WEEKDAYS[d.getDay()]!.slice(0, 3);
+  const de = prefs.language === "de";
+  if (diff === 0) return de ? "Heute" : "Today";
+  if (diff === 1) return de ? "Gestern" : "Yesterday";
+  if (diff > 1 && diff < 7) return names(prefs).weekdaysShort[d.getDay()]!;
   return formatShortDate(d, prefs, now);
 }
 
@@ -158,24 +193,36 @@ export function startOfWeek(d: Date, weekStart: FormatPrefs["weekStart"]): Date 
   return new Date(day.getFullYear(), day.getMonth(), day.getDate() - offset);
 }
 
-/** "This week", "Last week", "14–20 September", "31 August – 6 September", with year when not current. */
-export function formatWeekLabel(weekStartDate: Date, prefs: Pick<FormatPrefs, "weekStart">, now = new Date()): string {
+/**
+ * "This week", "Last week", "14–20 September", "31 August – 6 September", with year when not current.
+ * German: "Diese Woche", "Letzte Woche", "14.–20. September", "31. August – 6. September".
+ */
+export function formatWeekLabel(weekStartDate: Date, prefs: Pick<FormatPrefs, "weekStart"> & Lang, now = new Date()): string {
+  const de = prefs.language === "de";
   const thisWeek = startOfWeek(now, prefs.weekStart).getTime();
   const t = startOfDay(weekStartDate).getTime();
-  if (t === thisWeek) return "This week";
-  if (dayDiff(new Date(thisWeek), weekStartDate) === 7) return "Last week";
+  if (t === thisWeek) return de ? "Diese Woche" : "This week";
+  if (dayDiff(new Date(thisWeek), weekStartDate) === 7) return de ? "Letzte Woche" : "Last week";
   const end = new Date(weekStartDate.getFullYear(), weekStartDate.getMonth(), weekStartDate.getDate() + 6);
   const y = end.getFullYear() !== now.getFullYear() ? ` ${end.getFullYear()}` : "";
   if (end.getMonth() === weekStartDate.getMonth()) {
-    return `${weekStartDate.getDate()}–${end.getDate()} ${MONTHS[end.getMonth()]}${y}`;
+    return `${weekStartDate.getDate()}${de ? "." : ""}–${formatDayMonth(end, prefs)}${y}`;
   }
-  return `${weekStartDate.getDate()} ${MONTHS[weekStartDate.getMonth()]} – ${end.getDate()} ${MONTHS[end.getMonth()]}${y}`;
+  return `${formatDayMonth(weekStartDate, prefs)} – ${formatDayMonth(end, prefs)}${y}`;
 }
 
+const PART_OF_DAY_NAMES: Record<Language, { workout: readonly string[]; run: readonly string[] }> = {
+  en: { workout: ["Morning workout", "Afternoon workout", "Evening workout"], run: ["Morning run", "Afternoon run", "Evening run"] },
+  de: { workout: ["Morgentraining", "Nachmittagstraining", "Abendtraining"], run: ["Morgenlauf", "Nachmittagslauf", "Abendlauf"] },
+};
+const partOfDay = (d: Date) => (d.getHours() < 12 ? 0 : d.getHours() < 17 ? 1 : 2);
+
 /** Name for an empty workout, from the time of day it starts. */
-export function workoutNameForTime(d: Date): string {
-  const h = d.getHours();
-  if (h < 12) return "Morning workout";
-  if (h < 17) return "Afternoon workout";
-  return "Evening workout";
+export function workoutNameForTime(d: Date, language: Language = "en"): string {
+  return PART_OF_DAY_NAMES[language].workout[partOfDay(d)]!;
+}
+
+/** Name for a run, from the time of day it starts. */
+export function runNameForTime(d: Date, language: Language = "en"): string {
+  return PART_OF_DAY_NAMES[language].run[partOfDay(d)]!;
 }

@@ -82,6 +82,8 @@ Font: **IBM Plex Sans** (400/500/600), with `font-variant-numeric: tabular-nums`
 | Duration | hours + zero-padded minutes | `58 min`, `1 h 04 min` |
 | Rest / elapsed timer | clock | `0:56`, `34:12` |
 
+In **German** ([ADR 0007](../adr/0007-german-language.md)) the same rules apply with German words: `Dienstag, 29. September`, short `Di., 29. Sept.`, `Heute` / `Gestern`, `Diese Woche`, chart months `Jan … Dez`, default names `Morgentraining` / `Abendlauf`. The decimal separator and the date format are still the user's own settings (German does not switch them to `82,5` / `29.09.2026` by itself). German words are longer: keep labels short (`Wdh.`, `Sätze`) and check segments and buttons at 375 px width.
+
 ## Shape and spacing
 
 | Token | Value |
@@ -131,7 +133,7 @@ A **floating pill above the bottom nav**: `REST` label · progress bar · `0:56`
 - This week: **day dots** (Mon–Sun). A day with a workout is a filled `accent-fill` dot, and today has an accent ring. Below the dots: workouts, volume and duration for the week.
 
 ### Bottom navigation
-Home · History · Workout · Exercises · Profile, with icons and **always-visible labels**. The active tab gets `accent-text` and a pill background. It sits on `surface` with a `line` top border.
+Home · History · Workout · Running · Exercises · Profile (six tabs since running, 2026-10-01), with icons and **always-visible labels**. The active tab gets `accent-text` and a pill background. It sits on `surface` with a `line` top border.
 
 ## App icon (chosen 2026-10-01)
 

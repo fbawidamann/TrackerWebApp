@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fitness/shared": "*",
+    "@garmin/fitsdk": "^21.217.0",
     "@tanstack/react-router": "^1.170.40",
     "dexie": "^4.4.0",
     "dexie-react-hooks": "^4.4.0",

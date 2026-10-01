@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { discardWorkout, getActiveWorkout, startWorkout } from "@/db/actions";
+import { useT } from "@/i18n";
 import { Sheet } from "@/ui/Sheet";
 
 type StartOpts = { routineId?: string; repeatActivityId?: string };
@@ -11,6 +12,7 @@ type StartOpts = { routineId?: string; repeatActivityId?: string };
  */
 export function useStarter(): { start: (opts?: StartOpts) => Promise<void>; element: ReactNode } {
   const navigate = useNavigate();
+  const w = useT().workout;
   const [conflict, setConflict] = useState<{ name: string; id: string; opts: StartOpts } | null>(null);
 
   const go = async (opts: StartOpts) => {
@@ -24,17 +26,17 @@ export function useStarter(): { start: (opts?: StartOpts) => Promise<void>; elem
   };
 
   const element = conflict && (
-    <Sheet onClose={() => setConflict(null)} label="Workout running">
-      <h3>{conflict.name} is still running</h3>
-      <p>Only one workout can run at a time.</p>
+    <Sheet onClose={() => setConflict(null)} label={w.runningLabel}>
+      <h3>{w.stillRunning(conflict.name)}</h3>
+      <p>{w.oneAtATime}</p>
       <div className="acts">
-        <button type="button" className="btn btn-primary btn-block" onClick={() => { setConflict(null); void navigate({ to: "/workout" }); }}>Resume {conflict.name}</button>
+        <button type="button" className="btn btn-primary btn-block" onClick={() => { setConflict(null); void navigate({ to: "/workout" }); }}>{w.resumeName(conflict.name)}</button>
         <button type="button" className="btn btn-block btn-danger" onClick={async () => {
           const c = conflict;
           setConflict(null);
           await discardWorkout(c.id);
           await go(c.opts);
-        }}>Discard it and start new</button>
+        }}>{w.discardAndStart}</button>
       </div>
     </Sheet>
   );

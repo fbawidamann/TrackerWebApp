@@ -34,8 +34,9 @@ APPEARANCE
 │ Navigation labels [Always | Active]  │
 │ History cards  [Names only | Detailed]│
 └──────────────────────────────────────┘
-UNITS AND FORMATS
-┌ Weight unit          [kg | lb]       ┐
+LANGUAGE AND FORMATS
+┌ Language     [English | Deutsch]     ┐  each language named in itself
+│ Weight unit          [kg | lb]       │
 │ Decimal separator  [82.5 | 82,5]     │
 │ Date format        Tuesday, 29 Sep › │
 │ Example: 82,5 kg · 29.09.2026        │  live example line (muted)
@@ -90,9 +91,10 @@ ABOUT
 | Appearance | Text size | **Standard** (17 px base), Large (19 px base, every size +2 px) | this device |
 | Appearance | Navigation labels | **Always**, Active tab only | synced |
 | Appearance | History cards | **Names only**, Detailed (the earlier style A: `4 sets · best 82.5 kg` per exercise) | synced |
-| Units and formats | Weight unit | **kg**, lb (stored as kg; converted and rounded to the weight step for display) | synced |
-| Units and formats | Decimal separator | **82.5**, 82,5 (input accepts both regardless) | synced |
-| Units and formats | Date format | **Tuesday, 29 September**, 29.09.2026 | synced |
+| Language and formats | Language | **English** or Deutsch. A new device starts with the language last used on it, else the browser's (German browser → Deutsch). Changes the whole UI and the built-in exercise names and instructions at once; weight unit, decimal separator and date format stay separate settings ([ADR 0007](../../adr/0007-german-language.md)) | synced |
+| Language and formats | Weight unit | **kg**, lb (stored as kg; converted and rounded to the weight step for display) | synced |
+| Language and formats | Decimal separator | **82.5**, 82,5 (input accepts both regardless) | synced |
+| Language and formats | Date format | **Tuesday, 29 September**, 29.09.2026 | synced |
 | Home | Start screen | **Home**, Workout | synced |
 | Home | Show weekly goal / Routines / Recent workouts / Latest PRs | each **on**/off | synced |
 

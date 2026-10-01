@@ -1,4 +1,5 @@
 import { passwordRules } from "@fitness/shared";
+import { useT } from "@/i18n";
 import { IconCheck, IconEye, IconEyeOff } from "./icons";
 
 /** Password input with a show/hide eye button. */
@@ -7,13 +8,14 @@ export function PasswordField(props: {
   autoComplete: "current-password" | "new-password"; autoFocus?: boolean;
 }) {
   const { id, label, value, onChange, show, onToggle, autoComplete, autoFocus } = props;
+  const t = useT();
   return (
     <div className="grp" style={{ gap: 8 }}>
       <label className="lbl" htmlFor={id}>{label}</label>
       <div className="field-wrap">
         <input id={id} className="field pw" type={show ? "text" : "password"} autoComplete={autoComplete} autoCapitalize="none" spellCheck={false}
           value={value} onChange={(e) => onChange(e.target.value)} autoFocus={autoFocus} />
-        <button type="button" className="ib eye" onClick={onToggle} aria-label={show ? "Hide password" : "Show password"}>{show ? <IconEyeOff /> : <IconEye />}</button>
+        <button type="button" className="ib eye" onClick={onToggle} aria-label={show ? t.ui.hidePassword : t.ui.showPassword}>{show ? <IconEyeOff /> : <IconEye />}</button>
       </div>
     </div>
   );
@@ -21,10 +23,11 @@ export function PasswordField(props: {
 
 /** Live checklist: 8+ characters · a number · a special character. */
 export function PasswordRules({ value }: { value: string }) {
+  const t = useT();
   const r = passwordRules(value);
-  const items: Array<[boolean, string]> = [[r.length, "8+ characters"], [r.number, "a number"], [r.special, "a special character"]];
+  const items: Array<[boolean, string]> = [[r.length, t.ui.ruleLength], [r.number, t.ui.ruleNumber], [r.special, t.ui.ruleSpecial]];
   return (
-    <ul className="pw-rules" aria-label="Password rules">
+    <ul className="pw-rules" aria-label={t.ui.passwordRules}>
       {items.map(([ok, label]) => <li key={label} className={ok ? "ok" : undefined}><IconCheck />{label}</li>)}
     </ul>
   );

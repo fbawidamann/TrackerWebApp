@@ -4,6 +4,10 @@
  *
  *   npm run catalog:import           → regenerate data/exercises.json
  *   npm run catalog:images           → download images into apps/web/public/exercise-images (gitignored)
+ *   npm run catalog:version          → only refresh data/catalog-version.json (after editing a translation)
+ *
+ * Translations live in data/exercises.<lang>.json, keyed by slug and written by hand (docs/adr/0007-german-language.md).
+ * After an import, new slugs are listed as untranslated; the catalog test fails until they are added.
  */
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -12,11 +16,14 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { builtinExerciseId } from "../src/ids";
 import { EQUIPMENT, LEVELS, MUSCLES, type Equipment, type Muscle, type TrackingType } from "../src/schemas";
+import { translationVersion, type TranslationFile } from "./translation-version";
 
 const SOURCE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json";
 const IMAGE_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(here, "../data/exercises.json");
+const VERSION_FILE = resolve(here, "../data/catalog-version.json");
+const TRANSLATIONS: Record<string, string> = { de: resolve(here, "../data/exercises.de.json") };
 const IMAGE_DIR = resolve(here, "../../../apps/web/public/exercise-images");
 
 interface SourceExercise {
@@ -100,9 +107,27 @@ async function importCatalog(): Promise<void> {
   const catalogVersion = createHash("sha1").update(JSON.stringify(exercises)).digest("hex").slice(0, 12);
   await mkdir(dirname(OUT), { recursive: true });
   await writeFile(OUT, JSON.stringify({ catalogVersion, source: "free-exercise-db (Unlicense)", exercises }, null, 1) + "\n");
-  // Tiny file the app reads on every start to decide whether to (re)seed, without loading the full catalog.
-  await writeFile(join(dirname(OUT), "catalog-version.json"), JSON.stringify({ catalogVersion }) + "\n");
   console.log(`Wrote ${exercises.length} exercises (skipped ${source.length - exercises.length}), version ${catalogVersion}`);
+  await writeVersion();
+  for (const [lang, file] of Object.entries(TRANSLATIONS)) {
+    const t = existsSync(file) ? (JSON.parse(await readFile(file, "utf8")) as TranslationFile).exercises : {};
+    const missing = exercises.filter((e) => !t[e.slug]).map((e) => e.slug);
+    if (missing.length) console.log(`${lang}: ${missing.length} untranslated: ${missing.join(", ")}`);
+  }
+}
+
+/**
+ * Tiny file the app reads on every start to decide whether to (re)seed, without loading the full catalog:
+ * the catalog version plus one version per translation.
+ */
+async function writeVersion(): Promise<void> {
+  const { catalogVersion } = JSON.parse(await readFile(OUT, "utf8")) as { catalogVersion: string };
+  const translations: Record<string, string> = {};
+  for (const [lang, file] of Object.entries(TRANSLATIONS)) {
+    if (existsSync(file)) translations[lang] = translationVersion(JSON.parse(await readFile(file, "utf8")) as TranslationFile);
+  }
+  await writeFile(VERSION_FILE, JSON.stringify({ catalogVersion, translations }) + "\n");
+  console.log(`Wrote catalog-version.json (${catalogVersion}, ${JSON.stringify(translations)})`);
 }
 
 async function downloadImages(): Promise<void> {
@@ -130,4 +155,5 @@ async function downloadImages(): Promise<void> {
 }
 
 if (process.argv.includes("--images-only")) await downloadImages();
+else if (process.argv.includes("--version-only")) await writeVersion();
 else await importCatalog();

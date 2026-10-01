@@ -1,9 +1,11 @@
 import {
-  BACKUP_SCHEMA_VERSION, backupSchema, builtinExerciseId, DEFAULT_DEVICE_SETTINGS, DEFAULT_USER_SETTINGS,
-  workoutNameForTime,
+  BACKUP_SCHEMA_VERSION, backupSchema, bestEfforts, builtinExerciseId, cumulativeDistances, DEFAULT_DEVICE_SETTINGS,
+  DEFAULT_USER_SETTINGS, downsampleTrack, encodePolyline, manualEfforts, runNameForTime, summarizeTrack, workoutNameForTime,
   type Activity, type ActivityExercise, type Backup, type DeviceSettings, type Exercise, type Routine,
-  type RoutineExercise, type SetType, type UserSettings, type WorkoutSet,
+  type RoutineExercise, type Run, type RunTrack, type SetType, type TrackPoint, type TrackSummary, type UserSettings,
+  type WorkoutSet,
 } from "@fitness/shared";
+import { currentLanguage, tr } from "@/i18n";
 import { db, LOCAL_USER, SYNCED_TABLES, type SyncedTable } from "./db";
 import { alive, baseRow, patch, restore, softDelete, upsert, write } from "./mutate";
 
@@ -55,7 +57,7 @@ export async function stopRest(): Promise<void> {
 
 export async function getActiveWorkout(): Promise<Activity | undefined> {
   const list = await db.activities.where("status").equals("in_progress").toArray();
-  return list.filter(alive).sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
+  return list.filter((a) => alive(a) && a.type === "gym").sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
 }
 
 /** Completed sets of the last completed session of an exercise (optionally before a date, excluding one activity). */
@@ -90,7 +92,7 @@ async function defaultSetTypes(exerciseId: string): Promise<SetType[]> {
 
 export async function startWorkout(opts: { routineId?: string; repeatActivityId?: string } = {}): Promise<string> {
   const started = new Date();
-  let name = workoutNameForTime(started);
+  let name = workoutNameForTime(started, currentLanguage());
   let plan: Array<{ exerciseId: string; note: string; types: SetType[] }> = [];
   let routineId: string | null = null;
 
@@ -333,37 +335,40 @@ export async function routineChanges(routineId: string, activityId: string): Pro
   const def = await getRoutineItems(routineId);
   const done = await itemsFromActivity(activityId);
   const defIds = def.map((d) => d.exerciseId), ids = done.map((d) => d.exerciseId);
+  const t = tr().routines;
   const parts: string[] = [];
   const added = ids.filter((id) => !defIds.includes(id)).length;
   const removed = defIds.filter((id) => !ids.includes(id)).length;
-  if (added) parts.push(`${added} ${added === 1 ? "exercise" : "exercises"} added`);
-  if (removed) parts.push(`${removed} ${removed === 1 ? "exercise" : "exercises"} removed`);
-  if (ids.filter((i) => defIds.includes(i)).join() !== defIds.filter((i) => ids.includes(i)).join()) parts.push("order changed");
-  if (done.some((d) => { const x = def.find((y) => y.exerciseId === d.exerciseId); return x && (x.warmupSets !== d.warmupSets || x.workingSets !== d.workingSets); })) parts.push("number of sets changed");
+  if (added) parts.push(t.changedAdded(added));
+  if (removed) parts.push(t.changedRemoved(removed));
+  if (ids.filter((i) => defIds.includes(i)).join() !== defIds.filter((i) => ids.includes(i)).join()) parts.push(t.changedOrder);
+  if (done.some((d) => { const x = def.find((y) => y.exerciseId === d.exerciseId); return x && (x.warmupSets !== d.warmupSets || x.workingSets !== d.workingSets); })) parts.push(t.changedSets);
   return parts.join(" · ");
 }
 
 type StarterItem = [slug: string, warmup: number, sets: number];
-export const STARTERS: Record<string, { name: string; routines: Array<[string, StarterItem[]]> }> = {
-  ppl: { name: "Push / Pull / Legs", routines: [
-    ["Push", [["Barbell_Bench_Press_-_Medium_Grip", 1, 3], ["Standing_Military_Press", 0, 3], ["Incline_Dumbbell_Press", 0, 3], ["Side_Lateral_Raise", 0, 3], ["Triceps_Pushdown", 0, 3]]],
-    ["Pull", [["Bent_Over_Barbell_Row", 0, 3], ["Pullups", 0, 3], ["Wide-Grip_Lat_Pulldown", 0, 3], ["Face_Pull", 0, 3], ["Dumbbell_Bicep_Curl", 0, 3]]],
-    ["Legs", [["Barbell_Squat", 1, 3], ["Romanian_Deadlift", 0, 3], ["Leg_Press", 0, 3], ["Lying_Leg_Curls", 0, 3], ["Standing_Calf_Raises", 0, 3]]],
-  ] },
-  full: { name: "Full Body", routines: [
-    ["Full Body", [["Barbell_Squat", 1, 3], ["Barbell_Bench_Press_-_Medium_Grip", 0, 3], ["Bent_Over_Barbell_Row", 0, 3], ["Standing_Military_Press", 0, 2], ["Romanian_Deadlift", 0, 2], ["Plank", 0, 2]]],
-  ] },
-  ul: { name: "Upper / Lower", routines: [
-    ["Upper", [["Barbell_Bench_Press_-_Medium_Grip", 1, 3], ["Bent_Over_Barbell_Row", 0, 3], ["Standing_Military_Press", 0, 3], ["Wide-Grip_Lat_Pulldown", 0, 3], ["Dumbbell_Bicep_Curl", 0, 2], ["Triceps_Pushdown", 0, 2]]],
-    ["Lower", [["Barbell_Squat", 1, 3], ["Romanian_Deadlift", 0, 3], ["Leg_Press", 0, 3], ["Lying_Leg_Curls", 0, 3], ["Standing_Calf_Raises", 0, 3]]],
-  ] },
+/** Starter routine sets; names come from the dictionary (`routines.starter`), so they are created in the user's language. */
+export type StarterKey = "ppl" | "full" | "ul";
+export type StarterRoutineKey = "push" | "pull" | "legs" | "full" | "upper" | "lower";
+export const STARTERS: Record<StarterKey, Array<[StarterRoutineKey, StarterItem[]]>> = {
+  ppl: [
+    ["push", [["Barbell_Bench_Press_-_Medium_Grip", 1, 3], ["Standing_Military_Press", 0, 3], ["Incline_Dumbbell_Press", 0, 3], ["Side_Lateral_Raise", 0, 3], ["Triceps_Pushdown", 0, 3]]],
+    ["pull", [["Bent_Over_Barbell_Row", 0, 3], ["Pullups", 0, 3], ["Wide-Grip_Lat_Pulldown", 0, 3], ["Face_Pull", 0, 3], ["Dumbbell_Bicep_Curl", 0, 3]]],
+    ["legs", [["Barbell_Squat", 1, 3], ["Romanian_Deadlift", 0, 3], ["Leg_Press", 0, 3], ["Lying_Leg_Curls", 0, 3], ["Standing_Calf_Raises", 0, 3]]],
+  ],
+  full: [
+    ["full", [["Barbell_Squat", 1, 3], ["Barbell_Bench_Press_-_Medium_Grip", 0, 3], ["Bent_Over_Barbell_Row", 0, 3], ["Standing_Military_Press", 0, 2], ["Romanian_Deadlift", 0, 2], ["Plank", 0, 2]]],
+  ],
+  ul: [
+    ["upper", [["Barbell_Bench_Press_-_Medium_Grip", 1, 3], ["Bent_Over_Barbell_Row", 0, 3], ["Standing_Military_Press", 0, 3], ["Wide-Grip_Lat_Pulldown", 0, 3], ["Dumbbell_Bicep_Curl", 0, 2], ["Triceps_Pushdown", 0, 2]]],
+    ["lower", [["Barbell_Squat", 1, 3], ["Romanian_Deadlift", 0, 3], ["Leg_Press", 0, 3], ["Lying_Leg_Curls", 0, 3], ["Standing_Calf_Raises", 0, 3]]],
+  ],
 };
 
-export async function addStarter(key: string): Promise<void> {
-  const starter = STARTERS[key];
-  if (!starter) return;
-  for (const [name, items] of starter.routines) {
-    await saveRoutine(null, name, items.map(([slug, w, s]) => ({ exerciseId: builtinExerciseId(slug), warmupSets: w, workingSets: s, note: "" })));
+export async function addStarter(key: StarterKey): Promise<void> {
+  const names = tr().routines.starterRoutine;
+  for (const [routine, items] of STARTERS[key]) {
+    await saveRoutine(null, names[routine], items.map(([slug, w, s]) => ({ exerciseId: builtinExerciseId(slug), warmupSets: w, workingSets: s, note: "" })));
   }
 }
 
@@ -435,7 +440,7 @@ export async function saveDraft(d: WorkoutDraft): Promise<string> {
   return write(async () => {
     const prev = d.activityId ? await db.activities.get(d.activityId) : undefined;
     const activity: Activity = {
-      ...(prev ?? baseRow()), type: "gym", name: d.name.trim().slice(0, 40) || workoutNameForTime(d.startedAt),
+      ...(prev ?? baseRow()), type: "gym", name: d.name.trim().slice(0, 40) || workoutNameForTime(d.startedAt, currentLanguage()),
       routineId: d.routineId, startedAt: iso(d.startedAt), endedAt: iso(end), status: "completed", notes: prev?.notes ?? "",
     };
     await upsert("activities", activity);
@@ -463,6 +468,118 @@ export async function saveDraft(d: WorkoutDraft): Promise<string> {
   });
 }
 
+/* ================= Running (docs/design/screens/running.md) ================= */
+
+export interface ManualRunInput {
+  activityId: string | null;
+  name: string;
+  startedAt: Date;
+  distanceM: number;
+  movingTimeS: number;
+  elevationGainM: number | null;
+  avgHr: number | null;
+  notes: string;
+}
+
+/** A run read from a GPX/FIT file, before it is saved. `totals` are the device's own numbers (FIT), preferred over ours. */
+export interface ParsedRunFile {
+  source: "gpx" | "fit";
+  name: string | null;
+  startedAt: Date;
+  points: TrackPoint[];
+  totals: Partial<TrackSummary>;
+}
+
+async function runOf(activityId: string): Promise<Run | undefined> {
+  return (await db.runs.where("activityId").equals(activityId).toArray()).find(alive);
+}
+
+/**
+ * Creates or edits a run. Imported runs keep their measured numbers; only name, notes and date change.
+ */
+export async function saveRun(input: ManualRunInput): Promise<string> {
+  return write(async () => {
+    const prevAct = input.activityId ? await db.activities.get(input.activityId) : undefined;
+    const prevRun = prevAct ? await runOf(prevAct.id) : undefined;
+    const name = input.name.trim().slice(0, 40) || runNameForTime(input.startedAt, currentLanguage());
+    const notes = input.notes.trim().slice(0, 1000);
+    if (prevAct && prevRun && prevRun.source !== "manual") {
+      const shift = input.startedAt.getTime() - new Date(prevAct.startedAt).getTime();
+      await patch("activities", prevAct.id, {
+        name, notes, startedAt: iso(input.startedAt),
+        endedAt: prevAct.endedAt ? iso(new Date(new Date(prevAct.endedAt).getTime() + shift)) : null,
+      });
+      return prevAct.id;
+    }
+    const activity: Activity = {
+      ...(prevAct ?? baseRow()), type: "run", name, routineId: null, notes, status: "completed",
+      startedAt: iso(input.startedAt), endedAt: iso(new Date(input.startedAt.getTime() + input.movingTimeS * 1000)),
+    };
+    await upsert("activities", activity);
+    await upsert("runs", {
+      ...(prevRun ?? baseRow()), activityId: activity.id, source: "manual", hasTrack: false,
+      distanceM: input.distanceM, movingTimeS: input.movingTimeS, elevationGainM: input.elevationGainM,
+      avgHr: input.avgHr, maxHr: prevRun?.maxHr ?? null, efforts: manualEfforts(input.distanceM, input.movingTimeS),
+    } satisfies Run);
+    return activity.id;
+  });
+}
+
+/** Saves an imported run with its track. A run starting within a minute of an existing one is a duplicate. */
+export async function importRun(file: ParsedRunFile): Promise<{ activityId: string; duplicate: boolean }> {
+  const start = file.startedAt.getTime();
+  const runs = (await db.activities.toArray()).filter((a) => alive(a) && a.type === "run");
+  const dup = runs.find((a) => Math.abs(new Date(a.startedAt).getTime() - start) < 60_000);
+  if (dup) return { activityId: dup.id, duplicate: true };
+
+  const summary = summarizeTrack(file.points);
+  const totals = { ...summary, ...Object.fromEntries(Object.entries(file.totals).filter(([, v]) => v !== null && v !== undefined)) } as TrackSummary;
+  const dist = cumulativeDistances(file.points);
+  const track = downsampleTrack(file.points);
+  const hasEle = track.some((p) => p.ele !== null), hasHr = track.some((p) => p.hr !== null);
+
+  return write(async () => {
+    const activity: Activity = {
+      ...baseRow(), type: "run", name: (file.name?.trim().slice(0, 40)) || runNameForTime(file.startedAt, currentLanguage()), routineId: null,
+      startedAt: iso(file.startedAt), endedAt: iso(new Date(start + totals.elapsedS * 1000)), status: "completed", notes: "",
+    };
+    await upsert("activities", activity);
+    await upsert("runs", {
+      ...baseRow(), activityId: activity.id, source: file.source, hasTrack: track.length > 1,
+      distanceM: Math.round(totals.distanceM), movingTimeS: Math.round(totals.movingTimeS),
+      elevationGainM: totals.elevationGainM, avgHr: totals.avgHr, maxHr: totals.maxHr,
+      // Without GPS (treadmill FIT) only the device totals exist: count the run as a whole, like a manual one.
+      efforts: file.points.length > 1 ? bestEfforts(dist, file.points.map((p) => p.t)) : manualEfforts(totals.distanceM, totals.movingTimeS),
+    } satisfies Run);
+    if (track.length > 1) {
+      await upsert("runTracks", {
+        ...baseRow(), activityId: activity.id,
+        polyline: encodePolyline(track.map((p) => [p.lat, p.lon])),
+        t: track.map((p) => Math.round(p.t)),
+        ele: hasEle ? track.map((p) => Math.round((p.ele ?? 0) * 10) / 10) : null,
+        hr: hasHr ? track.map((p) => Math.round(p.hr ?? 0)) : null,
+      } satisfies RunTrack);
+    }
+    return { activityId: activity.id, duplicate: false };
+  });
+}
+
+/** Soft-deletes a run with its totals and track. Returns an undo function. */
+export async function deleteRun(activityId: string): Promise<() => Promise<void>> {
+  const runs = (await db.runs.where("activityId").equals(activityId).toArray()).filter(alive).map((r) => r.id);
+  const tracks = (await db.runTracks.where("activityId").equals(activityId).toArray()).filter(alive).map((r) => r.id);
+  await write(async () => {
+    await softDelete("activities", activityId);
+    await softDelete("runs", runs);
+    await softDelete("runTracks", tracks);
+  });
+  return async () => write(async () => {
+    await restore("activities", [activityId]);
+    await restore("runs", runs);
+    await restore("runTracks", tracks);
+  });
+}
+
 /* ================= Backup ================= */
 
 export async function exportBackup(): Promise<string> {
@@ -476,12 +593,14 @@ export async function exportBackup(): Promise<string> {
     activityExercises: await all("activityExercises"),
     sets: await all("sets"),
     settings: await all("settings"),
+    runs: await all("runs"),
+    runTracks: await all("runTracks"),
   } as Backup["data"];
   const backup: Backup = { app: "fitness-tracker", schemaVersion: BACKUP_SCHEMA_VERSION, exportedAt: iso(), data };
   return JSON.stringify(backup);
 }
 
-export type ParsedBackup = { ok: true; backup: Backup; workouts: number; routines: number; exportedAt: Date } | { ok: false };
+export type ParsedBackup = { ok: true; backup: Backup; workouts: number; runs: number; routines: number; exportedAt: Date } | { ok: false };
 
 export function parseBackup(text: string): ParsedBackup {
   try {
@@ -490,7 +609,8 @@ export function parseBackup(text: string): ParsedBackup {
     const b = result.data;
     return {
       ok: true, backup: b, exportedAt: new Date(b.exportedAt),
-      workouts: b.data.activities.filter((a) => a.deletedAt === null && a.status === "completed").length,
+      workouts: b.data.activities.filter((a) => a.deletedAt === null && a.status === "completed" && a.type === "gym").length,
+      runs: b.data.activities.filter((a) => a.deletedAt === null && a.status === "completed" && a.type === "run").length,
       routines: b.data.routines.filter((r) => r.deletedAt === null).length,
     };
   } catch {

@@ -60,7 +60,8 @@ Chosen out of four styles on 2026-09-30. The per-exercise "sets · best" lines f
 
 ### Search and filter (same pattern as Exercises)
 - The **search** field searches exercise names and shows only workouts that contain a match. The matching exercise name is highlighted in `accent-text`.
-- The **filter button** (sliders icon) opens a sheet with **ROUTINE** chips, multi-select: every routine plus **Freeform** (workouts not started from a routine). It has **Reset** and **Show 12 workouts** buttons.
+- The **filter button** (sliders icon) opens a sheet with **ROUTINE** chips, multi-select: every routine plus **Freeform** (workouts not started from a routine) and **Runs**. It has **Reset** and **Show 12 results** buttons.
+- **Runs** (since 2026-10-01) appear in the list and the calendar between workouts, as run cards; an exercise search hides them. Details in [running.md](running.md#history).
 - Active filters appear as removable chips under the search, and the filter button shows a count badge.
 - **No results**: `No workouts found`.
 - **No workouts at all**: `No workouts yet` and a **Start empty workout** button.

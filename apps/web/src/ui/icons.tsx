@@ -26,6 +26,10 @@ export const IconExternal = make(<path d="M7 17 17 7M8 7h9v9" />);
 export const IconHome = make(<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />);
 export const IconHistory = make([<circle key="a" cx="12" cy="12" r="9" />, <path key="b" d="M12 7v5l3 2" />]);
 export const IconLift = make(<path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11" />);
+export const IconRun = make([
+  <circle key="a" cx="15" cy="4.5" r="2" />,
+  <path key="b" d="m13.5 8.5-2 5 3 2.5-1 5M11.5 13.5l-2.2 2.8-4 .7M13.5 8.5l-3.5 1.5-1.5 2.5M13.5 8.5l2 3 3.5.5" />,
+]);
 export const IconList = make(<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />);
 export const IconUser = make([<circle key="a" cx="12" cy="8" r="4" />, <path key="b" d="M4 21a8 8 0 0 1 16 0" />]);
 export const IconEye = make([<path key="a" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />, <circle key="b" cx="12" cy="12" r="3" />]);

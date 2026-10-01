@@ -5,7 +5,8 @@ import { getRoutineItems, lastSessionSets, loadDraft, saveDraft, type WorkoutDra
 import { useCatalog, useRoutines, useSettings, useTraining } from "@/data/hooks";
 import { ExercisePicker } from "@/features/exercises/ExercisePicker";
 import { placeholders, SetTable } from "@/features/workout/SetTable";
-import { columnsFor, EQUIPMENT_LABEL } from "@/lib/labels";
+import { currentLanguage, useT } from "@/i18n";
+import { columnsFor } from "@/lib/labels";
 import { useFormat } from "@/lib/useFormat";
 import { IconMore } from "@/ui/icons";
 import { ReorderList } from "@/ui/ReorderList";
@@ -27,7 +28,7 @@ function fromWorkoutDraft(d: WorkoutDraft): Draft {
 function newDraft(): Draft {
   const t = new Date(Date.now() - 60 * 60000);
   t.setMinutes(Math.floor(t.getMinutes() / 5) * 5, 0, 0);
-  return { activityId: null, name: workoutNameForTime(t), routineId: null, startedAt: t, durationMin: 60, exercises: [] };
+  return { activityId: null, name: workoutNameForTime(t, currentLanguage()), routineId: null, startedAt: t, durationMin: 60, exercises: [] };
 }
 
 /** Edit mode and "Log past workout" (docs/design/screens/history.md). Same set table as logging, without ✓. */
@@ -42,6 +43,8 @@ export function WorkoutEditor() {
   const routines = useRoutines();
   const settings = useSettings();
   const fmt = useFormat();
+  const tx = useT();
+  const hx = tx.history;
   const [draft, setDraft] = useState<Draft | null>(isNew ? newDraft() : null);
   const [dirty, setDirty] = useState(false);
   const [from, setFrom] = useState<string>("");
@@ -65,7 +68,7 @@ export function WorkoutEditor() {
 
   const startFrom = async (routineId: string) => {
     setFrom(routineId);
-    if (!routineId) { edit((d) => ({ ...d, routineId: null, name: workoutNameForTime(d.startedAt), exercises: [] })); return; }
+    if (!routineId) { edit((d) => ({ ...d, routineId: null, name: workoutNameForTime(d.startedAt, settings.language), exercises: [] })); return; }
     const items = await getRoutineItems(routineId);
     const r = routines?.find((x) => x.routine.id === routineId);
     edit((d) => ({
@@ -102,12 +105,12 @@ export function WorkoutEditor() {
     });
     if (bad) {
       setNeed(badKeys);
-      toast(draft.startedAt.getTime() > Date.now() ? "The date can't be in the future" : draft.durationMin < 1 || draft.durationMin > 720 ? "Duration must be 1 min to 12 h" : "Fill in the highlighted fields");
+      toast(draft.startedAt.getTime() > Date.now() ? hx.futureDate : draft.durationMin < 1 || draft.durationMin > 720 ? hx.durationRange : hx.fillHighlighted);
       window.setTimeout(() => setNeed(new Set()), 1500);
       return;
     }
     const id = await saveDraft({ ...draft, exercises: exercises.map((e) => ({ id: e.id, exerciseId: e.exerciseId, note: e.note, sets: e.sets.map((s) => ({ id: s.id, setType: s.setType, weightKg: s.weightKg, reps: s.reps, durationS: s.durationS })) })) });
-    toast("Saved");
+    toast(hx.saved);
     if (isNew) void navigate({ to: "/history/$activityId", params: { activityId: id }, replace: true });
     else router.history.back();
   };
@@ -122,10 +125,10 @@ export function WorkoutEditor() {
     return (
       <div className="page tight no-nav">
         <div className="ehead" style={{ padding: 0, margin: "-6px -8px -10px" }}>
-          <span style={{ width: 60 }} /><h1>Change order</h1>
-          <button type="button" className="tbtn save" onClick={() => setReordering(false)}>Done</button>
+          <span style={{ width: 60 }} /><h1>{tx.routines.changeOrder}</h1>
+          <button type="button" className="tbtn save" onClick={() => setReordering(false)}>{tx.common.done}</button>
         </div>
-        <ReorderList items={draft.exercises.map((e) => ({ id: e.key, label: catalog.byId.get(e.exerciseId)?.name ?? "Exercise" }))}
+        <ReorderList items={draft.exercises.map((e) => ({ id: e.key, label: catalog.byId.get(e.exerciseId)?.name ?? tx.common.exercise }))}
           onChange={(keys) => edit((d) => ({ ...d, exercises: keys.map((k) => d.exercises.find((e) => e.key === k)!) }))} />
       </div>
     );
@@ -134,16 +137,16 @@ export function WorkoutEditor() {
   return (
     <div className="page tight no-nav">
       <div className="ehead" style={{ padding: 0, margin: "-6px -8px -6px" }}>
-        <button type="button" className="tbtn" onClick={cancel}>Cancel</button>
-        <h1>{isNew ? "Log past workout" : "Edit workout"}</h1>
-        <button type="button" className="tbtn save" onClick={() => void save()}>Save</button>
+        <button type="button" className="tbtn" onClick={cancel}>{tx.common.cancel}</button>
+        <h1>{isNew ? hx.logPast : hx.editWorkout}</h1>
+        <button type="button" className="tbtn save" onClick={() => void save()}>{tx.common.save}</button>
       </div>
 
       {isNew && (
         <div className="grp">
-          <span className="lbl">Start from</span>
+          <span className="lbl">{hx.startFrom}</span>
           <div className="chips scroll-x">
-            <button type="button" className="chip" aria-pressed={from === ""} onClick={() => void startFrom("")}>Empty</button>
+            <button type="button" className="chip" aria-pressed={from === ""} onClick={() => void startFrom("")}>{hx.empty}</button>
             {(routines ?? []).map((r) => <button key={r.routine.id} type="button" className="chip" aria-pressed={from === r.routine.id} onClick={() => void startFrom(r.routine.id)}>{r.routine.name}</button>)}
           </div>
         </div>
@@ -151,28 +154,28 @@ export function WorkoutEditor() {
 
       <div className="card" style={{ padding: 16, display: "grid", gap: 14 }}>
         <div className="grp" style={{ gap: 6 }}>
-          <label className="lbl" htmlFor="w-name">Name</label>
+          <label className="lbl" htmlFor="w-name">{tx.common.name}</label>
           <input id="w-name" className="field" maxLength={40} value={draft.name} onChange={(e) => edit((d) => ({ ...d, name: e.target.value }))} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div className="grp" style={{ gap: 6 }}>
-            <label className="lbl" htmlFor="w-date">Date</label>
+            <label className="lbl" htmlFor="w-date">{tx.common.date}</label>
             <input id="w-date" className="field" type="date" max={toLocalDate(new Date())} value={toLocalDate(draft.startedAt)}
               onChange={(e) => { if (!e.target.value) return; const [y, mo, da] = e.target.value.split("-").map(Number); edit((d) => ({ ...d, startedAt: new Date(y!, mo! - 1, da!, d.startedAt.getHours(), d.startedAt.getMinutes()) })); }} />
           </div>
           <div className="grp" style={{ gap: 6 }}>
-            <label className="lbl" htmlFor="w-time">Start time</label>
+            <label className="lbl" htmlFor="w-time">{hx.startTime}</label>
             <input id="w-time" className="field" type="time" value={toLocalTime(draft.startedAt)}
               onChange={(e) => { if (!e.target.value) return; const [hh, mm] = e.target.value.split(":").map(Number); edit((d) => { const s = new Date(d.startedAt); s.setHours(hh!, mm!, 0, 0); return { ...d, startedAt: s }; }); }} />
           </div>
         </div>
         <div className="grp" style={{ gap: 6 }}>
-          <span className="lbl" id="w-dur">Duration</span>
+          <span className="lbl" id="w-dur">{hx.duration}</span>
           <div role="group" aria-labelledby="w-dur" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input className="field" inputMode="numeric" aria-label="Hours" style={{ width: 70, textAlign: "center" }} value={h}
+            <input className="field" inputMode="numeric" aria-label={hx.hours} style={{ width: 70, textAlign: "center" }} value={h}
               onChange={(e) => { const v = parseInt(e.target.value, 10) || 0; edit((d) => ({ ...d, durationMin: v * 60 + (d.durationMin % 60) })); }} />
             <span className="muted">h</span>
-            <input className="field" inputMode="numeric" aria-label="Minutes" style={{ width: 70, textAlign: "center" }} value={m}
+            <input className="field" inputMode="numeric" aria-label={hx.minutes} style={{ width: 70, textAlign: "center" }} value={m}
               onChange={(e) => { const v = Math.min(59, parseInt(e.target.value, 10) || 0); edit((d) => ({ ...d, durationMin: Math.floor(d.durationMin / 60) * 60 + v })); }} />
             <span className="muted">min</span>
           </div>
@@ -186,20 +189,20 @@ export function WorkoutEditor() {
             <section key={e.key} className="card live">
               <div className="ex-head">
                 <div>
-                  <h2 className="ex-name">{ex?.name ?? "Exercise"}<span className="ex-eq">{ex ? EQUIPMENT_LABEL[ex.equipment] : ""}</span></h2>
+                  <h2 className="ex-name">{ex?.name ?? tx.common.exercise}<span className="ex-eq">{ex ? tx.equipment[ex.equipment] : ""}</span></h2>
                   {e.note && <p className="ex-note">{e.note}</p>}
                 </div>
-                <button type="button" className="ib" onClick={() => setSheet({ kind: "exmenu", key: e.key })} aria-label={`${ex?.name ?? "Exercise"} options`}><IconMore /></button>
+                <button type="button" className="ib" onClick={() => setSheet({ kind: "exmenu", key: e.key })} aria-label={tx.workout.exerciseOptions(ex?.name ?? tx.common.exercise)}><IconMore /></button>
               </div>
                 <SetTable exercise={ex} sets={e.sets} prev={prevFor(e.exerciseId)} fmt={fmt} withCheck={false}
                   onChange={(key, ch) => editEx(e.key, (x) => ({ ...x, sets: x.sets.map((s) => (s.key === key ? { ...s, ...ch } : s)) }))}
                   onSetMenu={(key) => setSheet({ kind: "setmenu", ex: e.key, set: key })}
                   onSwipeDelete={(key) => editEx(e.key, (x) => ({ ...x, sets: x.sets.filter((s) => s.key !== key) }))} need={need} />
-              <button type="button" className="ghost" onClick={() => editEx(e.key, (x) => ({ ...x, sets: [...x.sets, blankSet()] }))} style={{ justifySelf: "start", paddingLeft: 4 }}>+ Add set</button>
+              <button type="button" className="ghost" onClick={() => editEx(e.key, (x) => ({ ...x, sets: [...x.sets, blankSet()] }))} style={{ justifySelf: "start", paddingLeft: 4 }}>{tx.workout.addSet}</button>
             </section>
           );
         })}
-        <button type="button" className="btn btn-block" onClick={() => setPicker({ mode: "multi" })}>Add exercise</button>
+        <button type="button" className="btn btn-block" onClick={() => setPicker({ mode: "multi" })}>{tx.workout.addExercise}</button>
       </div>
 
       {picker && (
@@ -210,25 +213,25 @@ export function WorkoutEditor() {
         }} />
       )}
       {sheet?.kind === "discard" && (
-        <ConfirmSheet title="Discard changes?" text="Your edits will be lost." confirm="Discard" cancel="Keep editing" danger onConfirm={() => router.history.back()} onClose={() => setSheet(null)} />
+        <ConfirmSheet title={tx.common.discardChanges} text={tx.routines.editsLost} confirm={tx.common.discard} cancel={tx.common.keepEditing} danger onConfirm={() => router.history.back()} onClose={() => setSheet(null)} />
       )}
       {sheet?.kind === "exmenu" && menuEx && (
-        <MenuSheet title={catalog.byId.get(menuEx.exerciseId)?.name ?? "Exercise"} onClose={() => setSheet(null)} items={[
-          { label: "Replace exercise", onSelect: () => setPicker({ mode: "single", key: menuEx.key }) },
-          { label: "Note", onSelect: () => setSheet({ kind: "note", key: menuEx.key }) },
-          { label: "Reorder exercises", onSelect: () => setReordering(true) },
-          { label: "Remove exercise", danger: true, onSelect: () => edit((d) => ({ ...d, exercises: d.exercises.filter((x) => x.key !== menuEx.key) })) },
+        <MenuSheet title={catalog.byId.get(menuEx.exerciseId)?.name ?? tx.common.exercise} onClose={() => setSheet(null)} items={[
+          { label: tx.workout.replaceExercise, onSelect: () => setPicker({ mode: "single", key: menuEx.key }) },
+          { label: tx.workout.note, onSelect: () => setSheet({ kind: "note", key: menuEx.key }) },
+          { label: tx.workout.reorderExercises, onSelect: () => setReordering(true) },
+          { label: tx.workout.removeExercise, danger: true, onSelect: () => edit((d) => ({ ...d, exercises: d.exercises.filter((x) => x.key !== menuEx.key) })) },
         ]} />
       )}
       {sheet?.kind === "note" && noteEx && (
-        <TextSheet title="Note" initial={noteEx.note} maxLength={120} placeholder="e.g. Seat position 4" onClose={() => setSheet(null)}
+        <TextSheet title={tx.workout.note} initial={noteEx.note} maxLength={120} placeholder={hx.notePlaceholder} onClose={() => setSheet(null)}
           onSave={(v) => editEx(noteEx.key, (x) => ({ ...x, note: v }))} />
       )}
       {sheet?.kind === "setmenu" && setMenu && (
-        <MenuSheet title="Set" onClose={() => setSheet(null)} items={[
-          ...(["warmup", "normal"] as SetType[]).map((t) => ({ label: t === "warmup" ? "Warm-up" : "Normal", checked: setMenu.setType === t,
+        <MenuSheet title={tx.workout.set} onClose={() => setSheet(null)} items={[
+          ...(["warmup", "normal"] as SetType[]).map((t) => ({ label: t === "warmup" ? tx.workout.warmup : tx.workout.normal, checked: setMenu.setType === t,
             onSelect: () => editEx(sheet.ex, (x) => ({ ...x, sets: x.sets.map((s) => (s.key === setMenu.key ? { ...s, setType: t } : s)) })) })),
-          { label: "Delete set", danger: true, onSelect: () => editEx(sheet.ex, (x) => ({ ...x, sets: x.sets.filter((s) => s.key !== setMenu.key) })) },
+          { label: tx.workout.deleteSet, danger: true, onSelect: () => editEx(sheet.ex, (x) => ({ ...x, sets: x.sets.filter((s) => s.key !== setMenu.key) })) },
         ]} />
       )}
     </div>

@@ -1,5 +1,6 @@
-import { MONTHS } from "@fitness/shared";
 import { useRef, type PointerEvent } from "react";
+import { useT } from "@/i18n";
+import { useFormat } from "@/lib/useFormat";
 
 export interface ChartPoint { date: Date; value: number }
 
@@ -15,7 +16,9 @@ export function LineChart({ points, from, to, steps, format, selected, onSelect,
 }) {
   const ref = useRef<SVGSVGElement>(null);
   const scrubbing = useRef(false);
-  if (!points.length) return <p className="muted" style={{ margin: 0, padding: "24px 12px" }}>No sessions in this range</p>;
+  const fmt = useFormat();
+  const t = useT();
+  if (!points.length) return <p className="muted" style={{ margin: 0, padding: "24px 12px" }}>{t.exercises.noSessionsInRange}</p>;
 
   let min = Math.min(...points.map((p) => p.value)), max = Math.max(...points.map((p) => p.value));
   if (min === max) { min -= steps[0]!; max += steps[0]!; }
@@ -29,7 +32,7 @@ export function LineChart({ points, from, to, steps, format, selected, onSelect,
   for (let v = y0; v <= y1 + 1e-9; v += step) grid.push({ v, y: Y(v) });
   const months: Array<{ x: number; label: string }> = [];
   for (let d = new Date(from.getFullYear(), from.getMonth() + 1, 1); d <= to; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
-    months.push({ x: X(d.getTime()), label: MONTHS[d.getMonth()]!.slice(0, 3) });
+    months.push({ x: X(d.getTime()), label: fmt.monthAxis(d.getMonth()) });
   }
   const every = Math.max(1, Math.ceil(months.length / 5));
   const path = points.map((p, i) => `${i ? "L" : "M"}${X(p.date.getTime()).toFixed(1)} ${Y(p.value).toFixed(1)}`).join(" ");

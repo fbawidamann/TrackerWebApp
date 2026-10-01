@@ -1,5 +1,6 @@
 import { parseRepsInput, type Exercise, type SetType, type WorkoutSet } from "@fitness/shared";
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import { useT } from "@/i18n";
 import { columnsFor } from "@/lib/labels";
 import { durationInputValue, parseDurationInput } from "@/lib/time";
 import type { Fmt } from "@/lib/useFormat";
@@ -53,6 +54,7 @@ interface Props {
 /** The logging set table: SET · PREVIOUS · KG · REPS · ✓ (✓ hidden in edit mode). */
 export function SetTable({ exercise, sets, prev, fmt, withCheck, onChange, onCheck, onSetMenu, onSwipeDelete, afterRow, need }: Props) {
   const cols = columnsFor(exercise);
+  const w = useT().workout;
   const info = placeholders(sets, prev);
   const narrow = !cols.weight || !cols.reps;
   const cls = "tr" + (narrow ? " r" : "") + (withCheck ? "" : " nochk");
@@ -60,20 +62,20 @@ export function SetTable({ exercise, sets, prev, fmt, withCheck, onChange, onChe
   return (
     <div>
       <div className={cls + " th"}>
-        <span className="lbl">Set</span>
-        <span className="lbl">Previous</span>
+        <span className="lbl">{w.colSet}</span>
+        <span className="lbl">{w.colPrevious}</span>
         {cols.weight && <span className="lbl c">{fmt.unit}</span>}
-        {cols.reps && <span className="lbl c">Reps</span>}
-        {cols.time && <span className="lbl c">Time</span>}
+        {cols.reps && <span className="lbl c">{w.colReps}</span>}
+        {cols.time && <span className="lbl c">{w.colTime}</span>}
         {withCheck && <span />}
       </div>
       {sets.map((s, i) => {
         if (s.setType !== "warmup") n++;
-        const label = s.setType === "warmup" ? "W" : String(n);
+        const label = s.setType === "warmup" ? w.warmupShort : String(n);
         const { prev: p, ph } = info[i]!;
         const prevText = !p ? "–"
           : cols.time ? durationInputValue(p.durationS)
-          : !cols.weight ? `${p.reps ?? 0} reps`
+          : !cols.weight ? `${p.reps ?? 0} ${w.repsUnit}`
           : `${fmt.weightValue(p.weightKg ?? 0)} × ${p.reps ?? 0}`;
         return (
           <div key={s.key}>
@@ -92,6 +94,7 @@ function SetRow(props: {
   cols: ReturnType<typeof columnsFor>; fmt: Fmt; withCheck: boolean; forceNeed: boolean;
 } & Pick<Props, "onChange" | "onCheck" | "onSetMenu" | "onSwipeDelete">) {
   const { cls, label, warm, set, prevText, ph, cols, fmt, withCheck, forceNeed, onChange, onCheck, onSetMenu, onSwipeDelete } = props;
+  const tx = useT().workout;
   const [w, setW] = useState(() => fmt.weightInput(set.weightKg));
   const [r, setR] = useState(() => (set.reps === null ? "" : String(set.reps)));
   const [t, setT] = useState(() => durationInputValue(set.durationS));
@@ -184,32 +187,32 @@ function SetRow(props: {
 
   return (
     <div className="row-wrap">
-      <div className="row-del" aria-hidden="true">Delete</div>
+      <div className="row-del" aria-hidden="true">{tx.swipeDelete}</div>
       <div ref={rowRef} className={cls + (set.done ? " done" : "") + (ready ? " ready" : "")}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClickCapture={(e) => { if (suppressClick.current) { e.stopPropagation(); e.preventDefault(); } }}>
-        <button type="button" className={"setn" + (warm ? " w" : "")} onClick={() => onSetMenu(set.key)} aria-label={`Set ${label} options`}>{label}</button>
+        <button type="button" className={"setn" + (warm ? " w" : "")} onClick={() => onSetMenu(set.key)} aria-label={tx.setOptions(label)}>{label}</button>
         <span className="prev">{prevText}</span>
         {cols.weight && (
           <input className={"inp" + (needW ? " need" : "")} inputMode="decimal" enterKeyHint="next" autoComplete="off"
-            aria-label={`Set ${label} weight in ${fmt.unit}`} placeholder={fmtPh(ph?.weightKg, "w")} value={w}
+            aria-label={tx.weightAria(label, fmt.unit)} placeholder={fmtPh(ph?.weightKg, "w")} value={w}
             onKeyDown={next}
             onChange={(e) => { setW(e.target.value); const p = fmt.parseWeight(e.target.value); if (p.ok) { synced.current.weightKg = p.value; onChange(set.key, { weightKg: p.value }); } }} />
         )}
         {cols.reps && (
           <input className={"inp" + (needR ? " need" : "")} inputMode="numeric" enterKeyHint="next" autoComplete="off"
-            aria-label={`Set ${label} reps`} placeholder={fmtPh(ph?.reps, "r")} value={r}
+            aria-label={tx.repsAria(label)} placeholder={fmtPh(ph?.reps, "r")} value={r}
             onKeyDown={next}
             onChange={(e) => { setR(e.target.value); const p = parseRepsInput(e.target.value); if (p.ok) { synced.current.reps = p.value; onChange(set.key, { reps: p.value }); } }} />
         )}
         {cols.time && (
           <input className={"inp" + (needT ? " need" : "")} inputMode="numeric" enterKeyHint="next" autoComplete="off"
-            aria-label={`Set ${label} time`} placeholder={fmtPh(ph?.durationS, "t") || "0:30"} value={t}
+            aria-label={tx.timeAria(label)} placeholder={fmtPh(ph?.durationS, "t") || "0:30"} value={t}
             onKeyDown={next}
             onChange={(e) => { setT(e.target.value); const p = parseDurationInput(e.target.value); if (p !== undefined) { synced.current.durationS = p; onChange(set.key, { durationS: p }); } }} />
         )}
         {withCheck && (
-          <button type="button" className="chk" onClick={check} aria-pressed={!!set.done} aria-label={set.done ? "Mark set not done" : "Complete set"}>
+          <button type="button" className="chk" onClick={check} aria-pressed={!!set.done} aria-label={set.done ? tx.markNotDone : tx.completeSet}>
             <IconCheck />
           </button>
         )}

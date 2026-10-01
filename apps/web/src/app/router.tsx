@@ -10,11 +10,19 @@ import { ProfileScreen } from "@/features/profile/ProfileScreen";
 import { UsersScreen } from "@/features/admin/UsersScreen";
 import { RoutineEditor } from "@/features/routines/RoutineEditor";
 import { RoutinesScreen } from "@/features/routines/RoutinesScreen";
+import { RunDetailScreen } from "@/features/running/RunDetailScreen";
+import { RunEditor } from "@/features/running/RunEditor";
+import { RunningScreen } from "@/features/running/RunningScreen";
 import { SummaryScreen } from "@/features/workout/SummaryScreen";
 import { WorkoutScreen } from "@/features/workout/WorkoutScreen";
+import { useT } from "@/i18n";
 import { Layout } from "./Layout";
 
-const root = createRootRoute({ component: Layout, notFoundComponent: () => <div className="page"><p className="muted">Page not found.</p></div> });
+function NotFound() {
+  return <div className="page"><p className="muted">{useT().common.pageNotFound}</p></div>;
+}
+
+const root = createRootRoute({ component: Layout, notFoundComponent: NotFound });
 const home = createRoute({ getParentRoute: () => root, path: "/", component: HomeScreen });
 const workout = createRoute({ getParentRoute: () => root, path: "/workout", component: WorkoutScreen });
 const summary = createRoute({ getParentRoute: () => root, path: "/workout/done/$activityId", component: SummaryScreen });
@@ -28,11 +36,16 @@ const workoutEdit = createRoute({ getParentRoute: () => root, path: "/history/$a
 const routines = createRoute({ getParentRoute: () => root, path: "/routines", component: RoutinesScreen });
 const routineNew = createRoute({ getParentRoute: () => root, path: "/routines/new", component: RoutineEditor });
 const routineEdit = createRoute({ getParentRoute: () => root, path: "/routines/$routineId/edit", component: RoutineEditor });
+const running = createRoute({ getParentRoute: () => root, path: "/running", component: RunningScreen });
+const runNew = createRoute({ getParentRoute: () => root, path: "/running/new", component: RunEditor });
+const runDetail = createRoute({ getParentRoute: () => root, path: "/running/$activityId", component: RunDetailScreen });
+const runEdit = createRoute({ getParentRoute: () => root, path: "/running/$activityId/edit", component: RunEditor });
 const profile = createRoute({ getParentRoute: () => root, path: "/profile", component: ProfileScreen });
 const users = createRoute({ getParentRoute: () => root, path: "/profile/users", component: UsersScreen });
 
 const routeTree = root.addChildren([
-  home, workout, summary, exercises, exerciseDetail, history, calendar, logPast, workoutDetail, workoutEdit, routines, routineNew, routineEdit, profile, users,
+  home, workout, summary, exercises, exerciseDetail, history, calendar, logPast, workoutDetail, workoutEdit, routines, routineNew, routineEdit,
+  running, runNew, runDetail, runEdit, profile, users,
 ]);
 
 export const router = createRouter({ routeTree, defaultPreload: false });

@@ -33,7 +33,11 @@ Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation change
 - [ ] **M9: Deploy**: Docker Compose on the VPS behind the existing Traefik ([ADR 0004](adr/0004-deployment.md)). **Done 2026-10-01:** the `app` container is live at https://tracker.fbawidamannserver.cloud (deployed by the VPS agent Hermes, built on the VPS). M7 update (db container, admin, nightly backups): instructions in `ForHermesInstruction.md`. Still open: automatic deploys
 
 ## Phase 2: Running and swimming
-- [ ] Plan in detail (manual entry; GPX import?); follow the `add-activity-type` skill
+- [x] **Running** (built 2026-10-01): Running tab, GPX/FIT import, manual log/edit, run detail (route, charts, splits, best efforts), runs in History and calendar, sync ([running.md](design/screens/running.md), [ADR 0006](adr/0006-running.md))
+- [ ] Swimming: plan in detail; follow the `add-activity-type` skill
+
+## Languages
+- [x] **German** (built 2026-10-01): language setting in Profile, whole UI and the exercise catalog (names + instructions) translated ([ADR 0007](adr/0007-german-language.md))
 
 ## Phase 3: Food tracking
 - [ ] Plan in detail (foods, meals, calories/macros; food database source?)

@@ -33,8 +33,9 @@ exercises ─────────────┐
                        │
 routines ─< routine_exercises (warm-up / working set counts, note)
                        │
-activities ─< activity_exercises ─< sets
-   (type = gym | run | swim …)
+activities ─< activity_exercises ─< sets     (type = gym)
+           ├─ runs (1 per run)                 (type = run)
+           └─ run_tracks (0–1 per run)
 user_settings (1 per user)
 ```
 
@@ -70,8 +71,8 @@ Routines store **no target weights or reps** (decided 2026-09-30). Placeholders 
 ### activities (timeline spine)
 | Field | Type | Notes |
 |---|---|---|
-| type | enum | `gym` now; `run`, `swim` later |
-| name | text | e.g. routine name or "Evening workout" |
+| type | enum | `gym`, `run`; `swim` later |
+| name | text | e.g. routine name, "Evening workout" or "Evening run" |
 | routine_id | uuid? | the routine it was started from |
 | started_at / ended_at | timestamp | `ended_at` is null while in progress |
 | status | enum | `in_progress`, `completed` |
@@ -93,22 +94,51 @@ Routines store **no target weights or reps** (decided 2026-09-30). Placeholders 
 | rpe | numeric? | in the schema, not in the MVP UI |
 | completed_at | timestamp? | set is "done" when not null |
 
+### runs → run_tracks (running)
+Decisions in [ADR 0006](../adr/0006-running.md), screens in [running.md](../design/screens/running.md). A run is an `activities` row with `type = run`, `status = completed`, `routine_id = null` and `ended_at = started_at + elapsed time`.
+
+**runs** (one per run, small, read by every list):
+
+| Field | Type | Notes |
+|---|---|---|
+| activity_id | uuid | |
+| distance_m | numeric | |
+| moving_time_s | int | pauses removed; elapsed = `ended_at − started_at` |
+| elevation_gain_m | numeric? | |
+| avg_hr / max_hr | int? | bpm |
+| source | enum | `manual`, `gpx`, `fit` |
+| efforts | {metres: seconds} | fastest time per standard distance inside the run (`"1000"`, `"5000"` …), computed once at import |
+| has_track | bool | |
+
+**run_tracks** (0–1 per run, only for imported runs with GPS):
+
+| Field | Type | Notes |
+|---|---|---|
+| activity_id | uuid | |
+| polyline | text | lat/lon, Google polyline encoding (1e-5°) |
+| t | int[] | seconds since start, parallel to the polyline points |
+| ele | numeric[]? | metres, 0.1 m |
+| hr | int[]? | bpm, 0 = no reading |
+
+Downsampled to ~1 point per 5 s, max 10 000 points. Splits, pace/elevation/HR charts and the route are derived from it on display.
+
 ### user_settings
 Synced per-user settings (full list and defaults in [profile.md](../design/screens/profile.md#settings-reference)):
-display_name, weekly_goal (3), week_start (monday), default_sets (3), weight_step_kg (2.5), warmups_in_prs (false), rest_timer_enabled (true), default_rest_seconds (90), rest_autostart (true), theme (system), accent (cobalt), nav_labels (always), history_card_style (names), weight_unit (kg | lb), decimal_separator (point | comma), date_format (long | numeric), start_screen (home), home_show_goal / home_show_routines / home_show_recent / home_show_prs (true).
+display_name, language (en | de; first default from the browser language), weekly_goal (3), week_start (monday), default_sets (3), weight_step_kg (2.5), warmups_in_prs (false), rest_timer_enabled (true), default_rest_seconds (90), rest_autostart (true), theme (system), accent (cobalt), nav_labels (always), history_card_style (names), weight_unit (kg | lb), decimal_separator (point | comma), date_format (long | numeric), start_screen (home), home_show_goal / home_show_routines / home_show_recent / home_show_prs (true).
 
 Device-only settings (Dexie `meta`, never synced): keep_screen_on (true), vibrate_on_complete (true), text_size (standard | large).
 
 Rest-timer state (`restStartedAt`, the set it belongs to) is local UI state in Dexie `meta`. It is not synced.
 
 ### Later
-- **run/swim**: new child table (e.g. `cardio_details`: activity_id, distance_m, duration_s, pool_length_m?, laps?) and a new `activities.type` value. No new columns on `activities`.
+- **swim**: a new child table (e.g. `swims`: activity_id, distance_m, moving_time_s, pool_length_m?, laps?) and a new `activities.type` value, like running. No new columns on `activities`.
 - **food**: separate domain (`foods`, `meals`, `meal_entries`), not part of `activities`.
 
 ## Derived metrics (computed, never stored)
 - **Heaviest-weight PR**: max `weight_kg` over the completed normal sets of an exercise. It is a PR when it beats every earlier session.
 - **Best set reps**: max `reps` over completed normal sets per session (Reps chart).
 - **e1RM** (Epley): `weight × (1 + reps / 30)`, reps ≤ 12 only. Shown only in the workout detail footer, not charted.
+- **Running**: pace, splits, period totals, weekly distance and personal bests (fastest `efforts` value per distance over all runs). Only `runs.efforts` is stored, because it needs the full-resolution track ([ADR 0006](../adr/0006-running.md)).
 - **Last used / session count** per exercise (for list sorting): derived from completed activities.
 - **Volume**: `weight × reps`, per set, per exercise per session, and per muscle group per week.
 

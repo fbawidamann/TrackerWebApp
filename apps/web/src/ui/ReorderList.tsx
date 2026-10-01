@@ -1,10 +1,12 @@
 import { useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useT } from "@/i18n";
 import { IconGrip } from "./icons";
 
 export interface ReorderItem { id: string; label: ReactNode }
 
 /** Collapsed rows with drag handles (pointer events: mouse and touch). Calls onChange with the new order on drop. */
 export function ReorderList({ items, onChange }: { items: ReorderItem[]; onChange: (ids: string[]) => void }) {
+  const t = useT();
   const [order, setOrder] = useState(() => items.map((i) => i.id));
   const [dragging, setDragging] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -42,7 +44,7 @@ export function ReorderList({ items, onChange }: { items: ReorderItem[]; onChang
       {order.map((id) => (
         <div key={id} className={"card ro-item" + (dragging === id ? " dragging" : "")}>
           <span className="grow">{byId.get(id)?.label}</span>
-          <span className="handle" role="button" aria-label="Drag to reorder" tabIndex={-1}
+          <span className="handle" role="button" aria-label={t.ui.dragToReorder} tabIndex={-1}
             onPointerDown={(e) => onDown(e, id)} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
             <IconGrip />
           </span>

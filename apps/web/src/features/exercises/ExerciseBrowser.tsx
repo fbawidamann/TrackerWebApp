@@ -1,7 +1,8 @@
 import { EQUIPMENT, MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@fitness/shared";
 import { useMemo, useState, type ReactNode } from "react";
 import { muscleGroup, useCatalog, useTraining } from "@/data/hooks";
-import { EQUIPMENT_LABEL, exerciseSearchText, matchesQuery } from "@/lib/labels";
+import { useT } from "@/i18n";
+import { exerciseSearchText, matchesQuery } from "@/lib/labels";
 import { useFormat } from "@/lib/useFormat";
 import { IconCheck, IconChevron, IconSearch, IconSliders, IconX } from "@/ui/icons";
 import { Sheet } from "@/ui/Sheet";
@@ -26,6 +27,8 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
   const catalog = useCatalog();
   const training = useTraining();
   const fmt = useFormat();
+  const t = useT();
+  const x = t.exercises;
   const [f, setF] = useState<BrowserFilters>(() => memory[scope] ?? { ...EMPTY });
   const [sheet, setSheet] = useState(false);
   const update = (next: Partial<BrowserFilters>) => setF((cur) => { const v = { ...cur, ...next }; memory[scope] = v; return v; });
@@ -47,27 +50,27 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
   }), [catalog, f]);
 
   const sections = useMemo(() => {
-    const byName = (a: Exercise, b: Exercise) => a.name.localeCompare(b.name) || a.equipment.localeCompare(b.equipment);
+    const byName = (a: Exercise, b: Exercise) => a.name.localeCompare(b.name, fmt.prefs.language) || a.equipment.localeCompare(b.equipment);
     const done = visible.filter((e) => usage.count.has(e.id));
     const rest = visible.filter((e) => !usage.count.has(e.id)).sort(byName);
     if (f.sort === "az") return [{ title: null as string | null, items: [...visible].sort(byName), side: "last" as const }];
     if (f.sort === "muscle") {
-      return MUSCLE_GROUPS.map((g) => ({ title: g as string | null, items: visible.filter((e) => muscleGroup(e) === g).sort(byName), side: "last" as const })).filter((s) => s.items.length);
+      return MUSCLE_GROUPS.map((g) => ({ title: t.group[g] as string | null, items: visible.filter((e) => muscleGroup(e) === g).sort(byName), side: "last" as const })).filter((s) => s.items.length);
     }
     const yours = f.sort === "most"
       ? done.sort((a, b) => (usage.count.get(b.id) ?? 0) - (usage.count.get(a.id) ?? 0))
       : done.sort((a, b) => (usage.last.get(b.id)?.getTime() ?? 0) - (usage.last.get(a.id)?.getTime() ?? 0));
     return [
-      { title: "Your exercises" as string | null, items: yours, side: (f.sort === "most" ? "count" : "last") as "count" | "last" },
-      { title: "All exercises" as string | null, items: rest, side: "last" as const },
+      { title: x.yours as string | null, items: yours, side: (f.sort === "most" ? "count" : "last") as "count" | "last" },
+      { title: x.all as string | null, items: rest, side: "last" as const },
     ].filter((s) => s.items.length);
-  }, [visible, usage, f.sort]);
+  }, [visible, usage, f.sort, t, x, fmt.prefs.language]);
 
   const filterCount = f.groups.length + f.equipment.length + (f.showHidden ? 1 : 0);
   const chips: Array<{ key: string; label: string; remove: () => void }> = [
-    ...f.groups.map((g) => ({ key: "g" + g, label: g, remove: () => update({ groups: f.groups.filter((x) => x !== g) }) })),
-    ...f.equipment.map((q) => ({ key: "e" + q, label: EQUIPMENT_LABEL[q], remove: () => update({ equipment: f.equipment.filter((x) => x !== q) }) })),
-    ...(f.showHidden ? [{ key: "h", label: "Hidden shown", remove: () => update({ showHidden: false }) }] : []),
+    ...f.groups.map((g) => ({ key: "g" + g, label: t.group[g], remove: () => update({ groups: f.groups.filter((x) => x !== g) }) })),
+    ...f.equipment.map((q) => ({ key: "e" + q, label: t.equipment[q], remove: () => update({ equipment: f.equipment.filter((y) => y !== q) }) })),
+    ...(f.showHidden ? [{ key: "h", label: x.hiddenShown, remove: () => update({ showHidden: false }) }] : []),
   ];
 
   const row = (e: Exercise, side: "last" | "count") => {
@@ -81,10 +84,10 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
         <span className="li-main">
           <span className="li-name">
             {e.name}
-            {e.isCustom && <span className="tag">Custom</span>}
-            {catalog.hidden.has(e.id) && <span className="tag">Hidden</span>}
+            {e.isCustom && <span className="tag">{x.custom}</span>}
+            {catalog.hidden.has(e.id) && <span className="tag">{x.hidden}</span>}
           </span>
-          <span className="li-meta">{EQUIPMENT_LABEL[e.equipment]} · {muscleGroup(e)}</span>
+          <span className="li-meta">{t.equipment[e.equipment]} · {t.group[muscleGroup(e)]}</span>
         </span>
         <span className="li-side">{right}</span>
       </button>
@@ -98,9 +101,9 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
         <div className="searchrow">
           <label className="search">
             <IconSearch />
-            <input className="field" type="search" placeholder="Search" autoComplete="off" value={f.q} onChange={(e) => update({ q: e.target.value })} aria-label="Search exercises" />
+            <input className="field" type="search" placeholder={t.common.search} autoComplete="off" value={f.q} onChange={(e) => update({ q: e.target.value })} aria-label={x.searchAria} />
           </label>
-          <button type="button" className={"ib filter-btn" + (filterCount ? " active" : "")} onClick={() => setSheet(true)} aria-label={"Sort and filter" + (filterCount ? `, ${filterCount} active` : "")}>
+          <button type="button" className={"ib filter-btn" + (filterCount ? " active" : "")} onClick={() => setSheet(true)} aria-label={x.sortFilterAria(filterCount)}>
             <IconSliders />
             {filterCount > 0 && <span className="badge">{filterCount}</span>}
           </button>
@@ -108,7 +111,7 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
         {chips.length > 0 && (
           <div className="chiprow">
             {chips.map((c) => (
-              <button key={c.key} type="button" className="fchip" onClick={c.remove} aria-label={"Remove filter " + c.label}>{c.label}<IconX /></button>
+              <button key={c.key} type="button" className="fchip" onClick={c.remove} aria-label={x.removeFilter(c.label)}>{c.label}<IconX /></button>
             ))}
           </div>
         )}
@@ -121,8 +124,8 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
           </div>
         )) : (
           <div className="card empty">
-            <p>No exercise found</p>
-            {f.q.trim() && <button type="button" className="ghost" onClick={() => onCreate(f.q.trim())}>Create "{f.q.trim()}"</button>}
+            <p>{x.noneFound}</p>
+            {f.q.trim() && <button type="button" className="ghost" onClick={() => onCreate(f.q.trim())}>{x.createNamed(f.q.trim())}</button>}
           </div>
         )}
       </div>
@@ -132,26 +135,28 @@ export function ExerciseBrowser({ scope, head, mode, selected = [], onRow, onCre
 }
 
 function FilterSheet({ f, count, update, onClose }: { f: BrowserFilters; count: number; update: (p: Partial<BrowserFilters>) => void; onClose: () => void }) {
-  const sorts: Array<[SortMode, string]> = [["recent", "Recently used"], ["az", "A–Z"], ["muscle", "Muscle group"], ["most", "Most used"]];
-  const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  const t = useT();
+  const x = t.exercises;
+  const sorts: Array<[SortMode, string]> = [["recent", x.sortRecent], ["az", x.sortAz], ["muscle", x.sortMuscle], ["most", x.sortMost]];
+  const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((y) => y !== v) : [...list, v]);
   return (
-    <Sheet onClose={onClose} label="Sort and filter">
-      <h3>Sort and filter</h3>
-      <div className="grp"><span className="lbl">Sort</span>
+    <Sheet onClose={onClose} label={x.sortFilter}>
+      <h3>{x.sortFilter}</h3>
+      <div className="grp"><span className="lbl">{x.sort}</span>
         <div className="chips">{sorts.map(([k, l]) => <button key={k} type="button" className="chip" aria-pressed={f.sort === k} onClick={() => update({ sort: k })}>{l}</button>)}</div>
       </div>
-      <div className="grp"><span className="lbl">Muscle group</span>
-        <div className="chips">{MUSCLE_GROUPS.map((g) => <button key={g} type="button" className="chip" aria-pressed={f.groups.includes(g)} onClick={() => update({ groups: toggle(f.groups, g) })}>{g}</button>)}</div>
+      <div className="grp"><span className="lbl">{x.muscleGroup}</span>
+        <div className="chips">{MUSCLE_GROUPS.map((g) => <button key={g} type="button" className="chip" aria-pressed={f.groups.includes(g)} onClick={() => update({ groups: toggle(f.groups, g) })}>{t.group[g]}</button>)}</div>
       </div>
-      <div className="grp"><span className="lbl">Equipment</span>
-        <div className="chips">{EQUIPMENT.map((q) => <button key={q} type="button" className="chip" aria-pressed={f.equipment.includes(q)} onClick={() => update({ equipment: toggle(f.equipment, q) })}>{EQUIPMENT_LABEL[q]}</button>)}</div>
+      <div className="grp"><span className="lbl">{x.equipment}</span>
+        <div className="chips">{EQUIPMENT.map((q) => <button key={q} type="button" className="chip" aria-pressed={f.equipment.includes(q)} onClick={() => update({ equipment: toggle(f.equipment, q) })}>{t.equipment[q]}</button>)}</div>
       </div>
       <button type="button" className="row" role="switch" aria-checked={f.showHidden} onClick={() => update({ showHidden: !f.showHidden })} style={{ minHeight: 44 }}>
-        <span>Show hidden exercises</span><span className="sw" />
+        <span>{x.showHidden}</span><span className="sw" />
       </button>
       <div className="acts two">
-        <button type="button" className="btn" onClick={() => update({ sort: "recent", groups: [], equipment: [], showHidden: false })}>Reset</button>
-        <button type="button" className="btn btn-primary" onClick={onClose}>Show {count} exercises</button>
+        <button type="button" className="btn" onClick={() => update({ sort: "recent", groups: [], equipment: [], showHidden: false })}>{t.common.reset}</button>
+        <button type="button" className="btn btn-primary" onClick={onClose}>{x.show(count)}</button>
       </div>
     </Sheet>
   );

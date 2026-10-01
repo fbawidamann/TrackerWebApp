@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/i18n";
 import { IconCheck } from "./icons";
 
 let locks = 0;
@@ -68,7 +69,8 @@ export function ConfirmSheet(props: {
   title: string; text?: ReactNode; confirm: string; cancel?: string; danger?: boolean;
   onConfirm: () => void; onClose: () => void;
 }) {
-  const { title, text, confirm, cancel = "Cancel", danger, onConfirm, onClose } = props;
+  const t = useT();
+  const { title, text, confirm, cancel = t.common.cancel, danger, onConfirm, onClose } = props;
   return (
     <Sheet onClose={onClose} label={title}>
       <h3>{title}</h3>
@@ -108,6 +110,7 @@ export function TextSheet(props: {
   title: string; initial: string; maxLength: number; placeholder?: string; onSave: (v: string) => void; onClose: () => void;
 }) {
   const { title, initial, maxLength, placeholder, onSave, onClose } = props;
+  const t = useT();
   const submit = (form: HTMLFormElement) => {
     const v = (new FormData(form).get("v") as string | null) ?? "";
     onSave(v.trim());
@@ -118,7 +121,7 @@ export function TextSheet(props: {
       <h3>{title}</h3>
       <form onSubmit={(e) => { e.preventDefault(); submit(e.currentTarget); }} className="acts">
         <input className="field" name="v" defaultValue={initial} maxLength={maxLength} placeholder={placeholder} aria-label={title} autoFocus autoComplete="off" />
-        <button type="submit" className="btn btn-primary btn-block">Save</button>
+        <button type="submit" className="btn btn-primary btn-block">{t.common.save}</button>
       </form>
     </Sheet>
   );

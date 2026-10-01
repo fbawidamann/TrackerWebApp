@@ -1,7 +1,10 @@
+import { tr } from "@/i18n";
+
 /** Minimal JSON client for the app's own API (same origin, session cookie). */
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  /** `message` is shown to the user: the server's English text, translated when the dictionary knows it. */
+  constructor(public status: number, public serverMessage: string) { super(tr().serverErrors[serverMessage] ?? serverMessage); }
 }
 /** No connection (offline, server unreachable). */
 export class NetworkError extends Error {

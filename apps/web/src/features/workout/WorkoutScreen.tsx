@@ -3,6 +3,7 @@ import { useState } from "react";
 import { lastDoneByRoutine, useActiveWorkout, useRoutines, useTraining, type RoutineView } from "@/data/hooks";
 import { RoutinePreview } from "@/features/routines/RoutinePreview";
 import { StarterRoutines } from "@/features/routines/StarterRoutines";
+import { useT } from "@/i18n";
 import { useFormat } from "@/lib/useFormat";
 import { IconChevron } from "@/ui/icons";
 import { ActiveWorkout } from "./ActiveWorkout";
@@ -19,22 +20,23 @@ function IdleWorkout() {
   const routines = useRoutines();
   const training = useTraining();
   const fmt = useFormat();
+  const t = useT();
   const { start, element } = useStarter();
   const [preview, setPreview] = useState<RoutineView | null>(null);
   const last = lastDoneByRoutine(training);
   return (
     <div className="page">
-      <h1 className="title">Workout</h1>
-      <button type="button" className="btn btn-primary btn-block" onClick={() => void start()}>Start empty workout</button>
+      <h1 className="title">{t.workout.workout}</h1>
+      <button type="button" className="btn btn-primary btn-block" onClick={() => void start()}>{t.workout.startEmpty}</button>
       <div className="sec">
-        <div className="sec-head"><span className="lbl">Routines</span><Link to="/routines" className="link">Manage</Link></div>
+        <div className="sec-head"><span className="lbl">{t.workout.routines}</span><Link to="/routines" className="link">{t.workout.manage}</Link></div>
         {routines === undefined ? null : routines.length ? (
           <div className="card list">
             {routines.map((r) => (
               <button key={r.routine.id} type="button" className="li" onClick={() => setPreview(r)}>
                 <span className="li-main">
                   <span className="li-name">{r.routine.name}</span>
-                  <span className="li-meta">{r.items.length} exercises · {r.setCount} sets · {last.get(r.routine.id) ? "last " + fmt.relDay(last.get(r.routine.id)!) : "never done"}</span>
+                  <span className="li-meta">{t.routines.meta(r.items.length, r.setCount, last.get(r.routine.id) ? t.home.lastDone(fmt.relDay(last.get(r.routine.id)!)) : t.home.neverDone)}</span>
                 </span>
                 <span className="li-side"><IconChevron /></span>
               </button>

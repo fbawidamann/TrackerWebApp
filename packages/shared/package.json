@@ -6,13 +6,15 @@
   "exports": {
     ".": "./src/index.ts",
     "./catalog": "./data/exercises.json",
-    "./catalog-version": "./data/catalog-version.json"
+    "./catalog-version": "./data/catalog-version.json",
+    "./catalog-de": "./data/exercises.de.json"
   },
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "catalog:import": "tsx scripts/import-exercises.ts",
-    "catalog:images": "tsx scripts/import-exercises.ts --images-only"
+    "catalog:images": "tsx scripts/import-exercises.ts --images-only",
+    "catalog:version": "tsx scripts/import-exercises.ts --version-only"
   },
   "dependencies": {
     "uuid": "^14.0.2",
