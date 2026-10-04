@@ -187,7 +187,7 @@ body.no-nav .toast-wrap { bottom: calc(var(--safe-b) + 20px); }
 
 /* ---------- Sheets ---------- */
 .scrim { position: fixed; inset: 0; z-index: 80; background: var(--scrim); animation: fade .15s ease; }
-.sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: min(640px, 100%); z-index: 81; max-height: 88dvh; overflow-y: auto; padding: 10px 20px calc(22px + var(--safe-b)); border-radius: 22px 22px 0 0; background: var(--surf); display: grid; gap: 16px; animation: up .2s ease; }
+.sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: min(640px, 100%); z-index: 81; max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain; padding: 10px 20px calc(22px + var(--safe-b)); border-radius: 22px 22px 0 0; background: var(--surf); display: grid; gap: 16px; animation: up .2s ease; }
 .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
 .sheet h3 { margin: 4px 0 0; font-size: calc(20px + var(--d)); font-weight: 600; }
 .sheet p { margin: 0; color: var(--muted); font-size: calc(15px + var(--d)); }

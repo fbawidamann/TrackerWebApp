@@ -1,7 +1,8 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/i18n";
 import { IconCheck } from "./icons";
+import { useSwipeToClose } from "./useSwipeToClose";
 
 let locks = 0;
 /** Locks page scrolling while any sheet/overlay is open. */
@@ -26,14 +27,17 @@ export function useEscape(onEscape: () => void, active = true): void {
   }, [onEscape, active]);
 }
 
-/** Bottom sheet (centered dialog on desktop). */
+/** Bottom sheet (centered dialog on desktop). On phones it closes with a swipe down from the top of its content. */
 export function Sheet({ onClose, label, children }: { onClose: () => void; label: string; children: ReactNode }) {
   useScrollLock();
   useEscape(onClose);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
+  useSwipeToClose(sheetRef, scrimRef, onClose);
   return createPortal(
     <>
-      <div className="scrim" onClick={onClose} />
-      <div className="sheet" role="dialog" aria-modal="true" aria-label={label}>
+      <div className="scrim" ref={scrimRef} onClick={onClose} />
+      <div className="sheet" ref={sheetRef} role="dialog" aria-modal="true" aria-label={label}>
         <div className="grab" />
         {children}
       </div>

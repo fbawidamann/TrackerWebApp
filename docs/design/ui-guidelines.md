@@ -132,6 +132,9 @@ A **floating pill above the bottom nav**: `REST` label · progress bar · `0:56`
 - Order: date label → title → **full-width "Start empty workout" button at the top** → This week → Routines → Recent.
 - This week: **day dots** (Mon–Sun). A day with a workout is a filled `accent-fill` dot, and today has an accent ring. Below the dots: workouts, volume and duration for the week.
 
+### Sheets (bottom sheets)
+Phone: a sheet slides up from the bottom with a grab handle and scrolls inside when its content is long (max 88 % height). It closes by tapping the scrim, with Escape, or (added 2026-10-04) by **swiping down**: the drag only starts when the content is scrolled to the very top and the finger moves down, so scrolling inside a long sheet (routine preview) keeps working. Release after more than 90 px, or a fast flick, closes it; less springs back. The scrim fades along with the drag. Desktop (≥ 1024 px): centred dialog, no handle, no swipe. Implementation: `apps/web/src/ui/useSwipeToClose.ts`.
+
 ### Bottom navigation
 Home · History · Workout · Running · Exercises · Profile (six tabs since running, 2026-10-01), with icons and **always-visible labels**. The active tab gets `accent-text` and a pill background. It sits on `surface` with a `line` top border.
 
