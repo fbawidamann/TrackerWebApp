@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { router } from "./app/router";
-import { setUpdateReady, watchForUpdates } from "./app/updates";
+import { watchForUpdates } from "./app/updates";
 import { db } from "./db/db";
 import { setOwner } from "./db/owner";
 import { initDb } from "./db/seed";
@@ -27,9 +27,9 @@ async function boot() {
 
 void boot();
 // Updates: the new version waits for a tap on the banner instead of reloading by itself (app/updates.ts).
-const updateSW = registerSW({
+// registerSW only registers the service worker; update detection and applying are in watchForUpdates.
+registerSW({
   immediate: true,
-  onNeedRefresh() { setUpdateReady(() => updateSW(true)); },
   onRegisteredSW(_url, reg) { if (reg) watchForUpdates(reg); },
 });
 startSyncLoop(async () => !!(await getAccount()) && !(await db.meta.get("sessionExpired"))?.value);
