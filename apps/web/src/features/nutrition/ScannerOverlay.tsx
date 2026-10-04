@@ -99,8 +99,10 @@ export function ScannerOverlay({ onCode, onClose }: { onCode: (code: string) => 
     if (/^\d{6,14}$/.test(code)) { done.current = true; onCode(code); }
   };
 
+  // Own layer above other overlays: a portal opened in the same render as its parent (Scan button → Add food + scanner)
+  // lands in the DOM *before* the parent, and with equal z-index the parent would cover the camera.
   return (
-    <Overlay label={n.scanTitle} onEscape={onClose}>
+    <Overlay label={n.scanTitle} onEscape={onClose} className="scan-layer">
       <div className="scan">
         <video ref={video} className="scan-video" playsInline muted autoPlay disablePictureInPicture controls={false} aria-hidden="true" />
         {needTap && (

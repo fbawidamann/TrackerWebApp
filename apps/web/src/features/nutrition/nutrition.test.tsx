@@ -76,3 +76,15 @@ describe("ScannerOverlay", () => {
     play.mockRestore();
   });
 });
+
+describe("scanner layering", () => {
+  it("Scan button: the camera layer sits above Add food even though its portal comes first in the DOM", async () => {
+    const stream = { getTracks: () => [], getVideoTracks: () => [] };
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: vi.fn(async () => stream) } });
+    const { AddFood } = await import("./AddFood");
+    const { ToastProvider } = await import("@/ui/Toast");
+    render(<ToastProvider><AddFood day={new Date()} startWithScan onClose={() => {}} /></ToastProvider>);
+    const scanner = document.querySelector(".scan")!.closest(".overlay")!;
+    expect(scanner.classList.contains("scan-layer")).toBe(true);
+  });
+});
