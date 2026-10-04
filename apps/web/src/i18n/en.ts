@@ -162,7 +162,19 @@ export const en = {
   },
 
   home: {
-    goalAria: (done: number, goal: number) => `Weekly goal: ${done} of ${goal} workouts. Change goal`,
+    goalAria: (done: number, goal: number, runs: number) =>
+      `This week: ${done} of ${goal} workouts${runs ? `, ${pl(runs, "run", "runs")}` : ""}. Change weekly goal`,
+    dayAria: (day: string, gym: number, runs: number, today: boolean) =>
+      `${today ? "Today, " : ""}${day}: ${[gym && pl(gym, "workout", "workouts"), runs && pl(runs, "run", "runs")].filter(Boolean).join(" and ") || "no training"}`,
+    toGo: (n: number) => `${n} to go`,
+    streak: (n: number) => `Goal reached ${n} weeks in a row`,
+    upNext: "Up next",
+    start: "Start",
+    startAria: (name: string) => `Start ${name}`,
+    kindGym: "Workout",
+    kindRun: "Run",
+    prUp: (delta: string) => `${delta} more than before`,
+    runsWord: (n: number): string => (n === 1 ? "run" : "runs"),
     goalOf: "of",
     goalWorkouts: "workouts",
     goalReached: "goal reached",

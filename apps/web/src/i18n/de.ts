@@ -162,7 +162,19 @@ export const de: Dict = {
   },
 
   home: {
-    goalAria: (done, goal) => `Wochenziel: ${done} von ${goal} Trainings. Ziel ändern`,
+    goalAria: (done, goal, runs) =>
+      `Diese Woche: ${done} von ${goal} Trainings${runs ? `, ${pl(runs, "Lauf", "Läufe")}` : ""}. Wochenziel ändern`,
+    dayAria: (day, gym, runs, today) =>
+      `${today ? "Heute, " : ""}${day}: ${[gym && pl(gym, "Training", "Trainings"), runs && pl(runs, "Lauf", "Läufe")].filter(Boolean).join(" und ") || "kein Training"}`,
+    toGo: (n) => `noch ${n}`,
+    streak: (n) => `${n} Wochen in Folge Ziel erreicht`,
+    upNext: "Als Nächstes",
+    start: "Starten",
+    startAria: (name) => `${name} starten`,
+    kindGym: "Training",
+    kindRun: "Lauf",
+    prUp: (delta) => `${delta} mehr als vorher`,
+    runsWord: (n) => (n === 1 ? "Lauf" : "Läufe"),
     goalOf: "von",
     goalWorkouts: "Trainings",
     goalReached: "Ziel erreicht",

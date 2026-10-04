@@ -129,8 +129,7 @@ A **medal icon** (lucide `award`-style) in `accent-text`, 18 px, at the end of t
 A **floating pill above the bottom nav**: `REST` label · progress bar · `0:56` · Skip. It stays out of the way (low priority), and the screen gets extra bottom padding while it is visible.
 
 ### Home
-- Order: date label → title → **full-width "+ Start workout" button at the top** → This week → Routines → Recent.
-- This week: **day dots** (Mon–Sun). A day with a workout is a filled `accent-fill` dot, and today has an accent ring. Below the dots: workouts, volume and duration for the week.
+Source of truth: [screens/home.md](screens/home.md). Order: username → weekday title → **This week card** (goal line + segments + Mon–Sun day strip: filled `accent-fill` circle = gym workout, accent ring = today, runner icon = run) → **+ Start workout** → **Up next** routine card → Routines → Recent (workouts and runs) → Latest PRs.
 
 ### Start button (added 2026-10-04, requested by Florian)
 The primary button that starts a workout (Home, Workout tab, empty History) reads **`+ Start workout`** / **`+ Training starten`** (was "Start empty workout"; the routines below make clear what "empty" meant). The plus sits in a small round `on-accent` 20 % disc.

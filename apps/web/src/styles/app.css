@@ -407,7 +407,60 @@ ol.steps-list li::marker { color: var(--muted); }
 .segs { display: grid; gap: 4px; }
 .segs i { height: 4px; border-radius: 2px; background: var(--raised); }
 .segs i.on { background: var(--acc-fill); }
+/* Home: This week card (docs/design/screens/home.md → This week) */
+.home-head { display: grid; gap: 16px; }
+.week { padding: 16px 16px 14px; display: grid; gap: 16px; transition: opacity .2s ease; }
+.week.loading { opacity: .55; }
+.week .goal { gap: 6px; }
+.week-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.week-state { font-size: calc(13px + var(--d) / 2); color: var(--muted); font-weight: 500; white-space: nowrap; }
+.week-state.reached { color: var(--acc-text); }
+.week .segs { margin-top: 4px; }
+.days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.day { display: grid; justify-items: center; gap: 4px; min-width: 0; }
+.day-n { font-size: calc(11px + var(--d) / 2); font-weight: 500; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.day-c { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; font-size: calc(14px + var(--d) / 2); font-weight: 500; color: var(--text); background: transparent; transition: background-color .25s ease, color .25s ease; }
+.day.future .day-c { color: var(--muted); }
+.day.gym .day-c { background: var(--acc-fill); color: var(--on-acc); font-weight: 600; }
+.day.today .day-c { box-shadow: 0 0 0 2px var(--acc); }
+.day.today.gym .day-c { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--acc); }
+.day.today .day-n { color: var(--acc-text); }
+.day-run { height: 14px; display: grid; place-items: center; color: var(--acc-text); }
+.day-run svg { width: 14px; height: 14px; stroke-width: 2.25; }
+.week-streak { margin: -4px 0 0; font-size: calc(13px + var(--d) / 2); color: var(--acc-text); font-weight: 500; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Home: start area + Up next */
+.home-start { display: grid; gap: 12px; }
+.upnext { display: flex; align-items: center; gap: 8px; padding-right: 12px; }
+.upnext-main { flex: 1; min-width: 0; display: grid; gap: 2px; padding: 14px 4px 14px 16px; text-align: left; min-height: 44px; }
+.upnext-name { font-size: calc(17px + var(--d)); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upnext-main .lbl { color: var(--acc-text); }
+.upnext-go { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px 0 13px; border-radius: 999px; font-size: calc(15px + var(--d)); font-weight: 600; color: var(--acc-text); background: color-mix(in oklab, var(--acc) 14%, transparent); }
+.upnext-go svg { width: 15px; height: 15px; fill: currentColor; }
+:where(button.upnext-main):active { transform: none; opacity: .5; }
+
+/* Home: lists */
+.kind { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--raised); color: var(--muted); flex: none; }
+.kind svg { width: 18px; height: 18px; }
+.pr-up { font-size: calc(13px + var(--d) / 2); font-weight: 500; color: var(--acc-text); }
+.pr-up .u { color: inherit; opacity: .8; }
+.skel { padding: 16px; display: grid; gap: 14px; }
+.skel i { display: block; height: 14px; border-radius: 7px; background: var(--raised); animation: skel 1.2s ease-in-out infinite alternate; }
+.skel i:nth-child(2) { width: 60%; }
+@keyframes skel { from { opacity: .5; } to { opacity: 1; } }
+/* Gentle entrance, sections only (sheets are rendered inside .page too and keep their own animation). */
+.home-head, .home-start, .home > .resume, .home > .sec { animation: rise .32s ease both; }
+.home-start, .home > .resume { animation-delay: .04s; }
+.home > .sec { animation-delay: .08s; }
+@media (prefers-reduced-motion: reduce) {
+  .home-head, .home-start, .home > .resume, .home > .sec, .skel i { animation: none; }
+  .day-c, .week, .resume-bar i { transition: none; }
+}
+
 .resume { padding: 18px; display: grid; gap: 14px; }
+.resume-bar { display: block; height: 4px; border-radius: 2px; background: var(--raised); overflow: hidden; margin-top: -4px; }
+.resume-bar i { display: block; height: 100%; background: var(--acc-fill); transform-origin: left; transition: transform .4s ease; }
 .resume-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .resume-time { font-size: calc(22px + var(--d)); font-weight: 600; }
 .pr-val { display: grid; justify-items: end; gap: 2px; }
