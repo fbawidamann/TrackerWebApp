@@ -35,7 +35,7 @@ The **app** container can go live **before the backend exists** (M9 before M7): 
 
 ## Actual VPS setup (found by Hermes at first deploy, 2026-10-01)
 - Traefik runs with **`network_mode: host`**, so there is no Traefik Docker network. The `app` container publishes its port on **`127.0.0.1:${APP_HOST_PORT}`** only (e.g. 63255), and the router uses `loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}`.
-- Entrypoints: `web,websecure` (HTTP → HTTPS redirect with 301). Middleware: `secure-headers@file` (HSTS, X-Frame-Options, nosniff), the same as the other sites on the VPS. Let's Encrypt uses the HTTP-01 challenge on port 80.
+- Entrypoints: `web,websecure` (HTTP → HTTPS redirect with 301). Middleware: `secure-headers@file` (HSTS, X-Frame-Options, nosniff), the same as the other sites on the VPS. Since 2026-10-04 the fitness router uses its own copy `secure-headers-fitness@file`, identical except `camera=(self)` for the barcode scanner (ADR 0010). Let's Encrypt uses the HTTP-01 challenge on port 80.
 - **For M7:** the `db` service stays on the default Compose network with **no published port**. `app` reaches it as `db:5432`, because `app` itself is not in host network mode. Protect the database volume from any cleanup commands.
 
 ## Consequences

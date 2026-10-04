@@ -603,6 +603,9 @@ export async function exportBackup(): Promise<string> {
     settings: await all("settings"),
     runs: await all("runs"),
     runTracks: await all("runTracks"),
+    foods: await all("foods"),
+    foodEntries: await all("foodEntries"),
+    bodyWeights: await all("bodyWeights"),
   } as Backup["data"];
   const backup: Backup = { app: "fitness-tracker", schemaVersion: BACKUP_SCHEMA_VERSION, exportedAt: iso(), data };
   return JSON.stringify(backup);

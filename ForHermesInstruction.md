@@ -130,7 +130,7 @@ git clone git@github-fitness:fbawidamann/TrackerWebApp.git /opt/fitness-tracker
 ```
 Never ask for or store Florian's GitHub password or personal tokens.
 
-> **Status (2026-10-01): deployed and live.** Hermes' findings are now in the repo: Traefik on this VPS runs with `network_mode: host`, so the app publishes on `127.0.0.1:${APP_HOST_PORT}` and Traefik forwards to `loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}`. The entrypoints are `web,websecure`, and the middleware is `secure-headers@file`. `docker-compose.yml` and `.env.example` in the repo match the running setup. Steps 2–4 below were for the first deployment. For updates, see "Updating later".
+> **Status (2026-10-01): deployed and live.** Hermes' findings are now in the repo: Traefik on this VPS runs with `network_mode: host`, so the app publishes on `127.0.0.1:${APP_HOST_PORT}` and Traefik forwards to `loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}`. The entrypoints are `web,websecure`, and the middleware is `secure-headers-fitness@file` (since 2026-10-04: a copy of `secure-headers@file` with `camera=(self)` for the barcode scanner, file `/docker/traefik-r4mf/dynamic/security-headers-fitness.yml`). `docker-compose.yml` and `.env.example` in the repo match the running setup. Steps 2–4 below were for the first deployment. For updates, see "Updating later".
 
 ### 2. Read the existing Traefik setup (read-only)
 Find these values, but do **not** change the Traefik configuration:

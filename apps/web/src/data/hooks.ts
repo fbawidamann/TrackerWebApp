@@ -128,6 +128,19 @@ export function useRunTrack(activityId: string): RunTrack | null | undefined {
   return useLiveQuery(async () => (await db.runTracks.where("activityId").equals(activityId).toArray()).find(alive) ?? null, [activityId]);
 }
 
+/* ---------- Nutrition ---------- */
+
+/** All food entries (incl. deleted, filtered by the pure helpers). `undefined` while loading. */
+export function useFoodEntries(): import("@fitness/shared").FoodEntry[] | undefined {
+  return useLiveQuery(() => db.foodEntries.toArray(), []);
+}
+export function useFoods(): import("@fitness/shared").Food[] | undefined {
+  return useLiveQuery(() => db.foods.toArray(), []);
+}
+export function useBodyWeights(): import("@fitness/shared").BodyWeight[] | undefined {
+  return useLiveQuery(() => db.bodyWeights.toArray(), []);
+}
+
 /* ---------- Account and sync (M7/M8) ---------- */
 
 /** The logged-in account on this device: undefined while loading, null when logged out. */

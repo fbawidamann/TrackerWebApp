@@ -6,6 +6,7 @@ import {
   lastDoneByRoutine, muscleGroup, useAccount, useActiveWorkout, useCatalog, useRoutines, useRuns, useSettings, useTraining, type RoutineView,
 } from "@/data/hooks";
 import { RoutinePreview } from "@/features/routines/RoutinePreview";
+import { NutritionHomeCard } from "@/features/nutrition/NutritionHomeCard";
 import { StarterRoutines } from "@/features/routines/StarterRoutines";
 import { useStarter } from "@/features/workout/useStarter";
 import { useT } from "@/i18n";
@@ -67,7 +68,8 @@ export function HomeScreen() {
       <div className="home-head">
         <div>
           {/* Username at the very top (docs/design/screens/home.md). Until accounts exist (M7) this is the Profile name. */}
-          {user && <p className="home-user">{user}</p>}
+          {/* Tap the name → Profile (Profile left the bottom bar for Nutrition). */}
+          {user && <Link to="/profile" className="home-user">{user}</Link>}
           <h1 className="title">{fmt.weekday(today)}</h1>
           <p className="sub" style={{ marginTop: 2 }}>{fmt.dayMonth(today)}</p>
         </div>
@@ -126,6 +128,8 @@ export function HomeScreen() {
           </div>
         )
       )}
+
+      {settings.homeShowNutrition && <NutritionHomeCard now={today} />}
 
       {settings.homeShowRecent && feed.length > 0 && (
         <div className="sec">

@@ -8,7 +8,7 @@ import { LoginScreen } from "@/features/auth/LoginScreen";
 import { restLabel } from "@/features/workout/RestPill";
 import { rememberLanguage, setLanguage, useT } from "@/i18n";
 import { useNow } from "@/lib/time";
-import { IconChart, IconChevron, IconGrid, IconHistory, IconHome, IconLift, IconList, IconRun, IconSwim, IconUser } from "@/ui/icons";
+import { IconChart, IconChevron, IconFood, IconGrid, IconHistory, IconHome, IconLift, IconList, IconRun, IconSwim, IconUser } from "@/ui/icons";
 import { Sheet } from "@/ui/Sheet";
 import { ToastProvider } from "@/ui/Toast";
 import { useApplyTheme } from "./theme";
@@ -16,11 +16,11 @@ import { UpdateBanner } from "./UpdateBanner";
 import { autoImportStrava } from "@/features/strava/strava";
 import { useToast } from "@/ui/Toast";
 
-/** Bottom nav on phones: three tabs plus "More" (docs/design/ui-guidelines.md "Bottom navigation"). */
+/** Bottom nav on phones: Home, Workout, Nutrition plus "More" (docs/design/ui-guidelines.md "Bottom navigation"). */
 const NAV = [
   { to: "/", key: "home", icon: IconHome, match: (p: string) => p === "/" },
   { to: "/workout", key: "workout", icon: IconLift, match: (p: string) => p.startsWith("/workout") || p.startsWith("/routines") },
-  { to: "/profile", key: "profile", icon: IconUser, match: (p: string) => p.startsWith("/profile") },
+  { to: "/nutrition", key: "nutrition", icon: IconFood, match: (p: string) => p.startsWith("/nutrition") },
 ] as const;
 
 /** Behind "More" on phones; listed directly in the desktop sidebar. */
@@ -30,6 +30,8 @@ export const MORE = [
   { to: "/swimming", key: "swimming", icon: IconSwim, match: (p: string) => p.startsWith("/swimming"), soon: true },
   { to: "/stats", key: "stats", icon: IconChart, match: (p: string) => p.startsWith("/stats"), soon: false },
   { to: "/exercises", key: "exercises", icon: IconList, match: (p: string) => p.startsWith("/exercises"), soon: false },
+  // Profile left the bottom bar for Nutrition (2026-10-04); also reachable by tapping the name on Home.
+  { to: "/profile", key: "profile", icon: IconUser, match: (p: string) => p.startsWith("/profile"), soon: false },
 ] as const;
 
 /** Screens that hide the bottom nav (full-screen flows). */
@@ -76,19 +78,14 @@ export function Layout() {
       {!hideNav && (
         <nav className="nav" aria-label={t.nav.main}>
           <span className="brand">Fitness</span>
-          {/* Order in the desktop sidebar: Home, Workout, the More items, Profile. On phones .nav-extra is hidden. */}
-          {NAV.slice(0, 2).map(({ to, key, icon: Icon, match }) => (
+          {/* Order in the desktop sidebar: Home, Workout, Nutrition, then the More items (Profile last). On phones .nav-extra is hidden. */}
+          {NAV.map(({ to, key, icon: Icon, match }) => (
             <Link key={to} to={to} className={match(pathname) ? "on" : ""} aria-current={match(pathname) ? "page" : undefined}>
               <Icon /><span>{t.nav[key]}</span>
             </Link>
           ))}
           {MORE.map(({ to, key, icon: Icon, match }) => (
             <Link key={to} to={to} className={"nav-extra" + (match(pathname) ? " on" : "")} aria-current={match(pathname) ? "page" : undefined}>
-              <Icon /><span>{t.nav[key]}</span>
-            </Link>
-          ))}
-          {NAV.slice(2).map(({ to, key, icon: Icon, match }) => (
-            <Link key={to} to={to} className={match(pathname) ? "on" : ""} aria-current={match(pathname) ? "page" : undefined}>
               <Icon /><span>{t.nav[key]}</span>
             </Link>
           ))}

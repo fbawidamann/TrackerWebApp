@@ -158,6 +158,7 @@ export function ProfileScreen() {
         {toggle(p.showRoutines, s.homeShowRoutines, (v) => set({ homeShowRoutines: v }))}
         {toggle(p.showRecent, s.homeShowRecent, (v) => set({ homeShowRecent: v }))}
         {toggle(p.showPrs, s.homeShowPrs, (v) => set({ homeShowPrs: v }))}
+        {toggle(p.showNutrition, s.homeShowNutrition, (v) => set({ homeShowNutrition: v }))}
       </>)}
 
       {section(p.data, <>

@@ -29,7 +29,8 @@ services:
       - traefik.http.routers.fitness.entrypoints=${TRAEFIK_ENTRYPOINTS}
       - traefik.http.routers.fitness.tls=true
       - traefik.http.routers.fitness.tls.certresolver=${TRAEFIK_CERTRESOLVER}
-      - traefik.http.routers.fitness.middlewares=secure-headers@file
+      # Own header set: like secure-headers, but camera=(self) for the barcode scanner (docs/adr/0010-nutrition.md).
+      - traefik.http.routers.fitness.middlewares=secure-headers-fitness@file
       - traefik.http.services.fitness.loadbalancer.server.url=http://127.0.0.1:${APP_HOST_PORT}
 
   db:

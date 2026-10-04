@@ -30,6 +30,9 @@ export const IconRun = make([
   <circle key="a" cx="15" cy="4.5" r="2" />,
   <path key="b" d="m13.5 8.5-2 5 3 2.5-1 5M11.5 13.5l-2.2 2.8-4 .7M13.5 8.5l-3.5 1.5-1.5 2.5M13.5 8.5l2 3 3.5.5" />,
 ]);
+export const IconBarcode = make(<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M10 8v8M13 8v8M17 8v8" />);
+/** Fork and knife: the Nutrition tab. */
+export const IconFood = make(<path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17.5 3c-1.9 1.2-3 3.6-3 6.5 0 1.9.9 3 3 3.5V21" />);
 export const IconList = make(<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />);
 export const IconGrid = make([
   <rect key="a" x="3.5" y="3.5" width="7" height="7" rx="2" />, <rect key="b" x="13.5" y="3.5" width="7" height="7" rx="2" />,

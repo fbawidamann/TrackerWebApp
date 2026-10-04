@@ -33,7 +33,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // wasm = the barcode scanner (zxing, ~1 MB), precached so scanning starts fast; the lookup itself needs network.
+        globPatterns: ["**/*.{js,css,html,svg,png,woff2,wasm}"],
         globIgnores: ["exercise-images/**"],
         navigateFallback: "/index.html",
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,

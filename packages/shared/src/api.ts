@@ -1,7 +1,7 @@
 import { z } from "zod";
 import {
   activityExerciseSchema, activitySchema, exercisePrefSchema, exerciseSchema, routineExerciseSchema, routineSchema,
-  runSchema, runTrackSchema, userSettingsSchema, workoutSetSchema,
+  bodyWeightSchema, foodEntrySchema, foodSchema, runSchema, runTrackSchema, userSettingsSchema, workoutSetSchema,
 } from "./schemas";
 
 /* ---------- Accounts (docs/design/screens/login.md, admin-users.md) ---------- */
@@ -59,6 +59,9 @@ export const SYNCED_TABLE_SCHEMAS = {
   settings: userSettingsSchema,
   runs: runSchema,
   runTracks: runTrackSchema,
+  foods: foodSchema,
+  foodEntries: foodEntrySchema,
+  bodyWeights: bodyWeightSchema,
 } as const;
 export type SyncTable = keyof typeof SYNCED_TABLE_SCHEMAS;
 export const SYNC_TABLES = Object.keys(SYNCED_TABLE_SCHEMAS) as SyncTable[];

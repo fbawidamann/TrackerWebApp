@@ -164,6 +164,54 @@ export const runTrackSchema = syncedBase.extend({
 });
 export type RunTrack = z.infer<typeof runTrackSchema>;
 
+/* ---------- Nutrition (docs/design/screens/nutrition.md, docs/adr/0010-nutrition.md) ----------
+   Separate domain, not part of activities. Values per 100 g (or 100 ml); entries keep a snapshot of what was eaten. */
+
+export const FOOD_SOURCES = ["own", "off"] as const;
+export const FOOD_UNITS = ["g", "ml"] as const;
+export type FoodUnit = (typeof FOOD_UNITS)[number];
+
+const macro = z.number().min(0).max(100);
+
+/** A food: own or copied from Open Food Facts on first use. Values per 100 g / 100 ml. */
+export const foodSchema = syncedBase.extend({
+  name: z.string().min(1).max(80),
+  brand: z.string().max(60).nullable(),
+  barcode: z.string().regex(/^\d{6,14}$/).nullable(),
+  source: z.enum(FOOD_SOURCES),
+  unit: z.enum(FOOD_UNITS),
+  kcal: z.number().min(0).max(1000),
+  protein: macro,
+  carbs: macro,
+  fat: macro,
+  /** One portion in g/ml (e.g. 1 egg = 60), from the product or set by the user. */
+  portion: z.number().min(0.1).max(5000).nullable(),
+});
+export type Food = z.infer<typeof foodSchema>;
+
+/**
+ * One logged food. `name`, `kcal`, `protein`, `carbs`, `fat` are a **snapshot for the eaten amount** (decided
+ * 2026-10-04): editing the food later never changes past days.
+ */
+export const foodEntrySchema = syncedBase.extend({
+  foodId: z.string().min(1).nullable(),
+  eatenAt: z.string().min(1),
+  amount: z.number().min(0.1).max(10_000),
+  unit: z.enum(FOOD_UNITS),
+  name: z.string().min(1).max(80),
+  kcal: z.number().min(0).max(20_000),
+  protein: z.number().min(0).max(2_000),
+  carbs: z.number().min(0).max(2_000),
+  fat: z.number().min(0).max(2_000),
+});
+export type FoodEntry = z.infer<typeof foodEntrySchema>;
+
+export const bodyWeightSchema = syncedBase.extend({
+  measuredAt: z.string().min(1),
+  kg: z.number().min(20).max(400),
+});
+export type BodyWeight = z.infer<typeof bodyWeightSchema>;
+
 /* ---------- Settings ---------- */
 
 export const ACCENTS = ["cobalt", "teal", "amber", "rose", "violet"] as const;
@@ -200,6 +248,23 @@ export const userSettingsSchema = z.object({
   homeShowRoutines: z.boolean(),
   homeShowRecent: z.boolean(),
   homeShowPrs: z.boolean(),
+  // Nutrition (docs/design/screens/nutrition.md, added 2026-10-04). Defaults, so rows saved before stay valid.
+  homeShowNutrition: z.boolean().default(true),
+  /** Own daily kcal target; null = use the suggestion from body data. */
+  kcalTarget: z.number().int().min(800).max(8000).nullable().default(null),
+  /** Surplus added to the suggested maintenance kcal (muscle gain). */
+  kcalSurplus: z.number().int().min(-1000).max(1000).default(250),
+  /** Protein per kg bodyweight (1.5–2.2 usual), used when no own gram target is set. */
+  proteinPerKg: z.number().min(1).max(3).default(1.8),
+  /** Own protein target in g/day; null = weight × proteinPerKg. */
+  proteinTargetG: z.number().int().min(20).max(500).nullable().default(null),
+  /** Planned bodyweight change in kg/week (muscle gain ≈ +0.25). */
+  weightGainTarget: z.number().min(-1.5).max(1.5).default(0.25),
+  sex: z.enum(["male", "female"]).nullable().default(null),
+  birthYear: z.number().int().min(1900).max(2100).nullable().default(null),
+  heightCm: z.number().int().min(100).max(250).nullable().default(null),
+  /** 1 (desk, little movement) … 5 (very active job + training). */
+  activityLevel: z.number().int().min(1).max(5).default(3),
 });
 export type UserSettings = z.infer<typeof userSettingsSchema>;
 
@@ -227,6 +292,16 @@ export const DEFAULT_USER_SETTINGS: Omit<UserSettings, "userId" | "updatedAt"> =
   homeShowRoutines: true,
   homeShowRecent: true,
   homeShowPrs: true,
+  homeShowNutrition: true,
+  kcalTarget: null,
+  kcalSurplus: 250,
+  proteinPerKg: 1.8,
+  proteinTargetG: null,
+  weightGainTarget: 0.25,
+  sex: null,
+  birthYear: null,
+  heightCm: null,
+  activityLevel: 3,
 };
 
 export const deviceSettingsSchema = z.object({
@@ -256,6 +331,10 @@ export const backupSchema = z.object({
     // Added with running; optional so older backups still import.
     runs: z.array(runSchema).default([]),
     runTracks: z.array(runTrackSchema).default([]),
+    // Added with nutrition (2026-10-04); optional so older backups still import.
+    foods: z.array(foodSchema).default([]),
+    foodEntries: z.array(foodEntrySchema).default([]),
+    bodyWeights: z.array(bodyWeightSchema).default([]),
   }),
 });
 export type Backup = z.infer<typeof backupSchema>;

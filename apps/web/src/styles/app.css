@@ -695,3 +695,125 @@ html[data-mode="light"] .login::before { background: radial-gradient(closest-sid
   .appicon, .icon-arc.draw, .login form, .busy, .ring.fill .arc { animation: none; }
   .ring.spin .arc { animation-duration: 3s; }
 }
+
+/* ---------- Nutrition (docs/design/screens/nutrition.md) ---------- */
+/* Protein colours are fixed (not the accent), so red/yellow/green always mean the same. */
+:root { --p-none: var(--line); --p-low: #e5534b; --p-meh: #e3b341; --p-ok: #3fb950; --p-great: #1f7a3a; }
+html[data-mode="light"] { --p-low: #cf3a33; --p-meh: #c99a1c; --p-ok: #2e9a42; --p-great: #186a30; }
+.ps-none { --pc: var(--p-none); } .ps-low { --pc: var(--p-low); } .ps-meh { --pc: var(--p-meh); }
+.ps-ok { --pc: var(--p-ok); } .ps-great { --pc: var(--p-great); }
+
+.home-user { display: inline-block; text-decoration: none; }
+a.home-user { min-height: 28px; }
+
+.nutri-head { display: flex; align-items: center; gap: 4px; margin: -4px -8px -12px; }
+.nutri-head .title { flex: 1; text-align: center; font-size: calc(22px + var(--d)); }
+.nutri-setup { display: grid; gap: 4px; padding: 18px; text-align: left; width: 100%; }
+
+.nutri-hero { padding: 18px 16px 14px; display: grid; grid-template-columns: auto 1fr; gap: 14px 16px; align-items: center; }
+.nutri-minor, .pweek, .nutri-streak { grid-column: 1 / -1; }
+.pring { position: relative; flex: none; }
+.pring svg { width: 100%; height: 100%; display: block; }
+.pring circle { fill: none; stroke-width: 9; }
+.pring-bg { stroke: var(--raised); }
+.pring-fg { stroke: var(--pc); stroke-linecap: round; transition: stroke-dashoffset .6s cubic-bezier(.2, .8, .2, 1), stroke .3s; }
+.ps-none .pring-fg { stroke: transparent; }
+.pring-txt { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.15; }
+.pring-txt b { font-size: calc(30px + var(--d)); font-weight: 650; letter-spacing: -.02em; }
+.pring-txt b small { font-size: .5em; font-weight: 500; color: var(--muted); }
+.pring-txt span { font-size: calc(12px + var(--d) / 2); color: var(--muted); }
+.pring-txt .pring-status { margin-top: 3px; font-weight: 600; color: var(--pc); }
+.ps-none .pring-status { color: var(--muted); font-weight: 400; }
+.pring.mini circle { stroke-width: 11; }
+.pring.mini .pring-txt b { font-size: 15px; }
+.pring.mini .pring-txt b small, .pring.mini .pring-txt span { display: none; }
+
+.nutri-side { display: grid; gap: 10px; min-width: 0; }
+.kcal b { font-size: calc(24px + var(--d)); font-weight: 650; letter-spacing: -.01em; margin-left: 0; }
+.kcal .lbl { display: block; margin-bottom: 2px; }
+.kcal-track { margin: 8px 0 4px; }
+.kcal-track i { background: var(--acc-fill); }
+.kcal-left { font-size: calc(13px + var(--d) / 2); color: var(--muted); }
+.prot-left { margin: 0; font-size: calc(14px + var(--d) / 2); font-weight: 500; }
+
+.nutri-minor { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-top: 4px; }
+.mbar-top { display: flex; justify-content: space-between; gap: 6px; font-size: calc(13px + var(--d) / 2); color: var(--muted); }
+.mbar-top b { color: var(--text); font-weight: 600; }
+.mbar-track { height: 6px; border-radius: 99px; background: var(--raised); overflow: hidden; margin-top: 6px; }
+.mbar-track i { display: block; height: 100%; border-radius: inherit; background: var(--muted); transition: width .5s ease; }
+
+.pweek { list-style: none; margin: 4px 0 0; padding: 10px 0 0; border-top: 1px solid var(--card-div); display: grid; grid-template-columns: repeat(7, 1fr); }
+.pday { width: 100%; min-height: 44px; display: grid; justify-items: center; gap: 5px; border-radius: 10px; }
+.pday-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.pday i { width: 14px; height: 14px; border-radius: 50%; background: var(--pc); }
+.pday.ps-none i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); }
+.pday.today .pday-l { color: var(--text); font-weight: 600; }
+.pday.on { background: var(--raised); }
+.pday:disabled { opacity: .35; }
+.nutri-streak { margin: 0; font-size: calc(13px + var(--d) / 2); color: var(--muted); text-align: center; }
+
+.nutri-actions { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; }
+.nutri-actions .btn { min-height: 50px; }
+.nutri-actions svg, .scan-btn svg { width: 20px; height: 20px; }
+
+.entry-li { gap: 14px; }
+.entry-time { width: 44px; flex: none; font-size: calc(13px + var(--d) / 2); color: var(--muted); }
+
+.weight-card { padding: 14px 16px; display: grid; gap: 8px; }
+.weight-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.weight-kg { font-size: calc(24px + var(--d)); font-weight: 650; }
+.weight-spark .spark { width: 100%; height: 48px; }
+.weight-hint { color: var(--text); }
+.weight-empty { display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--acc-text); font-weight: 600; }
+.weight-empty svg { width: 18px; height: 18px; }
+
+/* Add food */
+.add-search { display: flex; gap: 8px; padding: 4px 20px 10px; max-width: 640px; width: 100%; margin: 0 auto; }
+.scan-btn { flex: none; padding: 10px 14px; }
+.food-li { gap: 10px; }
+.add-dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in oklab, var(--acc) 16%, transparent); color: var(--acc-text); flex: none; }
+.add-dot svg { width: 16px; height: 16px; }
+.attribution { font-size: 12px; text-align: center; }
+.busy-note { position: fixed; left: 50%; top: 45%; transform: translate(-50%, -50%); z-index: 90; background: var(--surf); border: 1px solid var(--line); padding: 14px 20px; border-radius: 14px; box-shadow: 0 10px 40px var(--shadow); }
+
+/* Amount sheet */
+.amount-head { display: grid; gap: 2px; }
+.amount-row { display: grid; grid-template-columns: 1fr 112px; gap: 10px; }
+.amount-field { display: grid; gap: 6px; }
+.amount-input { display: flex; align-items: baseline; gap: 6px; }
+.field.big { font-size: calc(28px + var(--d)); font-weight: 600; padding: 8px 14px; }
+.amount-field.time .field { height: 100%; min-height: 54px; }
+.macro-live { margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.macro-live div { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 8px 6px; text-align: center; }
+.macro-live dt { font-size: 11px; color: var(--muted); }
+.macro-live dd { margin: 2px 0 0; font-weight: 600; }
+.macro-live .hl { border-color: var(--acc); }
+.macro-live .hl dd { color: var(--acc-text); }
+
+/* Food form */
+.form-field { display: grid; gap: 6px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Scanner: camera full screen, a frame in the middle, controls top/bottom (thumb-reachable). */
+.scan { position: fixed; inset: 0; background: #000; color: #fff; }
+.scan-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.scan-frame { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.scan-frame i { width: min(78vw, 340px); aspect-ratio: 16 / 9; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(0, 0, 0, .45); border: 2px solid rgba(255, 255, 255, .9); }
+.scan-top, .scan-bottom { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+.scan-top { top: 0; padding-top: calc(var(--safe-t) + 10px); justify-content: space-between; }
+.scan-title { font-weight: 600; }
+.scan-ib { color: #fff; background: rgba(0, 0, 0, .35); }
+.scan-chip { color: #fff; border-color: rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .35); min-height: 40px; }
+.scan-chip[aria-pressed="true"] { background: #fff; color: #000; }
+.scan-bottom { bottom: 0; padding-bottom: calc(var(--safe-b) + 20px); flex-direction: column; }
+.scan-msg { margin: 0; text-align: center; font-size: 15px; text-shadow: 0 1px 3px #000; max-width: 360px; }
+.scan-manual { display: flex; gap: 8px; width: min(100%, 400px); }
+.scan-manual .field { background: rgba(255, 255, 255, .95); color: #000; }
+
+/* Home card */
+.nutri-home { display: flex; align-items: center; gap: 14px; padding: 12px 14px; text-decoration: none; color: inherit; }
+.nutri-home .chev { width: 18px; height: 18px; color: var(--muted); flex: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pring-fg, .mbar-track i { transition: none; }
+}

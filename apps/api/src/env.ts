@@ -12,6 +12,8 @@ export interface AppContext {
   allowedOrigins: string[];
   /** Strava API app (docs/adr/0009-strava.md); null/undefined = not set up, the Profile card says so. */
   strava?: StravaConfig | null;
+  /** fetch for the Open Food Facts proxy (tests pass a fake); default global fetch. */
+  foodFetch?: (url: string, init?: RequestInit) => Promise<Response>;
 }
 
 export interface AppEnv {

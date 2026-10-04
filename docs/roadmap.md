@@ -40,4 +40,8 @@ Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation change
 - [x] **German** (built 2026-10-01): language setting in Profile, whole UI and the exercise catalog (names + instructions) translated ([ADR 0007](adr/0007-german-language.md))
 
 ## Phase 3: Food tracking
-- [ ] Plan in detail (foods, meals, calories/macros; food database source?)
+- [x] Plan in detail (2026-10-04): [nutrition.md](design/screens/nutrition.md) — exact grams + kcal/macros, Open Food Facts + barcode, recipes, bodyweight, own Nutrition tab, suggested targets for muscle gain
+- [x] Build v1 (2026-10-04, ADR 0010): Nutrition tab with protein ring (red/yellow/green/dark green), kcal, carbs/fat small, entries by time, 7-day protein dots + streak; add food via Recent/Frequent, own foods, Open Food Facts search and **barcode scan**; amount sheet with portion chips; targets (protein g/kg 1.5–2.2 or own, kcal suggestion or own); bodyweight with 7-day trend and gain hint; Home card; Profile moved to More / tap on the name
+- [ ] Test the scanner on Florian's iPhone (Traefik middleware `secure-headers-fitness` allows `camera=(self)`, ADR 0010)
+- [ ] Recipes (pot of chili = 4 portions)
+- [ ] Statistics: average kcal/protein per week, days on protein target
