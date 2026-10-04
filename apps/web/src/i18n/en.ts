@@ -216,7 +216,7 @@ export const en = {
     autoStart: "Start automatically",
     autoStartOff: "Start it from the set row",
     keepScreenOn: "Keep screen on",
-    vibrate: "Vibrate on set complete",
+    vibrate: "Haptic tap on set complete",
     appearance: "Appearance",
     theme: "Theme",
     themes: { system: "System", dark: "Dark", light: "Light" } as Record<"system" | "dark" | "light", string>,

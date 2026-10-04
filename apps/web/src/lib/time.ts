@@ -46,6 +46,30 @@ export function durationInputValue(sec: number | null): string {
   return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
 }
 
+/**
+ * Short haptic tick. Android/Chrome: Vibration API. iPhone: Safari has no Vibration API, but since iOS 18 toggling
+ * a native `<input type="checkbox" switch>` through its label gives a system haptic, so we click a hidden one.
+ * Does nothing where neither exists (desktop, older iOS).
+ */
 export function vibrate(enabled: boolean): void {
-  if (enabled) navigator.vibrate?.(15);
+  if (!enabled) return;
+  if (typeof navigator.vibrate === "function") { navigator.vibrate(15); return; }
+  if (!canHaptic()) return;
+  const label = document.createElement("label");
+  label.setAttribute("aria-hidden", "true");
+  label.style.cssText = "position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.setAttribute("switch", "");
+  input.tabIndex = -1;
+  label.appendChild(input);
+  document.body.appendChild(label);
+  label.click();
+  label.remove();
+}
+
+/** True where vibrate() can give feedback (Vibration API or the iOS 18 switch haptic). */
+export function canHaptic(): boolean {
+  if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") return true;
+  return typeof HTMLInputElement !== "undefined" && "switch" in HTMLInputElement.prototype;
 }

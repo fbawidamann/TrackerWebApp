@@ -88,6 +88,23 @@ body.lock { overflow: hidden; }
 .btn-block { width: 100%; padding: 14px; }
 .btn:disabled { opacity: .45; }
 
+/* ---------- Press feedback (docs/design/ui-guidelines.md "Press feedback") ----------
+   Everything tappable reacts the moment the finger lands: buttons shrink a little and dim, list rows only dim
+   (scaling a full-width row looks wobbly), cards shrink very slightly. Instant on press, eased back on release.
+   :where() keeps specificity at :active only, so components with their own transform (.eye, .start-btn) and
+   .tr/.handle (drag gestures, not buttons) keep their behaviour. iOS only applies :active when a touchstart
+   listener exists: main.tsx adds an empty passive one. */
+:where(button, a[href], [role="button"]) { -webkit-touch-callout: none; transition: transform .16s ease, opacity .16s ease; }
+:where(button:not(:disabled), a[href]):active { transform: scale(.95); opacity: .7; transition-duration: 0s; }
+/* Element-qualified on purpose: :active also matches ANCESTORS of the pressed element, so a plain .card
+   selector would make a whole list card shrink when one row inside it is tapped. */
+:where(button.btn-block, a.minibar):active { transform: scale(.98); opacity: .8; }
+:where(button.wcard, button.card, a.card, button.goal):active { transform: scale(.985); opacity: .8; }
+:where(button.li, a.li, button.mi, button.radio, button.row, a.row, .nav a, button.li-main):active { transform: none; opacity: .5; }
+@media (prefers-reduced-motion: reduce) {
+  :where(button, a[href]):active { transform: none !important; }
+}
+
 /* ---------- Start button (docs/design/ui-guidelines.md "Start button") ----------
    Launch animation on tap, ~520 ms (START_ANIM_MS in ui/StartWorkoutButton.tsx): button dips and pops, the plus
    spins 180deg and grows, a ring and 8 sparks burst out of it, a light sweep crosses the button. Only

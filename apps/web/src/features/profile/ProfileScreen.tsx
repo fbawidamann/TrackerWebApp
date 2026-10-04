@@ -9,6 +9,7 @@ import { IconCheck, IconChevron, IconExternal } from "@/ui/icons";
 import { AccountSection } from "./AccountSection";
 import { RadioSheet, Sheet, TextSheet } from "@/ui/Sheet";
 import { useToast } from "@/ui/Toast";
+import { canHaptic } from "@/lib/time";
 
 type Picker = "goal" | "weekStart" | "defaultSets" | "step" | "rest" | "theme" | "date" | null;
 
@@ -119,7 +120,7 @@ export function ProfileScreen() {
         {s.restTimerEnabled && pick(p.restTime, formatClock(s.restSeconds), "rest")}
         {s.restTimerEnabled && toggle(p.autoStart, s.restAutostart, (v) => set({ restAutostart: v }), s.restAutostart ? undefined : p.autoStartOff)}
         {toggle(p.keepScreenOn, device.keepScreenOn, (v) => void updateDeviceSettings({ keepScreenOn: v }))}
-        {"vibrate" in navigator && toggle(p.vibrate, device.vibrateOnComplete, (v) => void updateDeviceSettings({ vibrateOnComplete: v }))}
+        {canHaptic() && toggle(p.vibrate, device.vibrateOnComplete, (v) => void updateDeviceSettings({ vibrateOnComplete: v }))}
       </>)}
 
       {section(p.appearance, <>

@@ -136,6 +136,15 @@ A **floating pill above the bottom nav**: `REST` label · progress bar · `0:56`
 The primary button that starts a workout (Home, Workout tab, empty History) reads **`+ Start workout`** / **`+ Training starten`** (was "Start empty workout"; the routines below make clear what "empty" meant). The plus sits in a small round `on-accent` 20 % disc.
 On tap it plays a **launch animation** (~0.5 s) before the workout opens, to make starting feel rewarding: the button dips and pops, the plus spins 180° and grows, a ring and 8 small sparks burst out of it, and a light sweep crosses the button. **Deliberate exception** to principle 2 (no glow/gradients): it only exists for that half second, never at rest. Only `transform`/`opacity` are animated, accent tokens only. Double taps are ignored; with *reduce motion* it starts immediately without animation. Implementation: `apps/web/src/ui/StartWorkoutButton.tsx`, CSS "Start button" in `app.css`.
 
+### Press feedback (added 2026-10-04)
+Everything tappable reacts **the moment the finger lands** (iOS has no default press highlight in this app):
+- Buttons and links: scale 0.95 + opacity 0.7. Full-width buttons and the mini bar: 0.98 / 0.8. Tappable cards: 0.985 / 0.8.
+- List rows, menu items, radio rows, settings rows, nav tabs: **only dim** (opacity 0.5), no scaling: a moving full-width row looks wobbly.
+- Instant on press, eased back (160 ms) on release. With *reduce motion*: dim only. Disabled buttons don't react.
+- Drag handles and swipe rows (`.handle`, `.tr`) are gestures, not buttons, and keep their own behaviour.
+- Selectors are element-qualified (`button.card`, not `.card`), because `:active` also matches ancestors: tapping a row must not shrink the whole card.
+- **Haptic tick on set complete** (setting "Haptic tap on set complete", on by default): Vibration API on Android; on iPhone (iOS 18+) via a hidden native switch, which is the only way a web app can trigger the Taptic Engine. Hidden where neither exists. Code: `vibrate()` in `apps/web/src/lib/time.ts`.
+
 ### Sheets (bottom sheets)
 Phone: a sheet slides up from the bottom with a grab handle and scrolls inside when its content is long (max 88 % height). It closes by tapping the scrim, with Escape, or (added 2026-10-04) by **swiping down**: the drag only starts when the content is scrolled to the very top and the finger moves down, so scrolling inside a long sheet (routine preview) keeps working. Release after more than 90 px, or a fast flick, closes it; less springs back. The scrim fades along with the drag. Desktop (≥ 1024 px): centred dialog, no handle, no swipe. Implementation: `apps/web/src/ui/useSwipeToClose.ts`.
 

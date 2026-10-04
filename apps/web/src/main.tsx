@@ -34,6 +34,8 @@ async function boot() {
 }
 
 void boot();
+// iOS Safari only applies :active styles (press feedback, app.css) when a touchstart listener exists.
+document.addEventListener("touchstart", () => {}, { passive: true });
 // Updates: the new version waits for a tap on the banner instead of reloading by itself (app/updates.ts).
 // registerSW only registers the service worker; update detection and applying are in watchForUpdates.
 registerSW({

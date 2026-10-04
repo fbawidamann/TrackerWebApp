@@ -216,7 +216,7 @@ export const de: Dict = {
     autoStart: "Automatisch starten",
     autoStartOff: "Start über die Satzzeile",
     keepScreenOn: "Bildschirm anlassen",
-    vibrate: "Vibrieren bei erledigtem Satz",
+    vibrate: "Haptik bei erledigtem Satz",
     appearance: "Darstellung",
     theme: "Design",
     themes: { system: "System", dark: "Dunkel", light: "Hell" },
