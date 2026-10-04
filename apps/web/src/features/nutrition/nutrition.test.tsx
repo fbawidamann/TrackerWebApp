@@ -1,8 +1,11 @@
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { proteinDays } from "@/lib/nutrition";
 import { ProteinRing, ProteinWeek } from "./ProteinRing";
+import { ScannerOverlay } from "./ScannerOverlay";
 import { validBarcode } from "./scanner";
+
+vi.mock("./scanner", async (orig) => ({ ...(await orig<typeof import("./scanner")>()), loadDetector: async () => ({ detect: async () => [] }) }));
 
 afterEach(cleanup);
 
@@ -43,5 +46,33 @@ describe("barcode check digit", () => {
     expect(validBarcode("96385074")).toBe(true);
     expect(validBarcode("036000291452")).toBe(true);
     expect(validBarcode("12345")).toBe(false);
+  });
+});
+
+describe("ScannerOverlay", () => {
+  it("shows the camera inline (iOS: playsinline + muted as attributes), stops it on close", async () => {
+    const stopTrack = vi.fn();
+    const stream = { getTracks: () => [{ stop: stopTrack }], getVideoTracks: () => [{ stop: stopTrack, getCapabilities: () => ({}) }] };
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: vi.fn(async () => stream) } });
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    const { container, unmount } = render(<ScannerOverlay onCode={() => {}} onClose={() => {}} />);
+    await waitFor(() => expect(play).toHaveBeenCalled());
+    const v = document.querySelector("video.scan-video") as HTMLVideoElement;
+    expect(v.hasAttribute("playsinline")).toBe(true);
+    expect(v.hasAttribute("webkit-playsinline")).toBe(true);
+    expect(v.muted).toBe(true);
+    expect(container).toBeTruthy();
+    unmount();
+    expect(stopTrack).toHaveBeenCalled();
+    play.mockRestore();
+  });
+
+  it("offers a start button when autoplay is refused", async () => {
+    const stream = { getTracks: () => [], getVideoTracks: () => [] };
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: vi.fn(async () => stream) } });
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValue(new Error("NotAllowedError"));
+    render(<ScannerOverlay onCode={() => {}} onClose={() => {}} />);
+    expect(await screen.findByRole("button", { name: "Start camera" })).toBeTruthy();
+    play.mockRestore();
   });
 });

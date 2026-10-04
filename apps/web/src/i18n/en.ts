@@ -292,6 +292,7 @@ export const en = {
     // scanner
     scanTitle: "Scan barcode",
     scanHint: "Hold the barcode in the frame.",
+    scanStart: "Start camera",
     scanTorch: "Light",
     scanManual: "Type the number",
     scanLookup: "Looking up…",

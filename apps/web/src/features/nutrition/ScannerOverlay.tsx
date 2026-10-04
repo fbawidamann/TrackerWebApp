@@ -17,6 +17,7 @@ export function ScannerOverlay({ onCode, onClose }: { onCode: (code: string) => 
   const [manual, setManual] = useState(false);
   const [typed, setTyped] = useState("");
   const [torch, setTorch] = useState<null | boolean>(null);
+  const [needTap, setNeedTap] = useState(false);
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const done = useRef(false);
 
@@ -34,10 +35,9 @@ export function ScannerOverlay({ onCode, onClose }: { onCode: (code: string) => 
     const start = async () => {
       if (!navigator.mediaDevices?.getUserMedia) { setError(n.cameraMissing); setManual(true); return; }
       try {
-        const [detector, s] = await Promise.all([
-          loadDetector(),
-          navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }),
-        ]);
+        // Camera first (still close to the tap), the ~1 MB decoder loads in parallel.
+        const detectorP = loadDetector();
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
         if (stopped) { s.getTracks().forEach((tr) => tr.stop()); return; }
         stream = s;
         const track = s.getVideoTracks()[0] ?? null;
@@ -45,11 +45,18 @@ export function ScannerOverlay({ onCode, onClose }: { onCode: (code: string) => 
         const caps = (track?.getCapabilities?.() ?? {}) as { torch?: boolean };
         if (caps.torch) setTorch(false);
         const v = video.current!;
+        // iOS: without these as real attributes the camera plays in the native fullscreen player (or not at all)
+        // instead of inside the app. React doesn't always write `muted` as an attribute, so set them by hand.
+        v.setAttribute("playsinline", "");
+        v.setAttribute("webkit-playsinline", "");
+        v.setAttribute("muted", "");
+        v.muted = true;
         v.srcObject = s;
-        await v.play().catch(() => {});
+        try { await v.play(); } catch { setNeedTap(true); }
+        const detector = await detectorP;
         const tick = async () => {
           if (stopped || done.current) return;
-          if (v.readyState >= 2) {
+          if (v.readyState >= 2 && !v.paused) {
             try {
               const codes = await detector.detect(v);
               const code = codes.map((c) => c.rawValue).find(validBarcode);
@@ -95,7 +102,10 @@ export function ScannerOverlay({ onCode, onClose }: { onCode: (code: string) => 
   return (
     <Overlay label={n.scanTitle} onEscape={onClose}>
       <div className="scan">
-        <video ref={video} className="scan-video" playsInline muted autoPlay aria-hidden="true" />
+        <video ref={video} className="scan-video" playsInline muted autoPlay disablePictureInPicture controls={false} aria-hidden="true" />
+        {needTap && (
+          <button type="button" className="btn btn-primary scan-start" onClick={() => { void video.current?.play().then(() => setNeedTap(false)).catch(() => {}); }}>{n.scanStart}</button>
+        )}
         <div className="scan-frame" aria-hidden="true"><i /></div>
         <div className="scan-top">
           <button type="button" className="ib scan-ib" onClick={onClose} aria-label={t.common.close}><IconClose /></button>

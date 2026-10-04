@@ -286,6 +286,7 @@ export const de: Dict = {
     pastStay: "Vergangene Tage behalten die Werte, mit denen sie eingetragen wurden.",
     scanTitle: "Barcode scannen",
     scanHint: "Halte den Barcode in den Rahmen.",
+    scanStart: "Kamera starten",
     scanTorch: "Licht",
     scanManual: "Nummer eintippen",
     scanLookup: "Suche Produkt…",
