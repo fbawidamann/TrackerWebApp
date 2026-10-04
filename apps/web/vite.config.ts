@@ -43,11 +43,7 @@ export default defineConfig({
             handler: "CacheFirst",
             options: { cacheName: "exercise-images", expiration: { maxEntries: 2000, maxAgeSeconds: 60 * 60 * 24 * 365 } },
           },
-          {
-            urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com" || url.origin === "https://fonts.gstatic.com",
-            handler: "CacheFirst",
-            options: { cacheName: "fonts", expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 } },
-          },
+          // No Google Fonts rule any more: the font is bundled and precached via globPatterns (woff2).
         ],
       },
     }),

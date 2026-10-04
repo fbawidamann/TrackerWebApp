@@ -4,6 +4,14 @@ import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { router } from "./app/router";
 import { watchForUpdates } from "./app/updates";
+// IBM Plex Sans is self-hosted (bundled from @fontsource, OFL-1.1): no request to Google, works offline from the
+// first start (docs/adr/0008-self-hosted-font.md). Only Latin + Latin Extended, the weights the UI uses.
+import "@fontsource/ibm-plex-sans/latin-400.css";
+import "@fontsource/ibm-plex-sans/latin-500.css";
+import "@fontsource/ibm-plex-sans/latin-600.css";
+import "@fontsource/ibm-plex-sans/latin-ext-400.css";
+import "@fontsource/ibm-plex-sans/latin-ext-500.css";
+import "@fontsource/ibm-plex-sans/latin-ext-600.css";
 import { db } from "./db/db";
 import { setOwner } from "./db/owner";
 import { initDb } from "./db/seed";

@@ -57,7 +57,7 @@ Semantic colours (success, danger, warning) are defined later, when first needed
 
 ## Typography
 
-Font: **IBM Plex Sans** (400/500/600), with `font-variant-numeric: tabular-nums` everywhere. No mono and no condensed faces.
+Font: **IBM Plex Sans** (400/500/600), with `font-variant-numeric: tabular-nums` everywhere. No mono and no condensed faces. Self-hosted from `@fontsource/ibm-plex-sans`, never from Google ([ADR 0008](../adr/0008-self-hosted-font.md)).
 
 | Role | Size / weight | Notes |
 |---|---|---|
