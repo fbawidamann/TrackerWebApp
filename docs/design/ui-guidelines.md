@@ -129,8 +129,12 @@ A **medal icon** (lucide `award`-style) in `accent-text`, 18 px, at the end of t
 A **floating pill above the bottom nav**: `REST` label · progress bar · `0:56` · Skip. It stays out of the way (low priority), and the screen gets extra bottom padding while it is visible.
 
 ### Home
-- Order: date label → title → **full-width "Start empty workout" button at the top** → This week → Routines → Recent.
+- Order: date label → title → **full-width "+ Start workout" button at the top** → This week → Routines → Recent.
 - This week: **day dots** (Mon–Sun). A day with a workout is a filled `accent-fill` dot, and today has an accent ring. Below the dots: workouts, volume and duration for the week.
+
+### Start button (added 2026-10-04, requested by Florian)
+The primary button that starts a workout (Home, Workout tab, empty History) reads **`+ Start workout`** / **`+ Training starten`** (was "Start empty workout"; the routines below make clear what "empty" meant). The plus sits in a small round `on-accent` 20 % disc.
+On tap it plays a **launch animation** (~0.5 s) before the workout opens, to make starting feel rewarding: the button dips and pops, the plus spins 180° and grows, a ring and 8 small sparks burst out of it, and a light sweep crosses the button. **Deliberate exception** to principle 2 (no glow/gradients): it only exists for that half second, never at rest. Only `transform`/`opacity` are animated, accent tokens only. Double taps are ignored; with *reduce motion* it starts immediately without animation. Implementation: `apps/web/src/ui/StartWorkoutButton.tsx`, CSS "Start button" in `app.css`.
 
 ### Sheets (bottom sheets)
 Phone: a sheet slides up from the bottom with a grab handle and scrolls inside when its content is long (max 88 % height). It closes by tapping the scrim, with Escape, or (added 2026-10-04) by **swiping down**: the drag only starts when the content is scrolled to the very top and the finger moves down, so scrolling inside a long sheet (routine preview) keeps working. Release after more than 90 px, or a fast flick, closes it; less springs back. The scrim fades along with the drag. Desktop (≥ 1024 px): centred dialog, no handle, no swipe. Implementation: `apps/web/src/ui/useSwipeToClose.ts`.

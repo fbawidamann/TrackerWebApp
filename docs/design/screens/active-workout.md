@@ -32,10 +32,10 @@ Clickable prototype: [Active workout prototype](https://claude.ai/artifact/8fUks
 There is **no separate "Next exercise" card**. All exercises are shown as full cards one below the other, so a preview card would only repeat the card below it (confirmed with the prototype).
 
 ## Workout tab when no workout is running
-It shows **Start empty workout** and your routines with a **Manage** link. See [routines.md](routines.md#workout-tab-idle-no-workout-running).
+It shows **+ Start workout** and your routines with a **Manage** link. See [routines.md](routines.md#workout-tab-idle-no-workout-running).
 
 ## Starting a workout
-- **Empty workout** (Home → "Start empty workout"): the name comes from the time of day: *Morning workout* (before 12:00), *Afternoon workout* (12–17), *Evening workout* (from 17:00). Tap the title to rename.
+- **Empty workout** (Home → "+ Start workout"): the name comes from the time of day: *Morning workout* (before 12:00), *Afternoon workout* (12–17), *Evening workout* (from 17:00). Tap the title to rename.
 - **From a routine** (M3): the name is the routine name. One card is created per routine exercise, with the routine's number of sets.
 - **Only one workout can be in progress.** Starting another while one is running asks: *Resume "Push Day"* / *Discard it and start new*.
 - The workout is written to Dexie immediately (`activities.status = in_progress`, `startedAt = now`).

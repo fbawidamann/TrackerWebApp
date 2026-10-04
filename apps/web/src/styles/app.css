@@ -87,6 +87,29 @@ body.lock { overflow: hidden; }
 .btn-danger { color: var(--danger); }
 .btn-block { width: 100%; padding: 14px; }
 .btn:disabled { opacity: .45; }
+
+/* ---------- Start button (docs/design/ui-guidelines.md "Start button") ----------
+   Launch animation on tap, ~520 ms (START_ANIM_MS in ui/StartWorkoutButton.tsx): button dips and pops, the plus
+   spins 180deg and grows, a ring and 8 sparks burst out of it, a light sweep crosses the button. Only
+   transform/opacity, so it stays smooth on the iPhone. Accent tokens only. */
+.start-btn { position: relative; overflow: hidden; gap: 10px; font-size: calc(17px + var(--d)); isolation: isolate; transition: transform .12s ease; }
+.start-btn:active:not(.go) { transform: scale(.97); }
+.start-plus { position: relative; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: color-mix(in oklab, var(--on-acc) 20%, transparent); flex: none; }
+.start-plus svg { width: 18px; height: 18px; stroke-width: 2.75; }
+.start-ring, .start-spark { position: absolute; left: 50%; top: 50%; pointer-events: none; opacity: 0; }
+.start-ring { width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; border: 2px solid var(--on-acc); }
+.start-spark { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: var(--on-acc); }
+.start-btn::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(105deg, transparent 30%, color-mix(in oklab, var(--on-acc) 35%, transparent) 50%, transparent 70%); transform: translateX(-110%); }
+.start-btn.go { animation: start-pop .52s cubic-bezier(.3, 1.4, .5, 1); }
+.start-btn.go .start-plus svg { animation: start-spin .52s cubic-bezier(.5, 0, .2, 1) forwards; }
+.start-btn.go .start-ring { animation: start-ring .5s ease-out forwards; }
+.start-btn.go .start-spark { animation: start-spark .5s cubic-bezier(.1, .7, .3, 1) forwards; }
+.start-btn.go::after { animation: start-sweep .5s ease-in-out forwards; }
+@keyframes start-pop { 0% { transform: scale(1); } 22% { transform: scale(.94); } 60% { transform: scale(1.035); } 100% { transform: scale(1); } }
+@keyframes start-spin { 0% { transform: rotate(0) scale(1); } 55% { transform: rotate(180deg) scale(1.35); } 100% { transform: rotate(180deg) scale(1.1); } }
+@keyframes start-ring { 0% { opacity: .9; transform: scale(.6); } 100% { opacity: 0; transform: scale(3.2); } }
+@keyframes start-spark { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-42px) scale(.5); } }
+@keyframes start-sweep { to { transform: translateX(110%); } }
 .ghost { color: var(--acc-text); font-size: calc(15px + var(--d)); font-weight: 600; padding: 8px 4px; }
 .ghost:disabled { color: var(--muted); }
 .link { font-size: calc(13px + var(--d) / 2); font-weight: 500; color: var(--acc-text); padding: 4px 0; }

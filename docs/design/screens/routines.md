@@ -9,7 +9,7 @@ A routine is a **template**: an ordered list of exercises, each with a **number 
 | Place | What |
 |---|---|
 | **Home** → Routines card | Up to 4 routines, most recently done first. **All** opens the Routines screen |
-| **Workout tab** (no workout running) | `Start empty workout`, then **ROUTINES** (all, in your own order) with a **Manage** link to the Routines screen |
+| **Workout tab** (no workout running) | `+ Start workout`, then **ROUTINES** (all, in your own order) with a **Manage** link to the Routines screen |
 | **Routines screen** | The full list in your own order; create, edit, reorder, and so on |
 | Workout finish summary | "Update Push Day with these changes?" ([active-workout.md](active-workout.md)) |
 | History workout ⋯ | "Save as routine" ([history.md](history.md)) |
@@ -19,7 +19,7 @@ There's no Routines tab in the bottom nav.
 ## Workout tab, idle (no workout running)
 ```
 Workout
-[        Start empty workout        ]
+[        + Start workout            ]
 ROUTINES                       Manage
 ┌ card ──────────────────────────────┐
 │ Push Day                            │  tap → preview sheet

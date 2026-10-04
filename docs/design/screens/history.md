@@ -64,7 +64,7 @@ Chosen out of four styles on 2026-09-30. The per-exercise "sets · best" lines f
 - **Runs** (since 2026-10-01) appear in the list and the calendar between workouts, as run cards; an exercise search hides them. Details in [running.md](running.md#history).
 - Active filters appear as removable chips under the search, and the filter button shows a count badge.
 - **No results**: `No workouts found`.
-- **No workouts at all**: `No workouts yet` and a **Start empty workout** button.
+- **No workouts at all**: `No workouts yet` and a **+ Start workout** button.
 
 The list loads older weeks as you scroll (it's paged).
 

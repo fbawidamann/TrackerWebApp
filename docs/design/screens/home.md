@@ -13,7 +13,7 @@ Clickable prototype: [Home screen prototype](https://claude.ai/artifact/FahzKjEe
 │ 2 of 3 workouts this week            │  goal line (tap → set goal)
 │ ▬▬▬▬▬▬▬▬ ▬▬▬▬▬▬▬▬ ░░░░░░░░          │  one segment per goal workout
 │                                      │
-│ [      Start empty workout      ]    │  or the Resume card (see below)
+│ [      + Start workout          ]    │  or the Resume card (see below)
 │                                      │
 │ ROUTINES                        All  │
 │ ┌ card ────────────────────────────┐ │
@@ -45,7 +45,7 @@ There is no "This week" card and no greeting or filler text.
 - Tapping the goal line opens a small sheet: **Weekly goal**, with chips 1–7 (default 3). This can also be set in Profile.
 
 ## Start / Resume
-- **No workout running**: a full-width primary button, **Start empty workout**.
+- **No workout running**: a full-width primary button, **+ Start workout**.
 - **Workout running**: a **Resume card** replaces the button:
   ```
   ┌ card ──────────────────────────────┐
@@ -83,7 +83,7 @@ There is no "This week" card and no greeting or filler text.
 - PRs are derived, not stored (see [data model](../../architecture/data-model.md)). A PR event is a completed normal set whose weight beats every earlier session of that exercise.
 
 ## First use (empty state)
-Title, date and goal line (`0 of 3 workouts this week`), the **Start empty workout** button, and the Routines card with **Create routine**. Recent and Latest PRs stay hidden until there is data. No onboarding text.
+Title, date and goal line (`0 of 3 workouts this week`), the **+ Start workout** button, and the Routines card with **Create routine**. Recent and Latest PRs stay hidden until there is data. No onboarding text.
 
 ## Desktop (≥ 1024 px)
 - The bottom nav becomes a **sidebar** on the left: the same five items with icons and labels, with the pill for the active item.

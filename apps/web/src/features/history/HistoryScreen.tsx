@@ -11,6 +11,7 @@ import { useFormat } from "@/lib/useFormat";
 import { IconCalendar, IconPlus, IconSearch, IconSliders, IconX } from "@/ui/icons";
 import { Sheet } from "@/ui/Sheet";
 import { WorkoutCard } from "./WorkoutCard";
+import { StartWorkoutButton } from "@/ui/StartWorkoutButton";
 
 /** One entry of the timeline: a gym workout or a run (docs/design/screens/running.md → History). */
 type Item = { kind: "gym"; w: WorkoutView; start: Date } | { kind: "run"; r: RunView; start: Date };
@@ -112,7 +113,7 @@ export function HistoryScreen() {
         {!training.loaded || runs === undefined ? null : !training.workouts.length && !runs.length ? (
           <div className="card empty" style={{ justifyItems: "stretch" }}>
             <p>{h.noWorkouts}</p>
-            <button type="button" className="btn btn-primary btn-block" onClick={() => void start()}>{t.home.startEmpty}</button>
+            <StartWorkoutButton onStart={() => void start()} />
           </div>
         ) : !weeks.length ? (
           <div className="card empty"><p>{h.noneFound}</p></div>

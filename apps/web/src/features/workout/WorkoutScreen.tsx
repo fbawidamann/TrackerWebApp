@@ -8,6 +8,7 @@ import { useFormat } from "@/lib/useFormat";
 import { IconChevron } from "@/ui/icons";
 import { ActiveWorkout } from "./ActiveWorkout";
 import { useStarter } from "./useStarter";
+import { StartWorkoutButton } from "@/ui/StartWorkoutButton";
 
 export function WorkoutScreen() {
   const active = useActiveWorkout();
@@ -27,7 +28,7 @@ function IdleWorkout() {
   return (
     <div className="page">
       <h1 className="title">{t.workout.workout}</h1>
-      <button type="button" className="btn btn-primary btn-block" onClick={() => void start()}>{t.workout.startEmpty}</button>
+      <StartWorkoutButton onStart={() => void start()} />
       <div className="sec">
         <div className="sec-head"><span className="lbl">{t.workout.routines}</span><Link to="/routines" className="link">{t.workout.manage}</Link></div>
         {routines === undefined ? null : routines.length ? (

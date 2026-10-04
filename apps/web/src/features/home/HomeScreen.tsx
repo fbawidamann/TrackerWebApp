@@ -11,6 +11,7 @@ import { useNow } from "@/lib/time";
 import { useFormat } from "@/lib/useFormat";
 import { IconChevron, IconMedal } from "@/ui/icons";
 import { RadioSheet } from "@/ui/Sheet";
+import { StartWorkoutButton } from "@/ui/StartWorkoutButton";
 
 export function HomeScreen() {
   const settings = useSettings();
@@ -65,7 +66,7 @@ export function HomeScreen() {
           <Link to="/workout" className="btn btn-primary btn-block" style={{ textDecoration: "none" }}>{t.home.resume}</Link>
         </div>
       ) : (
-        <button type="button" className="btn btn-primary btn-block" onClick={() => void start()}>{t.home.startEmpty}</button>
+        <StartWorkoutButton onStart={() => void start()} />
       )}
 
       {settings.homeShowRoutines && routines !== undefined && (
