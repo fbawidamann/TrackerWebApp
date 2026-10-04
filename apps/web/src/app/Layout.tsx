@@ -8,19 +8,26 @@ import { LoginScreen } from "@/features/auth/LoginScreen";
 import { restLabel } from "@/features/workout/RestPill";
 import { rememberLanguage, setLanguage, useT } from "@/i18n";
 import { useNow } from "@/lib/time";
-import { IconChevron, IconHistory, IconHome, IconLift, IconList, IconRun, IconUser } from "@/ui/icons";
+import { IconChart, IconChevron, IconGrid, IconHistory, IconHome, IconLift, IconList, IconRun, IconSwim, IconUser } from "@/ui/icons";
 import { Sheet } from "@/ui/Sheet";
 import { ToastProvider } from "@/ui/Toast";
 import { useApplyTheme } from "./theme";
 import { UpdateBanner } from "./UpdateBanner";
 
+/** Bottom nav on phones: three tabs plus "More" (docs/design/ui-guidelines.md "Bottom navigation"). */
 const NAV = [
   { to: "/", key: "home", icon: IconHome, match: (p: string) => p === "/" },
-  { to: "/history", key: "history", icon: IconHistory, match: (p: string) => p.startsWith("/history") },
   { to: "/workout", key: "workout", icon: IconLift, match: (p: string) => p.startsWith("/workout") || p.startsWith("/routines") },
-  { to: "/running", key: "running", icon: IconRun, match: (p: string) => p.startsWith("/running") },
-  { to: "/exercises", key: "exercises", icon: IconList, match: (p: string) => p.startsWith("/exercises") },
   { to: "/profile", key: "profile", icon: IconUser, match: (p: string) => p.startsWith("/profile") },
+] as const;
+
+/** Behind "More" on phones; listed directly in the desktop sidebar. */
+export const MORE = [
+  { to: "/history", key: "history", icon: IconHistory, match: (p: string) => p.startsWith("/history"), soon: false },
+  { to: "/running", key: "running", icon: IconRun, match: (p: string) => p.startsWith("/running"), soon: false },
+  { to: "/swimming", key: "swimming", icon: IconSwim, match: (p: string) => p.startsWith("/swimming"), soon: true },
+  { to: "/stats", key: "stats", icon: IconChart, match: (p: string) => p.startsWith("/stats"), soon: false },
+  { to: "/exercises", key: "exercises", icon: IconList, match: (p: string) => p.startsWith("/exercises"), soon: false },
 ] as const;
 
 /** Screens that hide the bottom nav (full-screen flows). */
@@ -48,6 +55,9 @@ export function Layout() {
   const hideNav = noNav(pathname) || gated;
   useEffect(() => { document.body.classList.toggle("no-nav", hideNav); }, [hideNav]);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  const [moreOpen, setMoreOpen] = useState(false);
+  useEffect(() => { setMoreOpen(false); }, [pathname]);
+  const inMore = MORE.some((m) => m.match(pathname));
 
   // Locked until the first login on this device (docs/design/screens/login.md). Offline starts work once logged in.
   if (account === undefined) return null;
@@ -64,13 +74,29 @@ export function Layout() {
       {!hideNav && (
         <nav className="nav" aria-label={t.nav.main}>
           <span className="brand">Fitness</span>
-          {NAV.map(({ to, key, icon: Icon, match }) => (
+          {/* Order in the desktop sidebar: Home, Workout, the More items, Profile. On phones .nav-extra is hidden. */}
+          {NAV.slice(0, 2).map(({ to, key, icon: Icon, match }) => (
             <Link key={to} to={to} className={match(pathname) ? "on" : ""} aria-current={match(pathname) ? "page" : undefined}>
               <Icon /><span>{t.nav[key]}</span>
             </Link>
           ))}
+          {MORE.map(({ to, key, icon: Icon, match }) => (
+            <Link key={to} to={to} className={"nav-extra" + (match(pathname) ? " on" : "")} aria-current={match(pathname) ? "page" : undefined}>
+              <Icon /><span>{t.nav[key]}</span>
+            </Link>
+          ))}
+          {NAV.slice(2).map(({ to, key, icon: Icon, match }) => (
+            <Link key={to} to={to} className={match(pathname) ? "on" : ""} aria-current={match(pathname) ? "page" : undefined}>
+              <Icon /><span>{t.nav[key]}</span>
+            </Link>
+          ))}
+          <button type="button" className={"nav-more" + (moreOpen || inMore ? " on" : "")} aria-haspopup="dialog" aria-expanded={moreOpen}
+            onClick={() => setMoreOpen(true)}>
+            <IconGrid /><span>{t.nav.more}</span>
+          </button>
         </nav>
       )}
+      {moreOpen && !hideNav && <MoreSheet pathname={pathname} onClose={() => setMoreOpen(false)} />}
       <StaleWorkoutCheck />
     </ToastProvider>
   );
@@ -91,6 +117,31 @@ function MiniBar({ pathname }: { pathname: string }) {
         <span className="rt">{rest && settings.restTimerEnabled ? <>{t.layout.rest} {restLabel(rest, now)}</> : null}<IconChevron /></span>
       </Link>
     </div>
+  );
+}
+
+/** The "More" sheet: everything that is not one of the three main tabs, with a short hint per item. */
+function MoreSheet({ pathname, onClose }: { pathname: string; onClose: () => void }) {
+  const t = useT();
+  const navigate = useNavigate();
+  return (
+    <Sheet onClose={onClose} label={t.nav.more}>
+      <h3>{t.nav.more}</h3>
+      <div className="more-list">
+        {MORE.map(({ to, key, icon: Icon, match, soon }) => (
+          <button key={to} type="button" className={"more-item" + (match(pathname) ? " on" : "")}
+            aria-current={match(pathname) ? "page" : undefined}
+            onClick={() => { onClose(); void navigate({ to }); }}>
+            <span className="more-ic"><Icon /></span>
+            <span className="li-main">
+              <span className="li-name">{t.nav[key]}{soon && <span className="soon">{t.nav.inProgress}</span>}</span>
+              <span className="li-meta">{t.nav.moreHint[key]}</span>
+            </span>
+            <IconChevron className="more-chev" />
+          </button>
+        ))}
+      </div>
+    </Sheet>
   );
 }
 

@@ -13,6 +13,8 @@ import { RoutinesScreen } from "@/features/routines/RoutinesScreen";
 import { RunDetailScreen } from "@/features/running/RunDetailScreen";
 import { RunEditor } from "@/features/running/RunEditor";
 import { RunningScreen } from "@/features/running/RunningScreen";
+import { StatsScreen } from "@/features/stats/StatsScreen";
+import { SwimmingScreen } from "@/features/swimming/SwimmingScreen";
 import { SummaryScreen } from "@/features/workout/SummaryScreen";
 import { WorkoutScreen } from "@/features/workout/WorkoutScreen";
 import { useT } from "@/i18n";
@@ -42,10 +44,12 @@ const runDetail = createRoute({ getParentRoute: () => root, path: "/running/$act
 const runEdit = createRoute({ getParentRoute: () => root, path: "/running/$activityId/edit", component: RunEditor });
 const profile = createRoute({ getParentRoute: () => root, path: "/profile", component: ProfileScreen });
 const users = createRoute({ getParentRoute: () => root, path: "/profile/users", component: UsersScreen });
+const stats = createRoute({ getParentRoute: () => root, path: "/stats", component: StatsScreen });
+const swimming = createRoute({ getParentRoute: () => root, path: "/swimming", component: SwimmingScreen });
 
 const routeTree = root.addChildren([
   home, workout, summary, exercises, exerciseDetail, history, calendar, logPast, workoutDetail, workoutEdit, routines, routineNew, routineEdit,
-  running, runNew, runDetail, runEdit, profile, users,
+  running, runNew, runDetail, runEdit, profile, users, stats, swimming,
 ]);
 
 export const router = createRouter({ routeTree, defaultPreload: false });

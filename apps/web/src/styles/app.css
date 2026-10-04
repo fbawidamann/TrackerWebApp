@@ -451,17 +451,44 @@ ol.steps-list li::marker { color: var(--muted); }
 .run-notes { margin: 0; font-size: calc(16px + var(--d)); line-height: 1.5; white-space: pre-wrap; }
 
 /* ---------- Navigation ---------- */
-.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(6, 1fr); padding: 8px 8px calc(10px + var(--safe-b)); border-top: 1px solid var(--line); background: var(--surf); }
-.nav a { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); text-decoration: none; }
-.nav a.on { color: var(--acc-text); font-weight: 600; background: color-mix(in oklab, var(--acc) 14%, transparent); }
+/* Phones: Home · Workout · Profile · More (docs/design/ui-guidelines.md "Bottom navigation"). The "More" items
+   (.nav-extra) are rendered in the nav too but only shown in the desktop sidebar; on phones they live in the More sheet. */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 8px calc(10px + var(--safe-b)); border-top: 1px solid var(--line); background: var(--surf); }
+.nav a, .nav-more { display: grid; justify-items: center; gap: 3px; padding: 5px 0; border-radius: 12px; font-size: 11px; color: var(--muted); text-decoration: none; }
+.nav a.on, .nav-more.on { color: var(--acc-text); font-weight: 600; background: color-mix(in oklab, var(--acc) 14%, transparent); }
 .nav svg { width: 22px; height: 22px; }
-html[data-nav="active"] .nav a:not(.on) span { visibility: hidden; }
+.nav .nav-extra { display: none; }
+html[data-nav="active"] .nav a:not(.on) span, html[data-nav="active"] .nav-more:not(.on) span { visibility: hidden; }
+
+/* "More" sheet: big rows with icon tile, name, one-line hint, chevron. */
+.more-list { display: grid; gap: 6px; margin-top: 4px; }
+.more-item { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px; border-radius: 14px; text-align: left; background: var(--raised); }
+.more-item.on { background: color-mix(in oklab, var(--acc) 14%, var(--raised)); }
+.more-ic { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 12px; background: var(--card-bg); color: var(--acc-text); }
+.more-ic svg { width: 22px; height: 22px; }
+.more-chev { width: 18px; height: 18px; color: var(--muted); flex: none; }
+.soon { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; vertical-align: middle; letter-spacing: .02em;
+  color: var(--acc-text); background: color-mix(in oklab, var(--acc) 16%, transparent); }
+.title .soon { font-size: 12px; }
+.swim-empty { justify-items: center; text-align: center; padding: 32px 20px; }
+.swim-ic { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 16px; background: var(--raised); color: var(--acc-text); }
+.swim-ic svg { width: 30px; height: 30px; }
+
+/* Stats: horizontal bars for sets per muscle group. */
+.hbars { padding: 14px 16px; display: grid; gap: 10px; }
+.hbar { display: grid; grid-template-columns: 84px 1fr 32px; align-items: center; gap: 10px; font-size: calc(14px + var(--d)); }
+.hbar-t { height: 10px; border-radius: 5px; background: var(--raised); overflow: hidden; }
+.hbar-t i { display: block; height: 100%; border-radius: 5px; background: var(--acc-fill); transition: width .3s ease; }
+.hbar-v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hbar-hint { margin: 2px 0 0; }
 .brand { display: none; }
 
 @media (min-width: 1024px) {
   :root { --nav-h: 0px; }
   .nav { top: 0; right: auto; width: 220px; grid-template-columns: 1fr; align-content: start; gap: 4px; padding: 24px 14px; border-top: 0; border-right: 1px solid var(--line); }
   .nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; font-size: 15px; justify-items: start; }
+  .nav .nav-extra { display: flex; }
+  .nav-more { display: none; }
   html[data-nav="active"] .nav a:not(.on) span { visibility: visible; }
   .brand { display: block; font-weight: 600; font-size: 16px; padding: 0 12px 18px; }
   .app-shell { padding-left: 220px; }

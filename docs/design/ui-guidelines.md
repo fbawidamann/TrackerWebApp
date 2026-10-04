@@ -149,7 +149,12 @@ Everything tappable reacts **the moment the finger lands** (iOS has no default p
 Phone: a sheet slides up from the bottom with a grab handle and scrolls inside when its content is long (max 88 % height). It closes by tapping the scrim, with Escape, or (added 2026-10-04) by **swiping down**: the drag only starts when the content is scrolled to the very top and the finger moves down, so scrolling inside a long sheet (routine preview) keeps working. Release after more than 90 px, or a fast flick, closes it; less springs back. The scrim fades along with the drag. Desktop (≥ 1024 px): centred dialog, no handle, no swipe. Implementation: `apps/web/src/ui/useSwipeToClose.ts`.
 
 ### Bottom navigation
-Home · History · Workout · Running · Exercises · Profile (six tabs since running, 2026-10-01), with icons and **always-visible labels**. The active tab gets `accent-text` and a pill background. It sits on `surface` with a `line` top border.
+Since 2026-10-04 (v0.1.1): **Home · Workout · Profile · More** on phones (four slots instead of six, so labels stay readable and the main actions are one tap away). Icons and **always-visible labels**. The active tab gets `accent-text` and a pill background; "More" gets the pill while a screen behind it is open. It sits on `surface` with a `line` top border.
+
+**More** opens a bottom sheet (swipe down to close) with one big row per item: icon tile · name · one-line hint · chevron:
+History · Running · Swimming (badge *In progress*, placeholder screen) · Statistics · Exercises. Tapping a row opens the screen; the sheet closes on navigation.
+
+Desktop (sidebar, ≥ 1024 px) has room, so it lists everything directly: Home, Workout, History, Running, Swimming, Statistics, Exercises, Profile; no More button. Code: `NAV` / `MORE` in `apps/web/src/app/Layout.tsx`.
 
 ## App icon (chosen 2026-10-01)
 

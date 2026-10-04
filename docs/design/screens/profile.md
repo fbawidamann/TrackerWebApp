@@ -53,7 +53,7 @@ DATA
 │ Import backup                     ›  │
 └──────────────────────────────────────┘
 ABOUT
-┌ Version                        0.1.0 ┐
+┌ Version                        0.1.1 ┐
 │ Exercise data   free-exercise-db  ↗  │
 └──────────────────────────────────────┘
 ```

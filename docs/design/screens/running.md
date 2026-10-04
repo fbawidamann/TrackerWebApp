@@ -6,7 +6,7 @@ Decisions: [ADR 0006](../../adr/0006-running.md). Data: `runs` and `runTracks` i
 Running is its own tab. Runs are **logged after the fact**: either imported from a watch file (GPX or FIT) or typed in by hand. There is no live GPS recording in the app (a phone browser can't record reliably with the screen off; the watch does that job).
 
 ## Navigation
-- Bottom nav: **Home · History · Workout · Running · Exercises · Profile** (six tabs, icon = runner).
+- Reached via **More → Running** on phones (since v0.1.1, see ui-guidelines "Bottom navigation"); icon = runner.
 - Routes: `/running` (tab), `/running/new` (log), `/running/$activityId` (detail), `/running/$activityId/edit` (edit). Log and edit hide the nav.
 - Runs also appear in **History** and its **Calendar** (see below). The gym parts of the app (Home weekly goal, workouts count, PRs, Workout tab) stay gym-only.
 

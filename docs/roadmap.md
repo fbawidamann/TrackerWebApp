@@ -13,7 +13,7 @@ The order is deliberate: the app is fully usable offline on one device after **M
   - [x] History (list, calendar, workout detail, edit, log past workout)
   - [x] Routines (list, editor, starter routines)
   - [x] Profile / Settings (personalization, backup)
-  - [ ] Stats (desktop) (deferred: charts already live in the exercise detail)
+  - [x] Stats page (v0.1.1, 2026-10-04): `/stats` via More, see docs/design/screens/stats.md
   - [x] Login (no registration; the admin creates accounts) + admin Users screen (M7, [login.md](design/screens/login.md), [admin-users.md](design/screens/admin-users.md))
 
 ## Phase 1: Gym (frontend, local-only)
@@ -34,7 +34,7 @@ Phase 1 frontend was built on 2026-09-30 (see ADR 0001 → Implementation change
 
 ## Phase 2: Running and swimming
 - [x] **Running** (built 2026-10-01): Running tab, GPX/FIT import, manual log/edit, run detail (route, charts, splits, best efforts), runs in History and calendar, sync ([running.md](design/screens/running.md), [ADR 0006](adr/0006-running.md))
-- [ ] Swimming: plan in detail; follow the `add-activity-type` skill
+- [ ] Swimming: plan in detail; follow the `add-activity-type` skill (placeholder screen `/swimming` with "In progress" exists since v0.1.1)
 
 ## Languages
 - [x] **German** (built 2026-10-01): language setting in Profile, whole UI and the exercise catalog (names + instructions) translated ([ADR 0007](adr/0007-german-language.md))
