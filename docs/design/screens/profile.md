@@ -11,6 +11,10 @@ The user asked for **many personalization options**, so the app can be shaped to
 Florian                                  ← name (28 px), tap → rename
 Training since March 2026                ← muted
 ┌ Workouts │ This year │ Streak ┐        ← 3 tiles: 142 · 96 · 6 weeks
+┌ (⛓) Connect Strava ─────────────────┐  ← Strava card (logged-in only), see "Strava" below
+│ • New runs appear by themselves …    │
+│ [   Connect with Strava   ] (orange) │
+└──────────────────────────────────────┘
 ACCOUNT
 ┌ Saved on this device ───────────────┐  info row (see Account)
 TRAINING
@@ -25,7 +29,7 @@ WORKOUT SCREEN
 │ Rest time                    1:30 ›  │  hidden when the timer is off
 │ Start automatically            [on]  │  hidden when the timer is off
 │ Keep screen on                 [on]  │
-│ Vibrate on set complete        [on]  │
+│ Haptic tap on set complete     [on]  │
 └──────────────────────────────────────┘
 APPEARANCE
 ┌ Theme                     System  ›  ┐
@@ -123,3 +127,19 @@ The app version, and a link to free-exercise-db (the catalog source, public doma
 | Rest timer off | Rest time + Start automatically rows hidden |
 | Option sheet | Radio list (theme, weight step, rest time, date format, week start, default sets, weekly goal) |
 | Import preview + confirm | Sheet with backup summary, Replace |
+
+
+## Strava (added 2026-10-04, v0.1.1, [ADR 0009](../adr/0009-strava.md))
+
+A card right **below the stats tiles**, so it's the first thing after your numbers. Only for logged-in accounts.
+
+- **Not connected**: link icon in a Strava-orange tile · "Connect Strava" · "Bring your runs in automatically." ·
+  three short points (runs arrive by themselves with route/pace/HR; Garmin, Apple Watch & co. via Strava; read-only) ·
+  full-width orange button **Connect with Strava** · small note "You'll confirm on Strava. You can disconnect any time".
+  Tap → Strava's consent page → back on a small "Strava is connected ✓" page with *Back to the app* →
+  Profile shows a toast and fetches the runs right away.
+- **Connected**: orange tile, "Strava" · green-dot line "Connected as Florian B · checked 5 min ago" ·
+  two buttons **Sync now** | **Disconnect** (confirm sheet: imported runs stay).
+- **Server without Strava keys**: "Not set up on this server yet", no button.
+- New runs also come in automatically when the app opens / returns to the foreground (max every 15 min), with a
+  toast "2 new runs from Strava". Imported runs say "Imported from Strava · **View on Strava**" (link) on their detail screen.

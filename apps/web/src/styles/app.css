@@ -474,6 +474,23 @@ html[data-nav="active"] .nav a:not(.on) span, html[data-nav="active"] .nav-more:
 .swim-ic { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 16px; background: var(--raised); color: var(--acc-text); }
 .swim-ic svg { width: 30px; height: 30px; }
 
+/* Strava card (Profile, docs/design/screens/profile.md "Strava"). Strava orange #FC5200 only as a small accent and on
+   the connect button (brand guidelines: "Connect with Strava", orange); our own accent stays everywhere else. */
+.strava { padding: 16px; display: grid; gap: 14px; }
+.strava-head { display: flex; align-items: center; gap: 14px; }
+.strava-ic { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 13px; color: #FC5200; background: color-mix(in oklab, #FC5200 16%, transparent); }
+.strava-ic svg { width: 22px; height: 22px; }
+.strava .li-name { font-size: calc(17px + var(--d)); font-weight: 600; }
+.strava .li-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.strava-points { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: calc(14px + var(--d)); color: var(--muted); }
+.strava-points li { position: relative; padding-left: 22px; }
+.strava-points li::before { content: ""; position: absolute; left: 4px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: #FC5200; }
+.strava-btn { background: #FC5200; color: #fff; border-color: transparent; font-weight: 600; min-height: 48px; }
+.strava-btn:disabled { opacity: .6; }
+.strava-note { margin: -4px 0 0; font-size: calc(12px + var(--d) / 2); color: var(--muted); text-align: center; }
+.strava.on .strava-ic { color: #fff; background: #FC5200; }
+.strava-link { color: #FC5200; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
 /* Stats: horizontal bars for sets per muscle group. */
 .hbars { padding: 14px 16px; display: grid; gap: 10px; }
 .hbar { display: grid; grid-template-columns: 84px 1fr 32px; align-items: center; gap: 10px; font-size: calc(14px + var(--d)); }

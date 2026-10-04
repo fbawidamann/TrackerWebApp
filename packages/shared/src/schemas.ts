@@ -32,7 +32,7 @@ export const SET_TYPES = ["normal", "warmup", "drop", "failure"] as const;
 export type SetType = (typeof SET_TYPES)[number];
 export const ACTIVITY_TYPES = ["gym", "run"] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
-export const RUN_SOURCES = ["manual", "gpx", "fit"] as const;
+export const RUN_SOURCES = ["manual", "gpx", "fit", "strava"] as const;
 export type RunSource = (typeof RUN_SOURCES)[number];
 export const ACTIVITY_STATUS = ["in_progress", "completed"] as const;
 
@@ -141,6 +141,8 @@ export const runSchema = syncedBase.extend({
    */
   efforts: z.record(z.string(), z.number().min(0)),
   hasTrack: z.boolean(),
+  /** Strava activity id for runs imported from Strava (docs/adr/0009-strava.md): dedupe + "View on Strava". Optional: older rows have none. */
+  stravaId: z.string().regex(/^\d{1,20}$/).nullable().optional(),
 });
 export type Run = z.infer<typeof runSchema>;
 

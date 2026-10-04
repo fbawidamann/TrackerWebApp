@@ -28,3 +28,4 @@ An ADR records one important decision: the context, the choice, the alternatives
 | [0006](adr/0006-running.md) | Running: GPX/FIT import, totals + downsampled track, no map tiles | Accepted |
 | [0007](adr/0007-german-language.md) | German language: own typed dictionaries, translated exercise catalog | Accepted |
 | [0008](adr/0008-self-hosted-font.md) | Self-hosted font (IBM Plex Sans via @fontsource) instead of Google Fonts | Accepted |
+| [0009](adr/0009-strava.md) | Strava connection: OAuth on the server, encrypted tokens, runs imported via importRun | Accepted |

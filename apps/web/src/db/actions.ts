@@ -483,11 +483,13 @@ export interface ManualRunInput {
 
 /** A run read from a GPX/FIT file, before it is saved. `totals` are the device's own numbers (FIT), preferred over ours. */
 export interface ParsedRunFile {
-  source: "gpx" | "fit";
+  source: "gpx" | "fit" | "strava";
   name: string | null;
   startedAt: Date;
   points: TrackPoint[];
   totals: Partial<TrackSummary>;
+  /** Strava activity id (Strava imports only): exact duplicate check and "View on Strava". */
+  stravaId?: string;
 }
 
 async function runOf(activityId: string): Promise<Run | undefined> {
@@ -528,6 +530,11 @@ export async function saveRun(input: ManualRunInput): Promise<string> {
 /** Saves an imported run with its track. A run starting within a minute of an existing one is a duplicate. */
 export async function importRun(file: ParsedRunFile): Promise<{ activityId: string; duplicate: boolean }> {
   const start = file.startedAt.getTime();
+  if (file.stravaId) {
+    const same = (await db.runs.toArray()).find((r) => alive(r) && r.stravaId === file.stravaId);
+    if (same) return { activityId: same.activityId, duplicate: true };
+  }
+  // Same start within a minute = the same run (e.g. the FIT file was imported before and now it comes from Strava).
   const runs = (await db.activities.toArray()).filter((a) => alive(a) && a.type === "run");
   const dup = runs.find((a) => Math.abs(new Date(a.startedAt).getTime() - start) < 60_000);
   if (dup) return { activityId: dup.id, duplicate: true };
@@ -550,6 +557,7 @@ export async function importRun(file: ParsedRunFile): Promise<{ activityId: stri
       elevationGainM: totals.elevationGainM, avgHr: totals.avgHr, maxHr: totals.maxHr,
       // Without GPS (treadmill FIT) only the device totals exist: count the run as a whole, like a manual one.
       efforts: file.points.length > 1 ? bestEfforts(dist, file.points.map((p) => p.t)) : manualEfforts(totals.distanceM, totals.movingTimeS),
+      ...(file.stravaId ? { stravaId: file.stravaId } : {}),
     } satisfies Run);
     if (track.length > 1) {
       await upsert("runTracks", {

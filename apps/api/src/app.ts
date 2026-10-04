@@ -7,11 +7,12 @@ import { SESSION_COOKIE, validateSession } from "./auth/session";
 import type { AppContext, AppEnv } from "./env";
 import { adminRoutes } from "./routes/admin";
 import { authRoutes } from "./routes/auth";
+import { stravaRoutes } from "./routes/strava";
 import { syncRoutes } from "./routes/sync";
 
 /**
  * The single app container (docs/adr/0004-deployment.md, 0005-backend-auth-and-sync.md):
- *   /api/*  → API (health, auth, admin, sync)
+ *   /api/*  → API (health, auth, admin, sync, strava)
  *   /*      → the built frontend, with index.html as fallback for client-side routes
  */
 export function createApp(ctx: AppContext, staticRoot?: string): Hono<AppEnv> {
@@ -38,6 +39,7 @@ export function createApp(ctx: AppContext, staticRoot?: string): Hono<AppEnv> {
   app.route("/api/auth", authRoutes());
   app.route("/api/admin", adminRoutes());
   app.route("/api/sync", syncRoutes());
+  app.route("/api/strava", stravaRoutes(ctx.strava ?? null));
   app.all("/api/*", (c) => c.json({ error: "Not found" }, 404));
 
   app.onError((err, c) => {

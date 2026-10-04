@@ -165,7 +165,10 @@ export function RunDetailScreen() {
       )}
 
       {activity.notes && <p className="run-notes">{activity.notes}</p>}
-      <p className="hint">{r9.source[run.source]}</p>
+      <p className="hint">
+        {r9.source[run.source]}
+        {run.stravaId && <> · <a className="strava-link" href={`https://www.strava.com/activities/${run.stravaId}`} target="_blank" rel="noopener noreferrer">{t.strava.viewOnStrava}</a></>}
+      </p>
 
       {sheet === "menu" && (
         <MenuSheet title={activity.name} onClose={() => setSheet(null)} items={[

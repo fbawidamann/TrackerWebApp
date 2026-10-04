@@ -10,6 +10,7 @@ import { AccountSection } from "./AccountSection";
 import { RadioSheet, Sheet, TextSheet } from "@/ui/Sheet";
 import { useToast } from "@/ui/Toast";
 import { canHaptic } from "@/lib/time";
+import { StravaCard } from "@/features/strava/StravaCard";
 
 type Picker = "goal" | "weekStart" | "defaultSets" | "step" | "rest" | "theme" | "date" | null;
 
@@ -104,6 +105,8 @@ export function ProfileScreen() {
         <div className="stat"><span className="stat-v">{stats.year}</span><span className="lbl">{p.thisYear}</span></div>
         <div className="stat"><span className="stat-v">{stats.streak}<span className="u">{p.weekUnit(stats.streak)}</span></span><span className="lbl">{p.streak}</span></div>
       </div>
+
+      {account && <StravaCard />}
 
       <AccountSection />
 

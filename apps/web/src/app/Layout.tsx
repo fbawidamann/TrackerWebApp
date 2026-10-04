@@ -13,6 +13,8 @@ import { Sheet } from "@/ui/Sheet";
 import { ToastProvider } from "@/ui/Toast";
 import { useApplyTheme } from "./theme";
 import { UpdateBanner } from "./UpdateBanner";
+import { autoImportStrava } from "@/features/strava/strava";
+import { useToast } from "@/ui/Toast";
 
 /** Bottom nav on phones: three tabs plus "More" (docs/design/ui-guidelines.md "Bottom navigation"). */
 const NAV = [
@@ -98,6 +100,7 @@ export function Layout() {
       )}
       {moreOpen && !hideNav && <MoreSheet pathname={pathname} onClose={() => setMoreOpen(false)} />}
       <StaleWorkoutCheck />
+      <StravaAutoImport />
     </ToastProvider>
   );
 }
@@ -143,6 +146,22 @@ function MoreSheet({ pathname, onClose }: { pathname: string; onClose: () => voi
       </div>
     </Sheet>
   );
+}
+
+/** Pulls new Strava runs when the app opens or comes back to the foreground (at most every 15 min, silent on errors). */
+function StravaAutoImport() {
+  const toast = useToast();
+  const t = useT();
+  useEffect(() => {
+    const run = () => {
+      if (document.visibilityState !== "visible") return;
+      void autoImportStrava().then((n) => { if (n) toast(t.strava.imported(n)); }).catch(() => {});
+    };
+    run();
+    document.addEventListener("visibilitychange", run);
+    return () => document.removeEventListener("visibilitychange", run);
+  }, [toast, t]);
+  return null;
 }
 
 /** A workout left running for more than 12 h: ask once per app start. */

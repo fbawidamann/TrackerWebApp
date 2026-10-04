@@ -37,6 +37,8 @@ export const IconGrid = make([
 ]);
 export const IconChart = make(<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />);
 export const IconSwim = make(<path d="M2 17c1.7 0 2.5-1.5 4-1.5s2.3 1.5 4 1.5 2.5-1.5 4-1.5 2.3 1.5 4 1.5 2.3-1 4-1.5M2 21c1.7 0 2.5-1.5 4-1.5s2.3 1.5 4 1.5 2.5-1.5 4-1.5 2.3 1.5 4 1.5 2.3-1 4-1.5M8 12l4-4 3 3M16.5 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" />);
+/** Two chain links: "connected service" (Strava card). Not the Strava logo on purpose (brand guidelines). */
+export const IconLink = make([<path key="a" d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" />, <path key="b" d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />]);
 export const IconUser = make([<circle key="a" cx="12" cy="8" r="4" />, <path key="b" d="M4 21a8 8 0 0 1 16 0" />]);
 export const IconEye = make([<path key="a" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />, <circle key="b" cx="12" cy="12" r="3" />]);
 export const IconEyeOff = make(<path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A16.8 16.8 0 0 0 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6" />);

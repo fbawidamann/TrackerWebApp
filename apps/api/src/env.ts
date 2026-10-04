@@ -1,6 +1,7 @@
 import type { LoginLimiter } from "./auth/rateLimit";
 import type { SessionUser } from "./auth/session";
 import type { Db } from "./db/client";
+import type { StravaConfig } from "./strava";
 
 export interface AppContext {
   db: Db;
@@ -9,6 +10,8 @@ export interface AppContext {
   secureCookies: boolean;
   /** Origins allowed to send state-changing requests (CSRF guard). Empty = allow any (development/tests). */
   allowedOrigins: string[];
+  /** Strava API app (docs/adr/0009-strava.md); null/undefined = not set up, the Profile card says so. */
+  strava?: StravaConfig | null;
 }
 
 export interface AppEnv {

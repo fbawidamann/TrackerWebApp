@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { createApp } from "./app";
 import { LoginLimiter } from "./auth/rateLimit";
 import { openDatabase } from "./db/client";
+import { configFromEnv } from "./strava";
 
 const port = Number(process.env.PORT ?? 3000);
 const staticRoot = process.env.STATIC_ROOT ?? "./public";
@@ -21,7 +22,9 @@ const app = createApp({
   limiter: new LoginLimiter(),
   secureCookies: production,
   allowedOrigins: production && domain ? [`https://${domain}`] : [],
+  strava: configFromEnv(process.env, production ? domain : undefined),
 }, staticRoot);
+console.log(`Strava: ${process.env.STRAVA_CLIENT_ID ? "configured" : "not configured (STRAVA_CLIENT_ID/SECRET/TOKEN_KEY missing)"}`);
 
 const server = serve({ fetch: app.fetch, port }, (info) => {
   console.log(`Fitness app listening on :${info.port} (static files from ${staticRoot}, db: ${process.env.DATABASE_URL ? "postgres" : "pglite"})`);

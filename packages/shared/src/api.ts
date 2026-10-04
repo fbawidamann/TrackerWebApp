@@ -83,3 +83,33 @@ export interface PullResponse {
   cursor: string;
   hasMore: boolean;
 }
+
+/* ---------- Strava (docs/adr/0009-strava.md) ---------- */
+
+export interface StravaStatus {
+  /** False when the server has no Strava API app configured (STRAVA_CLIENT_ID/SECRET missing). */
+  available: boolean;
+  connected: boolean;
+  athleteName: string | null;
+  connectedAt: string | null;
+  lastSyncAt: string | null;
+}
+
+/** One Strava run, already converted to the shape of a GPX/FIT import. Dates are ISO strings. */
+export interface StravaRun {
+  stravaId: string;
+  name: string;
+  startedAt: string;
+  /** Seconds since start; empty for runs without GPS (treadmill). */
+  points: Array<{ lat: number; lon: number; t: number; ele: number | null; hr: number | null }>;
+  totals: { distanceM: number; movingTimeS: number; elapsedS: number; elevationGainM: number | null; avgHr: number | null; maxHr: number | null };
+}
+
+export interface StravaRunsResponse {
+  runs: StravaRun[];
+  /** Pass back with POST /api/strava/ack after the runs are saved, so the next call continues after them. */
+  next: number;
+  hasMore: boolean;
+}
+
+export const stravaAckSchema = z.object({ next: z.number().int().min(0).max(4_102_444_800) });

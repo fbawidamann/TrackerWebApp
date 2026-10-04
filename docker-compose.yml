@@ -14,6 +14,10 @@ services:
       NODE_ENV: production
       APP_DOMAIN: ${APP_DOMAIN}
       DATABASE_URL: postgres://fitness:${DB_PASSWORD:?set DB_PASSWORD in .env}@db:5432/fitness
+      # Strava connection (optional, docs/adr/0009-strava.md). Empty = the Profile shows "not set up".
+      STRAVA_CLIENT_ID: ${STRAVA_CLIENT_ID:-}
+      STRAVA_CLIENT_SECRET: ${STRAVA_CLIENT_SECRET:-}
+      STRAVA_TOKEN_KEY: ${STRAVA_TOKEN_KEY:-}
     depends_on:
       db:
         condition: service_healthy
