@@ -35,7 +35,7 @@ Clickable prototype: [Home screen prototype](https://claude.ai/artifact/FahzKjEe
 There is no "This week" card and no greeting or filler text.
 
 ## Title and weekly goal
-- **Username at the very top** (added 2026-10-01): a small line above the weekday (15 px, 600, `accent-text`), e.g. `LegendFLOO`. It shows the account username once logged in (M7). Before accounts exist it shows the Profile name, and is hidden while that is empty.
+- **Username at the very top** (added 2026-10-01): a line above the weekday (20 px, 600, `accent-text`; enlarged from 15 px on 2026-10-04 so the name is easier to read, still smaller than the 28 px weekday title), e.g. `LegendFLOO`. It shows the account username once logged in (M7). Before accounts exist it shows the Profile name, and is hidden while that is empty.
 - The title is the **weekday** ("Tuesday"), with the date below ("29 September"). The year is only added if it isn't the current year.
 - **Goal line**: `2 of 3 workouts this week` (14 px, muted, numbers in `text` colour).
   - Below it is a thin **segmented bar** with one segment per goal workout; completed workouts fill segments with `accent-fill`.

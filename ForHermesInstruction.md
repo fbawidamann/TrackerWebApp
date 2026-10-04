@@ -178,6 +178,15 @@ docker image prune -f                # removes dangling old images only
 ```
 `.env` stays as it is (it's git-ignored). If `.env.example` gains new variables, add them to `.env`.
 
+### Changes made on the VPS (Hermes commits too, since 2026-10-04)
+Hermes can also change the app on Florian's request and pushes to `main` as author **`Hermes (VPS)`** (deploy key with write access, repo-only). The pipeline is `/root/scripts/trackerwebapp-ship.sh ship "message"` on the VPS:
+1. local checks in `node:24-alpine` (`npm ci`, lint, typecheck, test, build); stops on any failure, nothing is committed;
+2. commit + push to `main`, then waits for the GitHub Actions **CI** run of that commit; no deploy unless it is green;
+3. `pg_dump` backup to `/var/backups/fitness/predeploy-*.dump`, rebuild and restart **only** `fitness-app`;
+4. health check (container healthy, site and `/api/health` 200); if it fails, the previous image is restored automatically.
+
+So when working on the PC: **`git pull` before you start**, because `main` may have new commits from the VPS.
+
 ## Please don't
 - Change Traefik's own configuration, or touch other containers or their networks.
 - Publish any port on a public interface. The app port is bound to `127.0.0.1` only, and only Traefik (host network) reaches it.

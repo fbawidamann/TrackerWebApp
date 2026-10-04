@@ -442,7 +442,7 @@ html[data-nav="active"] .nav a:not(.on) span { visibility: hidden; }
 .safe-cover { position: fixed; top: 0; left: 0; right: 0; height: var(--safe-t); background: var(--bg); z-index: 50; pointer-events: none; }
 .plain { max-width: 640px; margin: 0 auto; padding-bottom: calc(var(--nav-h) + var(--safe-b) + 110px); }
 .plain-head { padding: calc(var(--safe-t) + 12px) 20px 0; }
-.home-user { margin: 0 0 6px; font-size: calc(15px + var(--d)); font-weight: 600; color: var(--acc-text); }
+.home-user { margin: 0 0 6px; font-size: calc(20px + var(--d)); font-weight: 600; line-height: 1.2; letter-spacing: -.01em; color: var(--acc-text); overflow-wrap: anywhere; }
 
 /* ---------- Login (docs/design/screens/login.md) ---------- */
 .login { position: relative; min-height: 100dvh; max-width: 440px; margin: 0 auto; display: grid; align-content: start; gap: 26px; padding: calc(var(--safe-t) + 64px) 24px calc(var(--safe-b) + 32px); isolation: isolate; }
