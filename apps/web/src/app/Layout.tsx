@@ -12,6 +12,7 @@ import { IconChevron, IconHistory, IconHome, IconLift, IconList, IconRun, IconUs
 import { Sheet } from "@/ui/Sheet";
 import { ToastProvider } from "@/ui/Toast";
 import { useApplyTheme } from "./theme";
+import { UpdateBanner } from "./UpdateBanner";
 
 const NAV = [
   { to: "/", key: "home", icon: IconHome, match: (p: string) => p === "/" },
@@ -50,11 +51,12 @@ export function Layout() {
 
   // Locked until the first login on this device (docs/design/screens/login.md). Offline starts work once logged in.
   if (account === undefined) return null;
-  if (gated) return <ToastProvider><div className="safe-cover" /><LoginScreen expired={expired && account !== null} /></ToastProvider>;
+  if (gated) return <ToastProvider><div className="safe-cover" /><LoginScreen expired={expired && account !== null} /><UpdateBanner /></ToastProvider>;
 
   return (
     <ToastProvider>
       <div className="safe-cover" />
+      <UpdateBanner />
       <div className="app-shell">
         <Outlet />
       </div>

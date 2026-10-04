@@ -83,6 +83,8 @@ export const en = {
     staleText: (name: string) => `${name} is still running.`,
     finish: "Finish",
     keepRunning: "Keep it running",
+    updateReady: "New version available",
+    updateReload: "Reload",
   },
 
   home: {

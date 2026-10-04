@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { router } from "./app/router";
+import { setUpdateReady, watchForUpdates } from "./app/updates";
 import { db } from "./db/db";
 import { setOwner } from "./db/owner";
 import { initDb } from "./db/seed";
@@ -25,7 +26,12 @@ async function boot() {
 }
 
 void boot();
-registerSW({ immediate: true });
+// Updates: the new version waits for a tap on the banner instead of reloading by itself (app/updates.ts).
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() { setUpdateReady(() => updateSW(true)); },
+  onRegisteredSW(_url, reg) { if (reg) watchForUpdates(reg); },
+});
 startSyncLoop(async () => !!(await getAccount()) && !(await db.meta.get("sessionExpired"))?.value);
 // Ask the browser to keep IndexedDB data (the only copy until sync exists).
 void navigator.storage?.persist?.();

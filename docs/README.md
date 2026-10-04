@@ -8,6 +8,7 @@ Everything we decide about the fitness tracker is written down here. Planning ha
 | [roadmap.md](roadmap.md) | Milestones and their order, as checklists |
 | [architecture/data-model.md](architecture/data-model.md) | Tables, fields, relations, IDs, derived metrics |
 | [architecture/sync.md](architecture/sync.md) | How offline-first storage and server sync work |
+| [architecture/pwa-updates.md](architecture/pwa-updates.md) | How new versions reach the installed iPhone app (update banner) |
 | [design/ui-guidelines.md](design/ui-guidelines.md) | Visual design: colours, type, formats, spacing, components |
 | [design/screens/](design/screens/) | One spec per screen: layout, interactions, states, edge cases |
 | [design/prototypes/](design/prototypes/README.md) | Clickable HTML prototypes used to decide the design (open in a browser) |

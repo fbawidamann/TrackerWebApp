@@ -184,6 +184,9 @@ body.lock { overflow: hidden; }
 .toast { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 15px; box-shadow: 0 14px 30px -12px var(--shadow); }
 .toast button { color: color-mix(in oklab, var(--acc) 70%, var(--bg)); font-weight: 600; padding: 4px 8px; }
 body.no-nav .toast-wrap { bottom: calc(var(--safe-b) + 20px); }
+/* Update banner: top of the screen, so it never covers the rest timer, mini bar or nav (docs/architecture/pwa-updates.md) */
+.update-wrap { position: fixed; left: 50%; transform: translateX(-50%); width: min(600px, calc(100% - 32px)); top: calc(var(--safe-t) + 8px); z-index: 70; animation: fade .15s ease; }
+.toast button:disabled { opacity: .5; }
 
 /* ---------- Sheets ---------- */
 .scrim { position: fixed; inset: 0; z-index: 80; background: var(--scrim); animation: fade .15s ease; }

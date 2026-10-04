@@ -83,6 +83,8 @@ export const de: Dict = {
     staleText: (name) => `${name} läuft noch.`,
     finish: "Beenden",
     keepRunning: "Weiterlaufen lassen",
+    updateReady: "Neue Version verfügbar",
+    updateReload: "Neu laden",
   },
 
   home: {
